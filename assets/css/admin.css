@@ -1,0 +1,8 @@
+.ftt-admin .ftt-inline-form{margin:0 0 1em}
+.ftt-admin .ftt-rows input,.ftt-admin .ftt-rows select{max-width:100%}
+.ftt-admin .ftt-pill{display:inline-block;padding:.1em .6em;border-radius:100px;background:#dcdcde;font-size:12px}
+.ftt-admin .ftt-pill--on{background:#d1f0d6;color:#0a5c1c}
+.ftt-admin .ftt-pill--wait{background:#fcf0c3;color:#6b4d00}
+.ftt-admin .ftt-banner{padding:.6em 1em;border:2px dashed #c98a00;background:#fff4d6;max-width:900px}
+.ftt-admin .ftt-banner--draft{border-color:#c0391b;background:#ffe9e3}
+.ftt-mail-body{white-space:pre-wrap;max-width:900px;background:#f6f7f7;padding:.8em;border-radius:4px}

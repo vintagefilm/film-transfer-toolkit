@@ -1,0 +1,45 @@
+/* Film Transfer Toolkit shared front-end styles. Inherits the theme's fonts and colors; override the --ftt-* properties. */
+.ftt-box{--ftt-bg:#fff;--ftt-text:inherit;--ftt-muted:#5c5c5c;--ftt-border:#d9d9d9;--ftt-soft:#f5f3ee;--ftt-accent:#9a5b00;--ftt-on-accent:#fff;--ftt-warn-bg:#fff4d6;--ftt-warn-border:#c98a00;--ftt-draft-bg:#ffe9e3;--ftt-draft-border:#c0391b;
+  box-sizing:border-box;margin:1.5em 0;padding:1.4em 1.5em;border:1px solid var(--ftt-border);border-radius:14px;background:var(--ftt-bg);color:var(--ftt-text);line-height:1.5}
+.ftt-box *,.ftt-box *::before,.ftt-box *::after{box-sizing:border-box}
+.ftt-box .ftt-box__title{margin:0 0 .25em;font-size:1.35em;line-height:1.2}
+.ftt-box .ftt-box__sub,.ftt-box .ftt-note{margin:0 0 1em;color:var(--ftt-muted);font-size:.92em}
+.ftt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9em 1em;margin:0 0 .9em}
+.ftt-field{display:flex;flex-direction:column;gap:.3em;margin:0;font-size:.9em;font-weight:600}
+.ftt-field[hidden],.ftt-grid[hidden]{display:none}
+.ftt-field input,.ftt-field select,.ftt-field textarea{width:100%;min-height:2.6em;padding:.5em .7em;font:inherit;font-weight:400;border:1px solid var(--ftt-border);border-radius:8px;background:#fff;color:#1d1d1d}
+.ftt-field input:focus-visible,.ftt-field select:focus-visible,.ftt-field textarea:focus-visible,.ftt-btn:focus-visible,.ftt-check input:focus-visible{outline:2px solid var(--ftt-accent);outline-offset:2px}
+fieldset.ftt-field,fieldset.ftt-est__order{border:0;padding:0;margin:0 0 .8em}
+.ftt-seg{flex-direction:row;flex-wrap:wrap;align-items:center;gap:.4em 1em}
+.ftt-seg legend{width:100%;margin-bottom:.3em;font-weight:600}
+.ftt-seg label,.ftt-check{display:inline-flex;align-items:flex-start;gap:.45em;font-weight:400;font-size:.95em;margin:0 1em .35em 0}
+.ftt-check input{margin-top:.25em}
+.ftt-box .ftt-result{margin:.4em 0 .6em;padding:.8em 1em;border-left:4px solid var(--ftt-accent);border-radius:6px;background:var(--ftt-soft);font-weight:600;font-variant-numeric:tabular-nums}
+.ftt-btn,.ftt-box button.ftt-btn{display:inline-flex;align-items:center;gap:.4em;padding:.65em 1.1em;font:inherit;font-weight:600;line-height:1.2;color:var(--ftt-on-accent);background:var(--ftt-accent);border:1px solid var(--ftt-accent);border-radius:8px;cursor:pointer;text-decoration:none;text-transform:none;letter-spacing:0;box-shadow:none}
+.ftt-btn:hover{filter:brightness(1.08);color:var(--ftt-on-accent)}
+.ftt-btn[disabled]{opacity:.5;cursor:not-allowed}
+.ftt-btn--ghost,.ftt-box button.ftt-btn--ghost{background:transparent;color:var(--ftt-accent)}
+.ftt-btn--link,.ftt-box button.ftt-btn--link{padding:.2em .4em;background:transparent;border:0;color:var(--ftt-draft-border);text-decoration:underline;font-weight:400}
+.ftt-banner{margin:0 0 1em;padding:.7em 1em;border:2px dashed var(--ftt-warn-border);border-radius:8px;background:var(--ftt-warn-bg);color:#3b2a00;font-size:.92em}
+.ftt-banner--draft{border-color:var(--ftt-draft-border);background:var(--ftt-draft-bg);color:#4a1206}
+.ftt-banner__date{white-space:nowrap}
+.ftt-table{width:100%;margin:0 0 1.2em;border-collapse:collapse;font-size:.93em;font-variant-numeric:tabular-nums}
+.ftt-table caption{text-align:left;font-weight:700;padding:0 0 .4em}
+.ftt-table th,.ftt-table td{padding:.5em .6em;border:0;border-bottom:1px solid var(--ftt-border);text-align:left;vertical-align:top;background:transparent}
+.ftt-table thead th{font-size:.85em;color:var(--ftt-muted)}
+.ftt-fees{margin:0 0 0 1.2em;padding:0;font-size:.93em}
+.ftt-line{margin:0 0 1em;padding:1em;border:1px solid var(--ftt-border);border-radius:10px;background:var(--ftt-soft)}
+.ftt-line__head{display:flex;flex-wrap:wrap;gap:.5em 1em;align-items:baseline;margin:0 0 .7em}
+.ftt-line__price{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.ftt-addons{display:flex;flex-wrap:wrap}
+.ftt-box .ftt-line__err{margin:.3em 0 0;color:var(--ftt-draft-border);font-weight:600}
+.ftt-box .ftt-line__err:empty{display:none}
+.ftt-est__totals td{text-align:right}
+.ftt-est__grand th,.ftt-est__grand td{font-size:1.15em;font-weight:700;border-bottom:2px solid var(--ftt-accent)}
+.ftt-est__form{margin-top:1.4em;padding-top:1.2em;border-top:1px solid var(--ftt-border)}
+.ftt-est__form h4{margin:0 0 .3em}
+.ftt-hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.ftt-msg{font-weight:600}
+.ftt-msg--bad{color:var(--ftt-draft-border)}
+.ftt-cta{padding:1em 1.2em;border-radius:10px;background:#e8f5e9;border:1px solid #6aa96e}
+@media (max-width:480px){.ftt-box{padding:1em;border-radius:0}.ftt-line__price{margin-left:0;width:100%}}

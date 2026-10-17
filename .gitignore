@@ -1,0 +1,18 @@
+# Never commit secrets, backups, or customer data
+*.sql
+*.sql.gz
+*.tgz
+*.tar.gz
+*.bak
+*.log
+debug.log
+.env
+*.pem
+*.key
+*.ppk
+wp-config.php
+grok_backups/
+backups/
+node_modules/
+vendor/
+.DS_Store

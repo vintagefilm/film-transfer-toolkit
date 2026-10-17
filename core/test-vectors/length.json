@@ -1,0 +1,56 @@
+{
+ "cases": [
+  {
+   "fpf": 72,
+   "fps": 18,
+   "value": "50",
+   "seconds": 200,
+   "frames": 3600,
+   "from": "feet"
+  },
+  {
+   "fpf": 80,
+   "fps": 16,
+   "value": "400",
+   "seconds": 2000,
+   "frames": 32000,
+   "from": "feet"
+  },
+  {
+   "fpf": 40,
+   "fps": 24,
+   "value": "11:06.67",
+   "feet": 400.002,
+   "from": "time"
+  },
+  {
+   "fpf": 16,
+   "fps": 24,
+   "value": "16000",
+   "feet": 1000,
+   "from": "frames"
+  }
+ ],
+ "reels": [
+  {
+   "format": "8",
+   "outer": 5.93,
+   "feet_min": 390,
+   "feet_max": 410
+  },
+  {
+   "format": "16",
+   "outer": 7,
+   "unit": "in",
+   "hub": 2,
+   "feet_min": 450,
+   "feet_max": 530
+  },
+  {
+   "format": "8",
+   "outer": 1,
+   "hub": 2,
+   "null": true
+  }
+ ]
+}

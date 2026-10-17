@@ -1,0 +1,329 @@
+{
+ "schema": 1,
+ "currency": "USD",
+ "status": "draft",
+ "label": "DRAFT FOR REVIEW - proposed Vintage Film Channel prices, not final",
+ "disclaimer": "Draft prices for internal review only (based on competitor research checked 2026-10-13). Not published rates; every order is quoted before work starts.",
+ "as_of": "2026-10-13",
+ "formats": [
+  {
+   "id": "8",
+   "label": "8mm (Regular 8)",
+   "fpf": 80,
+   "fps": 16
+  },
+  {
+   "id": "s8",
+   "label": "Super 8",
+   "fpf": 72,
+   "fps": 18
+  },
+  {
+   "id": "16",
+   "label": "16mm",
+   "fpf": 40,
+   "fps": 24
+  },
+  {
+   "id": "35",
+   "label": "35mm",
+   "fpf": 16,
+   "fps": 24
+  }
+ ],
+ "services": [
+  {
+   "id": "hd",
+   "label": "HD 1080p scan"
+  },
+  {
+   "id": "4k",
+   "label": "4K scan"
+  }
+ ],
+ "reels": [
+  {
+   "format": "8",
+   "size": "3",
+   "label": "3 in",
+   "feet": 50
+  },
+  {
+   "format": "8",
+   "size": "5",
+   "label": "5 in",
+   "feet": 200
+  },
+  {
+   "format": "8",
+   "size": "6",
+   "label": "6 in",
+   "feet": 300
+  },
+  {
+   "format": "8",
+   "size": "7",
+   "label": "7 in",
+   "feet": 400
+  },
+  {
+   "format": "s8",
+   "size": "3",
+   "label": "3 in",
+   "feet": 50
+  },
+  {
+   "format": "s8",
+   "size": "5",
+   "label": "5 in",
+   "feet": 200
+  },
+  {
+   "format": "s8",
+   "size": "6",
+   "label": "6 in",
+   "feet": 300
+  },
+  {
+   "format": "s8",
+   "size": "7",
+   "label": "7 in",
+   "feet": 400
+  },
+  {
+   "format": "16",
+   "size": "3",
+   "label": "3 in",
+   "feet": 50
+  },
+  {
+   "format": "16",
+   "size": "4",
+   "label": "4 in",
+   "feet": 100
+  },
+  {
+   "format": "16",
+   "size": "5",
+   "label": "5 in",
+   "feet": 200
+  },
+  {
+   "format": "16",
+   "size": "7",
+   "label": "7 in",
+   "feet": 400
+  },
+  {
+   "format": "16",
+   "size": "10",
+   "label": "10.5 in",
+   "feet": 800
+  },
+  {
+   "format": "16",
+   "size": "12",
+   "label": "12 in",
+   "feet": 1200
+  },
+  {
+   "format": "16",
+   "size": "14",
+   "label": "14 in",
+   "feet": 1600
+  },
+  {
+   "format": "35",
+   "size": "6",
+   "label": "6 in (200 ft)",
+   "feet": 200
+  },
+  {
+   "format": "35",
+   "size": "10",
+   "label": "10.5 in (1000 ft)",
+   "feet": 1000
+  },
+  {
+   "format": "35",
+   "size": "15",
+   "label": "15 in (2000 ft)",
+   "feet": 2000
+  }
+ ],
+ "rates": [
+  {
+   "format": "8",
+   "service": "hd",
+   "unit": "foot",
+   "price": 320
+  },
+  {
+   "format": "s8",
+   "service": "hd",
+   "unit": "foot",
+   "price": 320
+  },
+  {
+   "format": "16",
+   "service": "hd",
+   "unit": "foot",
+   "price": 350
+  },
+  {
+   "format": "35",
+   "service": "hd",
+   "unit": "foot",
+   "price": 400
+  },
+  {
+   "format": "8",
+   "service": "4k",
+   "unit": "foot",
+   "price": 450
+  },
+  {
+   "format": "s8",
+   "service": "4k",
+   "unit": "foot",
+   "price": 450
+  },
+  {
+   "format": "16",
+   "service": "4k",
+   "unit": "foot",
+   "price": 500
+  },
+  {
+   "format": "35",
+   "service": "4k",
+   "unit": "foot",
+   "price": 600
+  },
+  {
+   "format": "8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "3",
+   "price": 17000
+  },
+  {
+   "format": "8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "5",
+   "price": 64000
+  },
+  {
+   "format": "8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "6",
+   "price": 96000
+  },
+  {
+   "format": "8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "7",
+   "price": 128000
+  },
+  {
+   "format": "s8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "3",
+   "price": 17000
+  },
+  {
+   "format": "s8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "5",
+   "price": 64000
+  },
+  {
+   "format": "s8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "6",
+   "price": 96000
+  },
+  {
+   "format": "s8",
+   "service": "hd",
+   "unit": "reel",
+   "size": "7",
+   "price": 128000
+  }
+ ],
+ "addons": [
+  {
+   "id": "sound",
+   "label": "Sound capture (magnetic / optical)",
+   "unit": "foot",
+   "price": 80,
+   "formats": [
+    "s8",
+    "16"
+   ]
+  },
+  {
+   "id": "color",
+   "label": "Scene-by-scene color correction",
+   "unit": "foot",
+   "price": 100,
+   "formats": []
+  },
+  {
+   "id": "repair",
+   "label": "Extra splice / tear repair",
+   "unit": "reel",
+   "price": 5000,
+   "formats": []
+  },
+  {
+   "id": "split",
+   "label": "Split one reel into separate files",
+   "unit": "reel",
+   "price": 2000,
+   "formats": []
+  },
+  {
+   "id": "usb",
+   "label": "USB drive (64 GB) supplied",
+   "unit": "order",
+   "price": 20000,
+   "formats": []
+  },
+  {
+   "id": "dvd",
+   "label": "DVD set (one disc per 2 hours)",
+   "unit": "order",
+   "price": 20000,
+   "formats": []
+  },
+  {
+   "id": "ownhd",
+   "label": "Your own drive that already has data on it",
+   "unit": "order",
+   "price": 15000,
+   "formats": []
+  }
+ ],
+ "fees": {
+  "setup": 0,
+  "min_order": 50000,
+  "min_feet_per_reel": 50
+ },
+ "tiers": [
+  {
+   "min_feet": 2000,
+   "pct": 5
+  },
+  {
+   "min_feet": 5000,
+   "pct": 10
+  }
+ ]
+}

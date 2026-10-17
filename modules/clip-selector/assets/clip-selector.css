@@ -1,0 +1,20 @@
+/* Clip selector (ported from fw-clip-cart): LAYOUT ONLY. Fonts, sizes, colours, backgrounds, inputs and buttons all come from the theme (Kadence).
+   The only visual override is the 3px button radius requested by Joanne. */
+.fwcc{margin:1em 0}
+.fwcc .button,.fwcc button.button{border-radius:3px}
+.fwcc-marks{display:grid;grid-template-columns:max-content minmax(8em,max-content) max-content max-content;gap:.5em .75em;align-items:center;margin-bottom:.5em}
+.fwcc-marks .fwcc-set{width:100%}
+.fwcc-tc,.fwcc-list td.mono,.fwcc-debug{font-variant-numeric:tabular-nums}
+.fwcc-trim-label{cursor:help}
+.fwcc-nudge{display:inline-flex;flex-wrap:wrap;gap:.25em}
+.fwcc-row{display:flex;flex-wrap:wrap;gap:.5em .75em;align-items:center;margin:.4em 0}
+.fwcc-namebar label{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;width:100%}
+.fwcc-name{flex:1;min-width:12em}
+.fwcc-list{width:100%;margin:.5em 0}
+.fwcc-list input{width:100%;min-width:8em}
+.fwcc-actions{white-space:nowrap}
+.fwcc-help{margin-top:.75em}
+.fwcc-help summary{cursor:pointer}
+.fwcc-help-body ol,.fwcc-keys{margin:0 0 .5em 1.4em;padding:0}
+.fwcc-debug{white-space:pre-wrap;margin:0 0 .5em}
+@media (max-width:600px){.fwcc-marks{grid-template-columns:max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2}}

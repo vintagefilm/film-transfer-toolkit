@@ -1,0 +1,313 @@
+{
+ "table": "price-table-example.json",
+ "cases": [
+  {
+   "name": "16mm HD 1 x 7in reel per foot, setup, above minimum",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "service": "hd",
+      "reels": 1,
+      "size": "7"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "method": "foot",
+      "billable_feet": 400,
+      "base_cents": 10000,
+      "line_cents": 10000,
+      "seconds": 667
+     }
+    ],
+    "totals": {
+     "lines_cents": 10000,
+     "discount_cents": 0,
+     "setup_cents": 2500,
+     "minimum_adjust_cents": 0,
+     "total_cents": 12500
+    }
+   }
+  },
+  {
+   "name": "Super 8 2 x 3in per-reel rate + sound, raised to minimum",
+   "request": {
+    "lines": [
+     {
+      "format": "s8",
+      "service": "hd",
+      "reels": 2,
+      "size": "3",
+      "addons": [
+       "sound"
+      ]
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "method": "reel",
+      "billable_feet": 100,
+      "base_cents": 2400,
+      "addons_cents": 1000,
+      "line_cents": 3400
+     }
+    ],
+    "totals": {
+     "setup_cents": 2500,
+     "minimum_adjust_cents": 1600,
+     "total_cents": 7500
+    }
+   }
+  },
+  {
+   "name": "two lines, fractional feet rounded up, 5 percent tier, order add-on",
+   "request": {
+    "lines": [
+     {
+      "format": "8",
+      "service": "4k",
+      "feet": 1234.4,
+      "addons": [
+       "wetgate"
+      ]
+     },
+     {
+      "format": "35",
+      "service": "hd",
+      "feet": 30
+     }
+    ],
+    "order_addons": [
+     "usb"
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "method": "foot",
+      "billable_feet": 1235,
+      "base_cents": 61750,
+      "addons_cents": 6175,
+      "line_cents": 67925
+     },
+     {
+      "billable_feet": 50,
+      "line_cents": 1000
+     }
+    ],
+    "totals": {
+     "billable_feet": 1285,
+     "lines_cents": 68925,
+     "discount_pct": 5,
+     "discount_cents": 3446,
+     "order_addons_cents": 2500,
+     "setup_cents": 2500,
+     "total_cents": 70479
+    }
+   }
+  },
+  {
+   "name": "half-cent rounds up (4995 mills = 500 cents)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "service": "hd",
+      "feet": 333,
+      "addons": [
+       "repair"
+      ]
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "base_cents": 8325,
+      "addons_cents": 500,
+      "line_cents": 8825
+     }
+    ],
+    "totals": {
+     "total_cents": 11325
+    }
+   }
+  },
+  {
+   "name": "partial reel with feet given uses per-foot rate, not per-reel",
+   "request": {
+    "lines": [
+     {
+      "format": "s8",
+      "service": "hd",
+      "reels": 1,
+      "size": "7",
+      "feet": 120
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "method": "foot",
+      "billable_feet": 120,
+      "base_cents": 3000
+     }
+    ]
+   }
+  },
+  {
+   "name": "minimum feet per reel applies to each reel",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "service": "4k",
+      "reels": 3,
+      "feet": 60
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "billable_feet": 150,
+      "base_cents": 7500
+     }
+    ]
+   }
+  },
+  {
+   "name": "errors: format, size, add-on, reels, length, order add-on",
+   "request": {
+    "lines": [
+     {
+      "format": "x",
+      "service": "hd",
+      "reels": 1,
+      "size": "3"
+     },
+     {
+      "format": "s8",
+      "service": "hd",
+      "size": "9"
+     },
+     {
+      "format": "8",
+      "service": "hd",
+      "size": "3",
+      "addons": [
+       "sound"
+      ]
+     },
+     {
+      "format": "8",
+      "service": "hd",
+      "reels": 0,
+      "size": "3"
+     },
+     {
+      "format": "16",
+      "service": "hd"
+     },
+     {
+      "format": "8",
+      "service": "hd",
+      "feet": -5
+     },
+     {
+      "format": "8",
+      "service": "hd",
+      "feet": 10,
+      "addons": [
+       "usb"
+      ]
+     },
+     {
+      "format": "16",
+      "service": "8k",
+      "feet": 10
+     }
+    ],
+    "order_addons": [
+     "sound"
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_codes": [
+     "bad_format",
+     "bad_size",
+     "addon_not_available",
+     "bad_reels",
+     "need_length",
+     "bad_feet",
+     "order_addon_on_line",
+     "bad_service",
+     "bad_order_addon"
+    ],
+    "totals": {
+     "lines_cents": 0,
+     "setup_cents": 0,
+     "total_cents": 0
+    }
+   }
+  },
+  {
+   "name": "empty request is not ok and costs nothing",
+   "request": {
+    "lines": []
+   },
+   "expect": {
+    "ok": false,
+    "totals": {
+     "total_cents": 0
+    }
+   }
+  },
+  {
+   "name": "10 percent tier at 5000 feet, duplicate add-on counted once",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "service": "hd",
+      "reels": 5,
+      "size": "14",
+      "addons": [
+       "wetgate",
+       "wetgate"
+      ]
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "billable_feet": 8000,
+      "base_cents": 200000,
+      "addons_cents": 40000,
+      "line_cents": 240000
+     }
+    ],
+    "totals": {
+     "discount_pct": 10,
+     "discount_cents": 24000,
+     "total_cents": 218500
+    }
+   }
+  }
+ ]
+}
