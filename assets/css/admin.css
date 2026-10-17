@@ -73,3 +73,9 @@
 .ftt-faq--general>summary{font-size:14px}
 .ftt-standalone-notice p{max-width:900px}
 @media (max-width:900px){.ftt-help__intro{grid-template-columns:1fr}.ftt-help__two{grid-template-columns:1fr}}
+/* 1.3.0 storage defaults form */
+.ftt-st-row{border:1px solid #dcdcde;border-radius:4px;padding:.5em 1em 1em;margin:0 0 1em;max-width:980px;background:#fff}
+.ftt-st-row legend{padding:0 .4em}
+.ftt-st-grid{display:flex;flex-wrap:wrap;gap:.75em 1.25em}
+.ftt-st-field{display:flex;flex-direction:column;gap:.25em}
+.ftt-st-field[hidden]{display:none}

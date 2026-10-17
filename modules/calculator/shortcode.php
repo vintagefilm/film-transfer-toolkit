@@ -46,6 +46,11 @@ function ftt_calc_shortcode( $atts ) {
 			'extras'       => '',
 			'switch'       => '',
 			'table'        => '',
+			'meters'       => '',
+			'frames'       => '',
+			'fps_picker'   => '',
+			'speed'        => '',
+			'seconds'      => '',
 			'title'        => '',
 		),
 		$atts,
@@ -59,7 +64,18 @@ function ftt_calc_shortcode( $atts ) {
 	$theme        = ftt_calc_sanitize_choice( $atts['theme'], array( 'dark', 'light' ), $o['theme'] );
 	$accent       = ftt_calc_sanitize_hex( $atts['accent'] );
 	$heading_font = ftt_calc_sanitize_choice( $atts['heading_font'], array( 'preset', 'theme', 'plain', 'yeseva' ), $o['heading_font'] );
-	$show_extras  = ftt_calc_bool_att( $atts['extras'], $o['show_extras'] );
+	// Field toggles: a field's own attribute wins, then the old extras="" (both readouts), then Settings.
+	$show_meters  = ftt_calc_bool_att( $atts['meters'], $o['show_meters'] );
+	$show_frames  = ftt_calc_bool_att( $atts['frames'], $o['show_frames'] );
+	$show_fps     = ftt_calc_bool_att( $atts['fps_picker'], $o['show_fps'] );
+	$show_speed   = ftt_calc_bool_att( $atts['speed'], ftt_calc_bool_att( $atts['extras'], $o['show_speed'] ) );
+	$show_seconds = ftt_calc_bool_att( $atts['seconds'], ftt_calc_bool_att( $atts['extras'], $o['show_seconds'] ) );
+	$hide         = array();
+	foreach ( array( 'meters' => $show_meters, 'frames' => $show_frames, 'fps' => $show_fps ) as $k => $on ) {
+		if ( ! $on ) {
+			$hide[] = $k;
+		}
+	}
 	$show_switch  = ftt_calc_bool_att( $atts['switch'], $o['show_switch'] );
 	$show_table   = ftt_calc_bool_att( $atts['table'], $o['show_table'] );
 	$title        = '' !== trim( (string) $atts['title'] ) ? sanitize_text_field( $atts['title'] ) : __( 'Film Calculator', 'film-transfer-toolkit' );
@@ -86,7 +102,7 @@ function ftt_calc_shortcode( $atts ) {
 
 	ob_start();
 	?>
-	<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"<?php echo $style ? ' style="' . esc_attr( $style ) . '"' : ''; ?> data-ftt-calc data-mode="len">
+	<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"<?php echo $style ? ' style="' . esc_attr( $style ) . '"' : ''; ?> data-ftt-calc data-mode="len"<?php echo $hide ? ' data-hide="' . esc_attr( implode( ' ', $hide ) ) . '"' : ''; ?>>
 		<div class="filmcalc__head">
 			<div>
 				<h3 class="filmcalc__title"><?php echo esc_html( $title ); ?></h3>
@@ -108,29 +124,29 @@ function ftt_calc_shortcode( $atts ) {
 					<option value="<?php echo esc_attr( $key ); ?>" data-fpf="<?php echo esc_attr( $f['fpf'] ); ?>" <?php selected( $format, $key ); ?>><?php echo esc_html( $f['label'] . ' – ' . $f['fpf_label'] . ' fr/ft' ); ?></option>
 				<?php endforeach; ?>
 				</select></label>
-			<label class="filmcalc__field filmcalc__f-speed"><span><?php esc_html_e( 'Frame rate (fps)', 'film-transfer-toolkit' ); ?></span>
+			<label class="filmcalc__field filmcalc__f-speed"<?php echo $show_fps ? '' : ' hidden'; ?>><span><?php esc_html_e( 'Frame rate (fps)', 'film-transfer-toolkit' ); ?></span>
 				<select data-fc="speed">
 				<?php foreach ( $speeds as $s ) : ?>
 					<option value="<?php echo esc_attr( $s ); ?>" <?php selected( $fps, $s ); ?>><?php echo esc_html( $s ); ?></option>
 				<?php endforeach; ?>
 					<option value="custom" <?php selected( ! $is_std ); ?>><?php esc_html_e( 'Custom…', 'film-transfer-toolkit' ); ?></option>
 				</select></label>
-			<label class="filmcalc__field filmcalc__custom"<?php echo $is_std ? ' hidden' : ''; ?>><span><?php esc_html_e( 'Custom fps', 'film-transfer-toolkit' ); ?></span>
+			<label class="filmcalc__field filmcalc__custom"<?php echo ( $is_std || ! $show_fps ) ? ' hidden' : ''; ?>><span><?php esc_html_e( 'Custom fps', 'film-transfer-toolkit' ); ?></span>
 				<input type="number" inputmode="decimal" min="0.1" max="1000" step="any" data-fc="custom" value="<?php echo esc_attr( $is_std ? '' : $fps ); ?>"></label>
 			<label class="filmcalc__field filmcalc__f-feet"><span><?php esc_html_e( 'Length (feet)', 'film-transfer-toolkit' ); ?></span>
 				<input type="number" inputmode="decimal" min="0" step="any" data-fc="feet" value="100"></label>
-			<label class="filmcalc__field filmcalc__f-meters"><span><?php esc_html_e( 'Length (meters)', 'film-transfer-toolkit' ); ?></span>
+			<label class="filmcalc__field filmcalc__f-meters"<?php echo $show_meters ? '' : ' hidden'; ?>><span><?php esc_html_e( 'Length (meters)', 'film-transfer-toolkit' ); ?></span>
 				<input type="number" inputmode="decimal" min="0" step="any" data-fc="meters"></label>
 			<label class="filmcalc__field filmcalc__f-time"><span><?php esc_html_e( 'Running time (h:mm:ss.ss)', 'film-transfer-toolkit' ); ?></span>
 				<input type="text" inputmode="decimal" autocomplete="off" data-fc="time" placeholder="11:06.67"></label>
-			<label class="filmcalc__field filmcalc__f-frames"><span><?php esc_html_e( 'Frames', 'film-transfer-toolkit' ); ?></span>
+			<label class="filmcalc__field filmcalc__f-frames"<?php echo $show_frames ? '' : ' hidden'; ?>><span><?php esc_html_e( 'Frames', 'film-transfer-toolkit' ); ?></span>
 				<input type="number" inputmode="numeric" min="0" step="1" data-fc="frames"></label>
 		</div>
 		<p class="filmcalc__summary" data-fc="summary" aria-live="polite"></p>
-		<?php if ( $show_extras ) : ?>
+		<?php if ( $show_speed || $show_seconds ) : ?>
 			<dl class="filmcalc__stats">
-				<div><dt><?php esc_html_e( 'Film speed', 'film-transfer-toolkit' ); ?></dt><dd data-fc="ftmin">–</dd></div>
-				<div><dt><?php esc_html_e( 'Total seconds', 'film-transfer-toolkit' ); ?></dt><dd data-fc="seconds">–</dd></div>
+				<?php if ( $show_speed ) : ?><div><dt><?php esc_html_e( 'Film speed', 'film-transfer-toolkit' ); ?></dt><dd data-fc="ftmin">–</dd></div><?php endif; ?>
+				<?php if ( $show_seconds ) : ?><div><dt><?php esc_html_e( 'Total seconds', 'film-transfer-toolkit' ); ?></dt><dd data-fc="seconds">–</dd></div><?php endif; ?>
 			</dl>
 		<?php endif; ?>
 		<?php if ( $show_table ) : ?>

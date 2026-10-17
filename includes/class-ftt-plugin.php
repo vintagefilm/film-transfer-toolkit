@@ -32,7 +32,7 @@ class FTT_Plugin {
 			'pricing'    => array( 'label' => __( 'Price table', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_price_table]: shows the admin price table on a page.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/pricing/pricing.php' ),
 			'estimate'   => array( 'label' => __( 'Multi-reel estimate builder', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_estimate]: customers build an estimate and send a quote request (no payment). Requests are stored privately under Quote requests.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/estimate/estimate.php' ),
 			'storage'    => array( 'label' => __( 'Data rate / storage calculator', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_storage_calculator]: file size per reel and in total for ProRes, H.264/H.265, YouTube, DPX/TIFF and uncompressed deliverables, with a suggested drive size.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/storage/storage.php' ),
-			'clips'      => array( 'label' => __( 'Clip selector (optional)', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_clip_selector]: In/Out clip selection into the FluentCart cart (ported from FW Clip Cart). Needs FluentCart; stays off while the FW Clip Cart prototype plugin is active.', 'film-transfer-toolkit' ), 'default' => 0, 'file' => 'modules/clip-selector/clip-selector.php' ),
+			'clips'      => array( 'label' => __( 'Clip selector (optional)', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_clip_selector]: In/Out clip selection under any video player (video block, uploaded video, YouTube, Vimeo, FluentPlayer, FV Player). Clips go to the FluentCart cart when FluentCart is active, otherwise visitors send a clip request. Stays off while the FW Clip Cart prototype plugin is active.', 'film-transfer-toolkit' ), 'default' => 0, 'file' => 'modules/clip-selector/clip-selector.php' ),
 			'rfq'        => array( 'label' => __( 'Quote comparison / RFQ (optional)', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_rfq_providers], [ftt_rfq_form], [ftt_rfq_reply], [ftt_rfq_compare]: customers ask several providers for quotes and compare them (ported from filmtransfer.ai).', 'film-transfer-toolkit' ), 'default' => 0, 'file' => 'modules/rfq/rfq.php' ),
 		);
 	}
@@ -86,6 +86,10 @@ class FTT_Plugin {
 			self::$status[ $k ] = 'on';
 		}
 		FTT_Blocks::init();
+		FTT_Testbench::init();
+		if ( 'off' === self::$status['clips'] ) {
+			add_action( 'init', array( __CLASS__, 'register_clip_preview' ), 20 );
+		}
 		if ( is_admin() ) {
 			FTT_Setup::maybe_upgrade();
 			FTT_Setup::init();
@@ -96,6 +100,33 @@ class FTT_Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::add_command( 'ftt', 'FTT_CLI' );
 		}
+	}
+
+	/** Clip selector module off: [ftt_clip_selector] renders nothing, except a preview-only copy for editors (test bench, previews). */
+	public static function register_clip_preview() {
+		if ( ! shortcode_exists( 'ftt_clip_selector' ) ) {
+			add_shortcode( 'ftt_clip_selector', array( __CLASS__, 'clip_preview' ) );
+		}
+	}
+
+	public static function clip_preview( $atts ) {
+		if ( ! FTT_Testbench::clip_preview_allowed() ) {
+			return '';
+		}
+		if ( ! class_exists( 'FTT_Clip_Shortcode' ) ) {
+			// Load the module's classes only (no shortcodes, REST routes or FluentCart hooks are registered).
+			if ( ! defined( 'FTT_CLIP_DIR' ) ) {
+				define( 'FTT_CLIP_DIR', FTT_DIR . 'modules/clip-selector/' );
+				define( 'FTT_CLIP_URL', FTT_URL . 'modules/clip-selector/' );
+			}
+			foreach ( array( 'class-rate-card.php', 'class-cutlist.php', 'class-clip.php', 'class-rest.php', 'class-clip-settings.php', 'class-clip-request.php', 'class-shortcode.php' ) as $f ) {
+				require_once FTT_CLIP_DIR . $f;
+			}
+		}
+		FTT_Clip_Shortcode::$demo = true;
+		$html = FTT_Clip_Shortcode::render( is_array( $atts ) ? $atts : array() );
+		FTT_Clip_Shortcode::$demo = false;
+		return $html;
 	}
 
 	public static function register_assets() {
@@ -250,6 +281,50 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			update_option( 'ftt_modules', $on );
 			WP_CLI::success( wp_json_encode( $on ) );
+		}
+
+		/**
+		 * Create or rebuild the draft test bench page, or check it.
+		 *
+		 * ## OPTIONS
+		 *
+		 * [--check]
+		 * : Render the bench and check every tool instead of rebuilding it. Exits 1 on any failure.
+		 *
+		 * [--video=<url>]
+		 * : HTML5 sample video URL (default: the first video already in the Media Library; nothing is uploaded).
+		 *
+		 * [--youtube=<url>]
+		 * : YouTube watch URL for the embed sample.
+		 *
+		 * [--format=<format>]
+		 * : table or json (for --check).
+		 */
+		public function testbench( $args, $assoc ) {
+			if ( isset( $assoc['check'] ) ) {
+				$res  = FTT_Testbench::check();
+				$fail = 0;
+				foreach ( $res as $r ) {
+					$fail += $r[1] ? 0 : 1;
+				}
+				if ( 'json' === ( $assoc['format'] ?? '' ) ) {
+					WP_CLI::line( wp_json_encode( array( 'id' => FTT_Testbench::page_id(), 'failed' => $fail, 'checks' => $res ) ) );
+				} else {
+					foreach ( $res as $r ) {
+						WP_CLI::line( ( $r[1] ? 'PASS ' : 'FAIL ' ) . $r[0] . ( '' !== $r[2] ? ' (' . $r[2] . ')' : '' ) );
+					}
+				}
+				if ( $fail ) {
+					WP_CLI::error( $fail . ' check(s) failed.' );
+				}
+				WP_CLI::success( count( $res ) . ' checks passed on page ' . FTT_Testbench::page_id() . '.' );
+				return;
+			}
+			$id = FTT_Testbench::build( isset( $assoc['video'] ) ? esc_url_raw( $assoc['video'] ) : null, isset( $assoc['youtube'] ) ? esc_url_raw( $assoc['youtube'] ) : '' );
+			if ( is_wp_error( $id ) ) {
+				WP_CLI::error( $id->get_error_message() );
+			}
+			WP_CLI::success( 'Test bench page ' . $id . ' (draft). Preview: ' . add_query_arg( array( 'page_id' => $id, 'preview' => 'true' ), home_url( '/' ) ) );
 		}
 
 		/** Show the module status and mail mode. */

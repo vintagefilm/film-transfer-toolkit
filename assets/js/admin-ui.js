@@ -29,3 +29,21 @@
     if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(done, fail); } else { fail(); }
   });
 })();
+
+/* 1.3.0: Storage calculator defaults form - show only the fields the chosen file type uses. */
+(function () {
+  'use strict';
+  function sync(row) {
+    var k = row.querySelector('[data-ftt-kind]'); if (!k) { return; }
+    Array.prototype.forEach.call(row.querySelectorAll('label[data-ftt-kinds]'), function (l) {
+      l.hidden = !k.value || (' ' + l.getAttribute('data-ftt-kinds') + ' ').indexOf(' ' + k.value + ' ') < 0;
+    });
+  }
+  function boot() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ftt-st-row]'), function (row) {
+      sync(row);
+      var k = row.querySelector('[data-ftt-kind]'); if (k) { k.addEventListener('change', function () { sync(row); }); }
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+}());

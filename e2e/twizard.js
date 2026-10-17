@@ -1,6 +1,6 @@
 // Fresh-site walkthrough of the 1.2.0 setup wizard (real clicks/typing), plus re-run, front-end, block editor checks.
 const {chromium}=require('playwright');const cp=require('child_process');const fs=require('fs');
-const B='http://localhost:8090', SH='/workspace/ftt120-shots/wizard/';fs.mkdirSync(SH,{recursive:true});
+const B='http://localhost:8090', SH='/workspace/ftt130-shots/wizard/';fs.mkdirSync(SH,{recursive:true});
 const wp=(a)=>cp.execSync('cd /workspace/wpfresh && wp '+a+' 2>/dev/null',{encoding:'utf8'}).trim();
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
 (async()=>{
@@ -59,13 +59,21 @@ await shot('wizard-4b-prices-import-error');
 // import a real table via file upload (the DRAFT preset file as a stand-in for another site's export)
 await p.check('input[name=prices][value=import]');await p.setInputFiles('#ftt-price-file','/workspace/film-transfer-toolkit/core/data/price-table-vfc-draft.json');
 await p.click('button:has-text("Save and continue")');await p.waitForLoadState();
-ok('file import works',p.url().includes('step=email')&&JSON.parse(wp('option get ftt_price_table --format=json')).status==='draft');
+ok('file import works',p.url().includes('step=storage')&&JSON.parse(wp('option get ftt_price_table --format=json')).status==='draft');
 // go back and choose EXAMPLE (the default for new users)
 await p.goto(B+'/wp-admin/admin.php?page=ftt-setup&step=prices');await p.check('input[name=prices][value=example]');
 await p.click('button:has-text("Save and continue")');await p.waitForLoadState();
 ok('EXAMPLE prices loaded',JSON.parse(wp('option get ftt_price_table --format=json')).status==='example');
-ok('step 5 email',p.url().includes('step=email'));
-await shot('wizard-5-email');
+ok('step 5 storage (1.3.0)',p.url().includes('step=storage'),p.url());
+ok('storage step starts on 16mm',await p.locator('select[name="storage[default_format]"]').inputValue()==='16');
+ok('storage step: ProRes 422 HQ UHD + H.264 16 Mbps',await p.locator('#ftt-st-0-kind').inputValue()==='prores'&&await p.locator('#ftt-st-0-sizep').inputValue()==='uhd'&&await p.locator('#ftt-st-1-kind').inputValue()==='h264'&&await p.locator('#ftt-st-1-mbps').inputValue()==='16');
+ok('storage step: both PCM, film rate',await p.locator('#ftt-st-0-audio').inputValue()==='2304'&&await p.locator('#ftt-st-1-audio').inputValue()==='2304'&&await p.locator('#ftt-st-1-fps').inputValue()==='film');
+await shot('wizard-5-storage');
+await p.click('button:has-text("Save and continue")');await p.waitForLoadState();
+const so=JSON.parse(wp('option get ftt_storage --format=json'));
+ok('storage step saved the defaults',so.default_format==='16'&&so.deliverables.length===2&&so.deliverables[0].size==='uhd'&&so.deliverables[1].mbps==='16',JSON.stringify(so));
+ok('step 6 email',p.url().includes('step=email'));
+await shot('wizard-6-email');
 await p.fill('#ftt-notify','bob@localhost');await p.click('button:has-text("Save and continue")');await p.waitForLoadState();
 ok('invalid email rejected',p.url().includes('step=email')&&(await p.textContent('.ftt-wizard__card')).includes('does not look right'));
 await p.fill('#ftt-notify','');await p.click('button:has-text("Save and continue")');await p.waitForLoadState();

@@ -66,7 +66,7 @@ foreach ( FTT_Registry::embeds() as $tag => $e ) {
 $h = FTT_Blocks::render( 'ftt_storage_calculator', array( 'preset' => 'dpx-2k', 'headroom' => '30', 'bogus' => 'x' ) );
 $ok( 'block attrs pass through to the shortcode', false !== strpos( $h, 'data-preset="dpx-2k"' ) && false !== strpos( $h, 'data-headroom="30"' ) );
 $h = FTT_Blocks::render( 'ftt_storage_calculator', array( 'preset' => '"><script>', 'headroom' => '999' ) );
-$ok( 'hostile block attrs sanitized by the shortcode', false === strpos( $h, '<script>' ) && false !== strpos( $h, 'data-preset="prores-hq-hd"' ) && false !== strpos( $h, 'data-headroom="20"' ) );
+$ok( 'hostile block attrs sanitized by the shortcode', false === strpos( $h, '<script>' ) && false === strpos( $h, 'data-preset=' ) && false !== strpos( $h, 'data-headroom="20"' ) && false !== strpos( $h, 'data-dels=' ) );
 $ok( 'unknown tag renders nothing', '' === FTT_Blocks::render( 'nope', array() ) );
 // content_has exactness.
 $st = FTT_Registry::embeds()['ftt_storage_calculator'];

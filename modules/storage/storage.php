@@ -1,7 +1,9 @@
 <?php
 /**
  * [ftt_storage_calculator] - data rate / storage calculator for film transfer deliverables.
- * Optional attributes: title="", headroom="20" (percent, 0-100), preset="prores-hq-hd|h264|youtube-4k|dpx-2k|tiff-4k".
+ * Optional attributes: title="", headroom="20" (percent, 0-100), format="16" (first reel row; default from settings),
+ * preset="prores-hq-uhd|prores-hq-hd|prores-422-uhd|h264|youtube-4k|dpx-2k|tiff-4k" (start with this one deliverable
+ * instead of the default deliverables list from Film Transfer Toolkit > Storage calculator).
  * All maths runs in FTTCore.datarate (core/ftt-core.js); the PHP mirror is FTT_Datarate (WP-CLI: wp ftt storage).
  *
  * @package FilmTransferToolkit
@@ -11,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once FTT_DIR . 'includes/core/class-ftt-datarate.php';
+require_once __DIR__ . '/options.php';
 
 add_action( 'init', function () {
 	add_shortcode( 'ftt_storage_calculator', 'ftt_storage_shortcode' );
@@ -22,19 +25,22 @@ add_action( 'init', function () {
 }, 11 );
 
 function ftt_storage_presets() {
-	return array( 'prores-hq-hd', 'prores-422-uhd', 'h264', 'youtube-4k', 'dpx-2k', 'tiff-4k' );
+	return array( 'prores-hq-uhd', 'prores-hq-hd', 'prores-422-uhd', 'h264', 'youtube-4k', 'dpx-2k', 'tiff-4k' );
 }
 
 function ftt_storage_shortcode( $atts ) {
-	$atts     = shortcode_atts( array( 'title' => '', 'headroom' => '20', 'preset' => 'prores-hq-hd' ), $atts, 'ftt_storage_calculator' );
+	$o        = ftt_storage_get_options();
+	$atts     = shortcode_atts( array( 'title' => '', 'headroom' => '20', 'format' => '', 'preset' => '' ), $atts, 'ftt_storage_calculator' );
+	$formats  = ftt_storage_choices()['formats'];
+	$format   = isset( $formats[ (string) $atts['format'] ] ) ? (string) $atts['format'] : $o['default_format'];
 	$title    = '' !== trim( (string) $atts['title'] ) ? sanitize_text_field( $atts['title'] ) : __( 'How much storage will my transfer need?', 'film-transfer-toolkit' );
 	$headroom = is_numeric( $atts['headroom'] ) && $atts['headroom'] >= 0 && $atts['headroom'] <= 100 ? (string) (int) $atts['headroom'] : '20';
-	$preset   = in_array( $atts['preset'], ftt_storage_presets(), true ) ? $atts['preset'] : 'prores-hq-hd';
+	$preset   = in_array( $atts['preset'], ftt_storage_presets(), true ) ? $atts['preset'] : '';
 	wp_enqueue_style( 'ftt-front' );
 	wp_enqueue_script( 'ftt-storage' );
 	ob_start();
 	?>
-	<div class="ftt-box ftt-store" data-ftt-storage data-headroom="<?php echo esc_attr( $headroom ); ?>" data-preset="<?php echo esc_attr( $preset ); ?>">
+	<div class="ftt-box ftt-store" data-ftt-storage data-headroom="<?php echo esc_attr( $headroom ); ?>" data-format="<?php echo esc_attr( $format ); ?>"<?php echo $preset ? ' data-preset="' . esc_attr( $preset ) . '"' : ''; ?> data-dels="<?php echo esc_attr( wp_json_encode( $o['deliverables'] ) ); ?>">
 		<h3 class="ftt-box__title"><?php echo esc_html( $title ); ?></h3>
 		<p class="ftt-box__sub"><?php esc_html_e( 'List your reels, choose one or more file formats, and see the size per reel, the total, and a drive size with room to spare.', 'film-transfer-toolkit' ); ?></p>
 		<h4 class="ftt-store__h"><?php esc_html_e( '1. Your film', 'film-transfer-toolkit' ); ?></h4>

@@ -1,4 +1,4 @@
-/* Film Calculator UI 1.1.0 - vanilla JS, no external calls. Math lives in film-calc-core.js. */
+/* Film Calculator UI 1.3.0 (field toggles via data-hide) - vanilla JS, no external calls. Math lives in film-calc-core.js. */
 (function () {
   'use strict';
   var Core = window.FTTCore;
@@ -13,6 +13,8 @@
       sw: q('switch'), mode: q('mode'), tablefps: q('tablefps')
     };
     var customWrap = root.querySelector('.filmcalc__custom');
+    var hide = {};
+    (root.getAttribute('data-hide') || '').split(/\s+/).forEach(function (k) { if (k) { hide[k] = true; } });
     var rows = root.querySelectorAll('[data-fc-row]');
     var last = 'feet';
 
@@ -32,7 +34,7 @@
 
     function update(src) {
       if (src) { last = src; }
-      customWrap.hidden = el.speed.value !== 'custom';
+      customWrap.hidden = hide.fps || el.speed.value !== 'custom';
       var s = fps();
       updateTable(s);
       var res = Core.compute({ fpf: fpf(), fps: s, from: last, value: el[last].value });
@@ -43,12 +45,13 @@
         return;
       }
       if (last !== 'feet') { el.feet.value = r(res.feet, 2); }
-      if (last !== 'meters') { el.meters.value = r(res.meters, 2); }
+      if (last !== 'meters' && el.meters) { el.meters.value = r(res.meters, 2); }
       if (last !== 'time') { el.time.value = Core.formatTime(res.seconds); }
-      if (last !== 'frames') { el.frames.value = r(res.frames, 0); }
+      if (last !== 'frames' && el.frames) { el.frames.value = r(res.frames, 0); }
       var label = fmtOpt().text.split(' –')[0];
-      el.summary.textContent = label + ': ' + r(res.feet, 2) + ' ft (' + r(res.meters, 2) + ' m) = ' +
-        Math.round(res.frames).toLocaleString() + ' frames (' + res.wholeFeet + ' ft + ' + res.extraFrames + ' fr) = ' +
+      // Fields switched off in Settings (data-hide) are left out of the summary too.
+      el.summary.textContent = label + ': ' + r(res.feet, 2) + ' ft' + (hide.meters ? '' : ' (' + r(res.meters, 2) + ' m)') + ' = ' +
+        (hide.frames ? '' : Math.round(res.frames).toLocaleString() + ' frames (' + res.wholeFeet + ' ft + ' + res.extraFrames + ' fr) = ') +
         Core.formatTime(res.seconds) + ' at ' + r(s, 3) + ' fps';
       if (el.ftmin) { el.ftmin.textContent = r(res.ftPerMin, 2) + ' ft/min'; }
       if (el.seconds) { el.seconds.textContent = res.seconds.toFixed(3) + ' s'; }
@@ -61,7 +64,7 @@
     }
 
     ['feet', 'meters', 'time', 'frames'].forEach(function (k) {
-      el[k].addEventListener('input', function () { update(k); });
+      if (el[k]) el[k].addEventListener('input', function () { update(k); });
     });
     [el.format, el.speed, el.custom].forEach(function (e) {
       e.addEventListener('input', function () { update(); });

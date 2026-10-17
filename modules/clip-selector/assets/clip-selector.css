@@ -18,3 +18,11 @@
 .fwcc-help-body ol,.fwcc-keys{margin:0 0 .5em 1.4em;padding:0}
 .fwcc-debug{white-space:pre-wrap;margin:0 0 .5em}
 @media (max-width:600px){.fwcc-marks{grid-template-columns:max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2}}
+/* 1.3.0: request mode and preview notice */
+.fwcc-hp{position:absolute!important;left:-10000px!important;width:1px;height:1px;overflow:hidden}
+.fwcc-request{margin:.5em 0;padding:.75em;border:1px solid rgba(128,128,128,.35);border-radius:3px}
+.fwcc-request label{display:flex;flex-direction:column;gap:.25em;flex:1;min-width:12em}
+.fwcc-rq-notewrap label{width:100%}
+.fwcc-rq-note{width:100%}
+.fwcc-demo{padding:.5em .75em;border-left:4px solid #d63638;background:rgba(214,54,56,.08);margin:0 0 .75em}
+.fwcc-msg.bad{color:#b32d2e}

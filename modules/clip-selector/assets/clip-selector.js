@@ -1,4 +1,6 @@
-/* Film Transfer Toolkit clip selector (ported from FW Clip Cart 0.4.0). Reads the playhead via FTT_PLAYERS adapters (FluentPlayer/Vidstack or FV Player). */
+/* Film Transfer Toolkit clip selector (ported from FW Clip Cart 0.4.0). Reads the playhead via FTT_PLAYERS adapters
+   (HTML5 video, YouTube, Vimeo, FluentPlayer/Vidstack, FV Player). data-mode="cart" adds clips to the FluentCart cart;
+   data-mode="request" (no FluentCart or no clip product) sends the list as a clip request instead. */
 (function () {
   'use strict';
   var C = window.FTT_CLIP || {};
@@ -21,6 +23,14 @@
     function secOf(f) { return TC.framesToSeconds(f, fps); }
     function seekTo(p, f) { p.currentTime = TC.framesToSeconds(f + 0.5, fps); } // mid-frame so the player lands on frame f
     var clipId = el.getAttribute('data-clip'), title = el.getAttribute('data-title') || clipId;
+    var DEMO = el.getAttribute('data-demo') === '1';
+    function listText() {
+      var lines = [title + ' (' + clipId + '), timecode ' + R.label + ' fps'];
+      st.list.forEach(function (c) { lines.push(clipId + '-' + pad(c.seq) + '  ' + c.name + '  IN ' + tc(c.in) + '  OUT ' + tc(c.out) + '  ' + secOf(c.out - c.in).toFixed(3) + 's  est. ' + money(estimate(secOf(c.out - c.in)))); });
+      lines.push(location.href.split('#')[0]);
+      return lines.join('\n');
+    }
+    function fallbackCopy(t) { var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); }
     function pad(n) { return (n < 10 ? '0' : '') + n; }
     function defName(seq) { return title + ' ' + pad(seq); }
     function mk(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -94,8 +104,49 @@
       if (b.classList.contains('fwcc-clear')) { st.in = st.out = null; st.last = null; msg(''); draw(); return; }
       if (b.hasAttribute('data-ed')) { var inp = el.querySelector('[data-nm="' + b.getAttribute('data-ed') + '"]'); if (inp) { inp.focus(); inp.select(); } return; }
       if (b.hasAttribute('data-rm')) { st.list.splice(+b.getAttribute('data-rm'), 1); draw(); return; }
+      if (b.classList.contains('fwcc-copy')) {
+        if (!st.list.length) return msg('Clip list is empty.', true);
+        var txt = listText();
+        var done2 = function () { msg('Clip list copied. Paste it into an email or a note.'); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done2, function () { fallbackCopy(txt); done2(); });
+        else { fallbackCopy(txt); done2(); }
+        return;
+      }
+      if (b.classList.contains('fwcc-addcart') && el.getAttribute('data-mode') === 'request') {
+        if (!st.list.length) return msg('Clip list is empty.', true);
+        var form = $('.fwcc-request'); form.hidden = false; var first = form.querySelector('input'); if (first) first.focus();
+        msg(''); return;
+      }
+      if (b.classList.contains('fwcc-send')) {
+        if (!st.list.length) return msg('Clip list is empty.', true);
+        if (DEMO) return msg('Preview only: the Clip selector module is switched off on this site, so nothing is sent.', true);
+        var nm2 = $('.fwcc-rq-name'), em = $('.fwcc-rq-email');
+        if (!(nm2.value || '').trim()) { nm2.focus(); return msg('Please enter your name.', true); }
+        if (!/^[^\s@]+@[^\s@]+$/.test((em.value || '').trim())) { em.focus(); return msg('Please enter a valid email address.', true); }
+        b.disabled = true; msg('Sending...');
+        // A fresh nonce from /token, so pages served from a page cache still work (same pattern as the estimate builder).
+        fetch(C.rest + '/token', { credentials: 'omit', cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (tk) { return fetch(C.rest + '/request', {
+          method: 'POST', credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nonce: tk && tk.nonce, name: nm2.value.trim(), email: em.value.trim(), note: ($('.fwcc-rq-note').value || '').trim(), website: ($('.fwcc-rq-hp').value || ''),
+            clip_id: clipId, title: title, fps: fps, page_url: location.href.split('#')[0], page_id: +(el.getAttribute('data-page') || 0),
+            clips: st.list.map(function (c) { return { seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out) }; })
+          })
+        }); }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (r) {
+            b.disabled = false;
+            if (!r.ok) return msg((r.j && r.j.message) || 'Could not send the request.', true);
+            st.list = []; draw(); $('.fwcc-request').hidden = true;
+            msg((r.j && r.j.message) || 'Thank you. Your clip request was sent.');
+            document.dispatchEvent(new CustomEvent('ftt:clip-request', { detail: r.j }));
+          })
+          .catch(function (e) { b.disabled = false; msg(String(e), true); });
+        return;
+      }
       if (b.classList.contains('fwcc-addcart')) {
         if (!st.list.length) return msg('Clip list is empty.', true);
+        if (DEMO) return msg('Preview only: the Clip selector module is switched off on this site, so nothing is added to a cart.', true);
         b.disabled = true; msg('Adding...');
         var queue = st.list.slice(), done = 0, fail = [];
         (function next() {

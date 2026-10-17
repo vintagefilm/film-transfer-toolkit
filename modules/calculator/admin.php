@@ -30,10 +30,29 @@ function ftt_calc_register_settings() {
 	add_settings_field( 'accent', __( 'Accent color', 'film-transfer-toolkit' ), 'ftt_calc_field_accent', 'ftt-calculator', 'ftt_calc_look', array( 'label_for' => 'ftt_calc_accent' ) );
 	add_settings_field( 'heading_font', __( 'Heading font', 'film-transfer-toolkit' ), 'ftt_calc_field_heading_font', 'ftt-calculator', 'ftt_calc_look', array( 'label_for' => 'ftt_calc_heading_font' ) );
 
+	add_settings_section( 'ftt_calc_fields', __( 'Fields', 'film-transfer-toolkit' ), 'ftt_calc_fields_intro', 'ftt-calculator' );
+	foreach ( ftt_calc_field_toggle_labels() as $key => $l ) {
+		add_settings_field( $key, $l[0], 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_fields', array( 'key' => $key, 'text' => $l[1] ) );
+	}
+
 	add_settings_section( 'ftt_calc_extras', __( 'Extras', 'film-transfer-toolkit' ), '__return_false', 'ftt-calculator' );
-	add_settings_field( 'show_extras', __( 'Film speed and total seconds', 'film-transfer-toolkit' ), 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_extras', array( 'key' => 'show_extras', 'text' => __( 'Show ft/min and total seconds', 'film-transfer-toolkit' ) ) );
 	add_settings_field( 'show_switch', __( 'Switch button', 'film-transfer-toolkit' ), 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_extras', array( 'key' => 'show_switch', 'text' => __( 'Show the Length → Time / Time → Length switch', 'film-transfer-toolkit' ) ) );
 	add_settings_field( 'show_table', __( 'Reference table', 'film-transfer-toolkit' ), 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_extras', array( 'key' => 'show_table', 'text' => __( 'Show the format reference table', 'film-transfer-toolkit' ) ) );
+}
+
+/** Field toggles shown on the Settings page and in the setup wizard: key => [title, checkbox text]. */
+function ftt_calc_field_toggle_labels() {
+	return array(
+		'show_meters'  => array( __( 'Length in meters', 'film-transfer-toolkit' ), __( 'Show the Length (meters) field', 'film-transfer-toolkit' ) ),
+		'show_frames'  => array( __( 'Frame count', 'film-transfer-toolkit' ), __( 'Show the Frames field', 'film-transfer-toolkit' ) ),
+		'show_fps'     => array( __( 'Frame rate picker', 'film-transfer-toolkit' ), __( 'Show the Frame rate (fps) picker (when off, visitors get the default frame rate above)', 'film-transfer-toolkit' ) ),
+		'show_speed'   => array( __( 'Film speed', 'film-transfer-toolkit' ), __( 'Show the film speed readout (feet per minute)', 'film-transfer-toolkit' ) ),
+		'show_seconds' => array( __( 'Total seconds', 'film-transfer-toolkit' ), __( 'Show the total seconds readout', 'film-transfer-toolkit' ) ),
+	);
+}
+
+function ftt_calc_fields_intro() {
+	echo '<p>' . esc_html__( 'Choose which fields every calculator on this site shows. Feet and running time are always shown. A page can override each one with block settings or a shortcode attribute: meters="no", frames="no", fps_picker="no", speed="no", seconds="no" (or "yes").', 'film-transfer-toolkit' ) . '</p>';
 }
 
 function ftt_calc_field_format() {

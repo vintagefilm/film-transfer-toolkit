@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -20,7 +20,7 @@ Every module is also a block (ftt/calculator, ftt/reel-estimator, ftt/price-tabl
 * Reel size / diameter estimator - [ftt_reel_estimator format="s8" fps="18"].
 * Price table - [ftt_price_table service="hd" addons="yes" fees="yes"]; edit under Price table (per foot, per reel, add-ons, setup fee, minimums, volume tiers, JSON import/export, EXAMPLE and DRAFT presets).
 * Multi-reel estimate builder - [ftt_estimate]; customers send a quote request (no payment). The server re-prices every request; requests are private under Quote requests.
-* Clip selector (optional) - [ftt_clip_selector ...], ported from FW Clip Cart 0.4.0; needs FluentCart; waits while the FW Clip Cart prototype plugin is active.
+* Clip selector (optional) - [ftt_clip_selector ...], ported from FW Clip Cart 0.4.0. Works under any video player (Video block / uploaded video, YouTube, Vimeo, FluentPlayer, FV Player). Uses the FluentCart cart when FluentCart is active and a clip product is set; otherwise visitors send a clip request. Waits while the FW Clip Cart prototype plugin is active.
 * Data rate / storage calculator - [ftt_storage_calculator headroom="20" preset="prores-hq-hd"]; size per reel and in total for ProRes 422 Proxy/LT/422/HQ/4444/4444 XQ (Apple target rates), H.264/H.265 MP4 at a chosen bitrate, YouTube recommended upload bitrates, DPX/TIFF image sequences, uncompressed v210/2vuy/v410 and custom Mbps; several deliverables summed; decimal and binary units; suggested drive with headroom. Presets and sources: core/data/datarate-presets.json and docs/datarate-presets.md. On a page with [ftt_estimate] it can reuse the estimate's reel list.
 * Quote comparison / RFQ (optional) - [ftt_rfq_providers] [ftt_rfq_form] [ftt_rfq_reply] [ftt_rfq_compare], ported from filmtransfer.ai.
 
@@ -37,6 +37,15 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.3.0 =
+* Film calculator: the Length (meters) field, the Frames field, the Frame rate picker, the film speed (ft/min) readout and the total seconds readout can each be switched off for the site (Calculator look > Fields, and the setup wizard's Look step) or per page (meters, frames, fps_picker, speed, seconds attributes; block Settings panel). Defaults show everything. Settings saved by 1.2.0 carry over (the old extras checkbox becomes the speed and seconds toggles). The summary line leaves out hidden fields.
+* Clip selector works on any page with a video player: core Video block and other HTML5 video, YouTube and Vimeo embeds (driven through each player's own postMessage interface; no third-party script is added), FluentPlayer and FV Player. player_selector attaches it to one player; player="html5|youtube|vimeo|fluent|fv" limits automatic detection. Optional automatic placement under pages/posts that contain a video (off by default).
+* Clip selector without FluentCart: the button reads "Send clip request"; visitors give a name and email and the list is saved privately under Clip requests (server-side prices from the rate card; honeypot, nonce and rate limit) and the owner is notified through the mail log / Send mode. "Copy list" copies the clip names and timecodes. With FluentCart active and a clip product (product_id or the new default clip product setting), clips go to the cart as before.
+* Clip selector settings: default timecode frame rate, default clip product, automatic placement.
+* Storage calculator starts with 16mm and two deliverables: ProRes 422 HQ UHD 3840x2160 and H.264 16 Mbps, both at the film frame rate with PCM audio. Each site can choose its own default film format and up to four default deliverables (Film Transfer Toolkit > Storage calculator, and a new Storage step in the setup wizard). New format attribute; preset still starts with one particular format; new preset prores-hq-uhd.
+* Test bench: "wp ftt testbench" builds a draft page with every tool (plus the standalone [film_calculator]) and sample videos; "wp ftt testbench --check" renders and checks it. The page always stays a draft (publishing is refused), is noindex, and is kept out of menus. While the Clip selector module is off, editors previewing it see a "Preview only" selector that cannot send anything.
+* Uninstall also removes ftt_storage and ftt_clip_settings (clip requests are kept unless FTT_UNINSTALL_DELETE_DATA is set).
+
 = 1.2.0 =
 * Setup wizard on first activation (re-runnable): tools, pages (reuse existing, never duplicate, not added to menus, optional drafts), calculator look, EXAMPLE prices or JSON import, optional notify address (mail mode untouched).
 * One "Film Transfer Toolkit" admin menu: Dashboard / Getting started, Setup wizard, Settings, Prices, Help (a page per tool with block and classic editor steps, option tables, copy buttons, examples, bundled illustrations, FAQ), Calculator look, module screens, Mail log.

@@ -1,6 +1,10 @@
 // Storage calculator local end-to-end test (real typing). node tstorage.js
 const {chromium,devices}=require('playwright');
 const B='http://localhost:8088', SH='/workspace/ftt-shots/storage-';
+const cp=require('child_process');const wp=(a)=>cp.execSync('cd /workspace/wp && wp '+a+' 2>/dev/null',{encoding:'utf8'});
+// 1.3.0: this suite checks the 1.1.0 maths from a Super 8 / ProRes 422 HQ HD start, so it pins those as the site defaults
+// (the shipped 1.3.0 defaults are covered by t130.js) and removes the option again at the end.
+wp(`option update ftt_storage '{"default_format":"s8","deliverables":[{"kind":"prores","profile":"hq","size":"hd","fps":"film","audio_kbps":"0"}]}' --format=json`);
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
 (async()=>{
 const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1280,height:900}});const p=await ctx.newPage();
@@ -86,5 +90,5 @@ ok('calculator: badge inside the Film format label',await p.locator('.filmcalc__
 ok('no JS errors',errs.length===0,errs.join(' | '));
 ok('no 4xx/5xx for toolkit assets (WP core dist files missing locally are ignored: '+nf.length+')',nf.filter(x=>/film-transfer-toolkit|ftt/.test(x)).length===0,nf.join(' | '));
 ok('no external requests',ext.length===0,ext.join(' '));
-console.log(out.join('\n'));console.log(out.filter(x=>x.startsWith('PASS')).length+' passed, '+out.filter(x=>x.startsWith('FAIL')).length+' failed');await b.close();
+console.log(out.join('\n'));console.log(out.filter(x=>x.startsWith('PASS')).length+' passed, '+out.filter(x=>x.startsWith('FAIL')).length+' failed');await b.close();wp('option delete ftt_storage');
 })().catch(e=>{console.log(out.join('\n'));console.error('CRASH',e.message);process.exit(1);});

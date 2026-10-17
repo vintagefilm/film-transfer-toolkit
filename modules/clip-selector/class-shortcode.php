@@ -2,12 +2,20 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * [fw_clip_cart product_id="123" clip_id="FIRE-0001" fps="29.97df" player="auto|fluent|fv" title="Story title"]
- * Place directly under a [fluentplayer] (or FluentPlayer block) in the same container.
- * title defaults to the product's _fw_clip_title meta, then the product title.
+ * [ftt_clip_selector player="auto|html5|youtube|vimeo|fluent|fv" player_selector="#id" clip_id="FIRE-0001" fps="29.97df" title="Story title" product_id="123"]
+ * (alias [fw_clip_cart]). Place it under any video player: the core Video block / an uploaded <video>, a YouTube or
+ * Vimeo embed, FluentPlayer or FV Player. player_selector attaches it to one particular player.
+ * Cart mode (FluentCart active and a clip product from product_id or the default in settings): clips go to the cart.
+ * Request mode (otherwise): visitors send the list as a clip request (FTT_Clip_Request).
+ * title defaults to the product's _fw_clip_title meta, then the product title, then the page title.
  */
 class FTT_Clip_Shortcode
 {
+    /** Set while rendering a preview of a page when the module is switched off (FTT_Plugin::clip_preview). */
+    public static $demo = false;
+
+    const PLAYERS = ['auto', 'html5', 'youtube', 'vimeo', 'fluent', 'fv'];
+
     public static function init()
     {
         add_shortcode('ftt_clip_selector', [__CLASS__, 'render']);
@@ -34,6 +42,8 @@ class FTT_Clip_Shortcode
             'edit'      => 'Edit this clip\'s name',
             'remove'    => 'Remove this clip from your list',
             'addcart'   => 'Add all clips in your list to the cart',
+            'request'   => 'Send your clip list to us; we reply with the final price',
+            'copy'      => 'Copy the clip list (names and timecodes) to paste into an email',
         ]);
     }
 
@@ -49,7 +59,7 @@ class FTT_Clip_Shortcode
             . '<li>Click <b>Preview range</b> to watch just your selection.</li>'
             . '<li>Check the clip name, or type your own.</li>'
             . '<li>Click <b>Add to clip list</b>. Repeat to add more clips from the same video.</li>'
-            . '<li>When your list is ready, click <b>Add clips to cart</b>.</li>'
+            . '<li>When your list is ready, click <b>Add clips to cart</b> (or <b>Send clip request</b>). <b>Copy list</b> copies the names and timecodes.</li>'
             . '</ol>'
             . '<p><b>Keyboard shortcuts</b> (with the mouse over the video or this panel, not while typing a name):</p>'
             . '<ul class="fwcc-keys">'
@@ -80,12 +90,24 @@ class FTT_Clip_Shortcode
     public static function render($atts)
     {
         $a = shortcode_atts(['product_id' => 0, 'clip_id' => '', 'fps' => '', 'player' => 'auto', 'player_selector' => '', 'title' => ''], $atts, 'ftt_clip_selector');
-        $pid = absint($a['product_id']);
-        // Frame rate: shortcode fps="29.97df" overrides; else product meta _fw_fps; default 29.97 DF.
-        // The server always validates against the product's rate, so set _fw_fps on the product to match.
-        $fps = FTT_Timecode::norm($a['fps']) ?: FTT_Clip::product_fps($pid);
-        $offset = FTT_Clip::product_offset_frames($pid);
-        $title = $a['title'] !== '' ? $a['title'] : FTT_Clip::default_title($pid);
+        $set = FTT_Clip_Settings::get();
+        $pid = absint($a['product_id']) ?: (int) $set['default_product_id'];
+        $mode = FTT_Clip_Settings::is_clip_product($pid) ? 'cart' : 'request';
+        if ($mode === 'request') $pid = 0;
+        $page_id = (int) get_the_ID();
+        // Frame rate: shortcode fps="29.97df" overrides; else the product's _fw_fps (cart mode); else the settings default.
+        // In cart mode the server validates against the product's rate, so set _fw_fps on the product to match.
+        $fps = FTT_Timecode::norm($a['fps']) ?: ($pid ? FTT_Clip::product_fps($pid) : $set['default_fps']);
+        $offset = $pid ? FTT_Clip::product_offset_frames($pid) : 0;
+        $title = $a['title'] !== '' ? sanitize_text_field($a['title']) : ($pid ? FTT_Clip::default_title($pid) : ($page_id ? get_the_title($page_id) : __('Clip', 'film-transfer-toolkit')));
+        $clip_id = preg_match('/^[A-Za-z0-9._-]{1,64}$/', (string) $a['clip_id']) ? (string) $a['clip_id'] : '';
+        if ($clip_id === '' && $pid) $clip_id = (string) get_post_meta($pid, '_fw_clip_id', true);
+        if ($clip_id === '') {
+            $slug = $page_id ? (string) get_post_field('post_name', $page_id) : '';
+            $clip_id = substr(strtoupper(preg_replace('/[^A-Za-z0-9._-]+/', '-', $slug)), 0, 64) ?: 'CLIP';
+        }
+        $player = in_array(strtolower($a['player']), self::PLAYERS, true) ? strtolower($a['player']) : 'auto';
+        $a['clip_id'] = $clip_id;
         $card = FTT_Clip_Rate_Card::get();
         $T = self::tips();
         $ta = function ($k, $arg = null) use ($T) { $v = $arg === null ? $T[$k] : sprintf($T[$k], $arg); return 'title="' . esc_attr($v) . '" aria-label="' . esc_attr($v) . '"'; };
@@ -99,7 +121,9 @@ class FTT_Clip_Shortcode
             'card'  => $card,
         ]);
         ob_start(); ?>
-<div class="fwcc" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr(in_array(strtolower($a['player']), ['fv', 'fluent', 'auto'], true) ? strtolower($a['player']) : 'auto'); ?>" data-player-selector="<?php echo esc_attr($a['player_selector']); ?>" data-title="<?php echo esc_attr($title); ?>">
+<div class="fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>">
+<?php if (self::$demo) : ?>  <p class="fwcc-demo"><strong><?php esc_html_e('Preview only:', 'film-transfer-toolkit'); ?></strong> <?php esc_html_e('the Clip selector module is switched off on this site, so visitors do not see this and nothing can be sent.', 'film-transfer-toolkit'); ?></p>
+<?php endif; ?>
   <div class="fwcc-marks">
     <button type="button" class="button fwcc-set" data-which="in" <?php echo $ta('set_in'); ?>>Set In</button>
     <span class="fwcc-tc" data-tc="in"></span>
@@ -125,8 +149,21 @@ class FTT_Clip_Shortcode
   </div>
   <table class="fwcc-list"><thead><tr><th>Clip #</th><th>Name</th><th>In</th><th>Out</th><th>Duration</th><th>Est.</th><th></th></tr></thead><tbody></tbody></table>
   <div class="fwcc-row"><b>List total (estimate): <span class="fwcc-total">$0.00</span></b>
-    <button type="button" class="button fwcc-addcart" <?php echo $ta('addcart'); ?>>Add clips to cart</button></div>
-  <p class="fwcc-note">Timecode: <?php echo esc_html(FTT_Timecode::LABELS[$fps]); ?> fps<?php echo $offset ? ' (master offset ' . esc_html(FTT_Timecode::frames_to_tc($offset, $fps)) . ')' : ''; ?>. <?php echo esc_html($card['label']); ?> &mdash; final price is set by the server at checkout.</p>
+    <button type="button" class="button fwcc-copy" <?php echo $ta('copy'); ?>>Copy list</button>
+    <button type="button" class="button fwcc-addcart" <?php echo $mode === 'request' ? $ta('request') : $ta('addcart'); ?>><?php echo $mode === 'request' ? esc_html__('Send clip request', 'film-transfer-toolkit') : esc_html__('Add clips to cart', 'film-transfer-toolkit'); ?></button></div>
+<?php if ($mode === 'request') : ?>
+  <div class="fwcc-request" hidden>
+    <p><?php esc_html_e('Send this clip list to us. We reply by email with the final price; nothing is charged now.', 'film-transfer-toolkit'); ?></p>
+    <div class="fwcc-row">
+      <label><?php esc_html_e('Your name', 'film-transfer-toolkit'); ?> <input type="text" class="fwcc-rq-name" maxlength="100" autocomplete="name" required></label>
+      <label><?php esc_html_e('Email', 'film-transfer-toolkit'); ?> <input type="email" class="fwcc-rq-email" maxlength="200" autocomplete="email" required></label>
+    </div>
+    <div class="fwcc-row fwcc-rq-notewrap"><label><?php esc_html_e('Note (optional)', 'film-transfer-toolkit'); ?> <textarea class="fwcc-rq-note" rows="2" maxlength="2000"></textarea></label></div>
+    <div class="fwcc-hp" aria-hidden="true"><label>Website <input type="text" class="fwcc-rq-hp" tabindex="-1" autocomplete="off"></label></div>
+    <div class="fwcc-row"><button type="button" class="button fwcc-send"><?php esc_html_e('Send request', 'film-transfer-toolkit'); ?></button></div>
+  </div>
+<?php endif; ?>
+  <p class="fwcc-note">Timecode: <?php echo esc_html(FTT_Timecode::LABELS[$fps]); ?> fps<?php echo $offset ? ' (master offset ' . esc_html(FTT_Timecode::frames_to_tc($offset, $fps)) . ')' : ''; ?>. <?php echo esc_html($card['label']); ?> &mdash; <?php echo $mode === 'request' ? esc_html__('estimate only; we confirm the final price when we reply.', 'film-transfer-toolkit') : esc_html__('final price is set by the server at checkout.', 'film-transfer-toolkit'); ?></p>
   <div class="fwcc-msg" aria-live="polite"></div>
   <details class="fwcc-help">
     <summary>How to select a clip</summary>

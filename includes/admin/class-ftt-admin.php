@@ -271,7 +271,7 @@ class FTT_Admin {
 			</div>
 
 			<?php if ( 'clips' === $key ) : ?>
-				<div class="notice notice-info inline"><p><?php esc_html_e( 'The clip selector goes on a FluentCart product page, directly under the video player, rather than on a page of its own.', 'film-transfer-toolkit' ); ?></p></div>
+				<div class="notice notice-info inline"><p><?php esc_html_e( 'The clip selector goes directly under a video player on any page (a Video block, an uploaded video, a YouTube or Vimeo embed, FluentPlayer or FV Player), rather than on a page of its own. Use player_selector to attach it to one particular player.', 'film-transfer-toolkit' ); ?></p></div>
 			<?php endif; ?>
 			<?php if ( 'rfq' === $key ) : ?>
 				<div class="notice notice-info inline"><p><?php esc_html_e( 'Quote comparison uses four pages, one for each piece below. The setup wizard can create all four and connect them for you; if you make them yourself, choose them on the RFQ requests settings page so emailed links point to the right place.', 'film-transfer-toolkit' ); ?></p></div>

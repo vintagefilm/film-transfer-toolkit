@@ -9,6 +9,7 @@
   var KINDS = [['prores', 'Apple ProRes (.mov)'], ['h264', 'H.264 MP4'], ['h265', 'H.265 / HEVC MP4'], ['youtube', 'YouTube upload (H.264, recommended bitrate)'], ['dpx', 'DPX image sequence'], ['tiff', 'TIFF image sequence'], ['uncompressed', 'Uncompressed video (.mov)'], ['custom', 'Custom bitrate (Mbps)']];
   var AUDIO = [['0', 'No audio'], ['384', 'AAC stereo 384 kbps (YouTube recommendation)'], ['2304', 'PCM 48 kHz 24-bit stereo (2304 kbps)']];
   var PRESET = {
+    'prores-hq-uhd': { kind: 'prores', profile: 'hq', size: 'uhd', fps: 'film', audio_kbps: '2304' },
     'prores-hq-hd': { kind: 'prores', profile: 'hq', size: 'hd', fps: 'film' },
     'prores-422-uhd': { kind: 'prores', profile: '422', size: 'uhd', fps: 'film' },
     'h264': { kind: 'h264', mbps: '20', fps: 'film' },
@@ -45,8 +46,12 @@
   function init(root) {
     var q = function (k) { return root.querySelector('[data-s="' + k + '"]'); };
     var linesBox = q('lines'), delsBox = q('dels'), out = q('out'), head = q('headroom'), fromEst = q('from-estimate');
-    var preset = PRESET[root.getAttribute('data-preset')] || PRESET['prores-hq-hd'];
-    var state = { lines: [newLine('s8')], dels: [JSON.parse(JSON.stringify(preset))] }, estLines = null;
+    // Start: one explicit preset (data-preset), else the site's default deliverables (data-dels, from Settings).
+    var dels = null, preset = PRESET[root.getAttribute('data-preset')];
+    if (preset) { dels = [preset]; }
+    else { try { dels = JSON.parse(root.getAttribute('data-dels') || 'null'); } catch (e) { dels = null; } }
+    if (!Array.isArray(dels) || !dels.length) { dels = [PRESET['prores-hq-uhd'], { kind: 'h264', mbps: '16', fps: 'film', audio_kbps: '2304' }]; }
+    var state = { lines: [newLine(root.getAttribute('data-format') || '16')], dels: JSON.parse(JSON.stringify(dels.slice(0, PR.limits.deliverables))) }, estLines = null;
     function newLine(fmt) { var f = Core.getFormat(fmt) || Core.FORMATS[1]; var r = Core.reels.sizes(f.id); return { format: f.id, fps: f.id === '8' ? '16' : f.id === 's8' ? '18' : '24', reels: '1', mode: 'size', size: r.length ? r[r.length - 1].size : '', feet: '', time: '' }; }
     function request() {
       return {

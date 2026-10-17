@@ -28,6 +28,7 @@ class FTT_Setup {
 			'pages'   => __( 'Pages', 'film-transfer-toolkit' ),
 			'look'    => __( 'Look', 'film-transfer-toolkit' ),
 			'prices'  => __( 'Prices', 'film-transfer-toolkit' ),
+			'storage' => __( 'Storage', 'film-transfer-toolkit' ),
 			'email'   => __( 'Email', 'film-transfer-toolkit' ),
 			'finish'  => __( 'Done', 'film-transfer-toolkit' ),
 		);
@@ -176,7 +177,7 @@ class FTT_Setup {
 				<span class="dashicons dashicons-<?php echo esc_attr( $t['icon'] ); ?>" aria-hidden="true"></span>
 				<strong><?php echo esc_html( $t['title'] ); ?></strong>
 				<span class="ftt-choice__desc"><?php echo esc_html( $t['summary'] ); ?></span>
-				<?php if ( 'clips' === $k ) : ?><span class="ftt-choice__note"><?php echo esc_html( defined( 'FLUENTCART_VERSION' ) || class_exists( '\FluentCart\App\App' ) ? __( 'FluentCart detected.', 'film-transfer-toolkit' ) : __( 'Needs the FluentCart plugin, which is not active on this site.', 'film-transfer-toolkit' ) ); ?></span><?php endif; ?>
+				<?php if ( 'clips' === $k ) : ?><span class="ftt-choice__note"><?php echo esc_html( defined( 'FLUENTCART_VERSION' ) || class_exists( '\FluentCart\App\App' ) ? __( 'FluentCart detected: clips can go to the cart.', 'film-transfer-toolkit' ) : __( 'FluentCart is not active: visitors send clip requests instead of using a cart.', 'film-transfer-toolkit' ) ); ?></span><?php endif; ?>
 				<?php if ( 'rfq' === $k ) : ?><span class="ftt-choice__note"><?php esc_html_e( 'Optional: for directory-style sites that list several providers.', 'film-transfer-toolkit' ); ?></span><?php endif; ?>
 			</label>
 		<?php endforeach; ?>
@@ -270,6 +271,13 @@ class FTT_Setup {
 			<tr><th><label for="ftt-fps"><?php esc_html_e( 'Frame rate shown first', 'film-transfer-toolkit' ); ?></label></th><td>
 				<select id="ftt-fps" name="default_fps"><?php foreach ( ftt_calc_speeds() as $s ) : ?><option value="<?php echo esc_attr( $s ); ?>" <?php selected( $o['default_fps'], $s ); ?>><?php echo esc_html( $s ); ?> fps</option><?php endforeach; ?></select>
 			</td></tr>
+			<tr><th><?php esc_html_e( 'Fields to show', 'film-transfer-toolkit' ); ?></th><td>
+				<input type="hidden" name="fields_form" value="1">
+				<?php foreach ( ftt_calc_field_toggle_labels() as $k => $l ) : ?>
+					<label class="ftt-radio" style="display:block"><input type="checkbox" name="<?php echo esc_attr( $k ); ?>" value="1" <?php checked( ! empty( $o[ $k ] ) ); ?>> <?php echo esc_html( $l[1] ); ?></label>
+				<?php endforeach; ?>
+				<p class="description"><?php esc_html_e( 'Feet and running time are always shown.', 'film-transfer-toolkit' ); ?></p>
+			</td></tr>
 		</table>
 		<?php
 	}
@@ -293,6 +301,18 @@ class FTT_Setup {
 		</fieldset>
 		<p class="description"><?php esc_html_e( 'To type prices in one by one, finish setup and open Film Transfer Toolkit > Prices.', 'film-transfer-toolkit' ); ?></p>
 		<?php
+	}
+
+	private static function render_storage() {
+		?>
+		<h2><?php esc_html_e( 'Storage calculator defaults', 'film-transfer-toolkit' ); ?></h2>
+		<?php
+		if ( ! function_exists( 'ftt_storage_get_options' ) ) {
+			echo '<p><em>' . esc_html__( 'The storage calculator is switched off. Continue to the next step.', 'film-transfer-toolkit' ) . '</em></p>';
+			return;
+		}
+		echo '<p>' . esc_html__( 'Choose the film format and the file formats (deliverables) the storage calculator starts with. You can change these later under Film Transfer Toolkit > Storage calculator.', 'film-transfer-toolkit' ) . '</p>';
+		ftt_storage_render_fields( ftt_storage_get_options(), 'storage' );
 	}
 
 	private static function render_email() {
@@ -379,6 +399,11 @@ class FTT_Setup {
 							$o[ $k ] = sanitize_text_field( wp_unslash( $_POST[ $k ] ) );
 						}
 					}
+					if ( ! empty( $_POST['fields_form'] ) ) {
+						foreach ( array_keys( ftt_calc_field_toggles() ) as $k ) {
+							$o[ $k ] = empty( $_POST[ $k ] ) ? 0 : 1;
+						}
+					}
 					update_option( 'ftt_calc_options', ftt_calc_sanitize_options( $o ) );
 				}
 				self::back( $next );
@@ -410,6 +435,12 @@ class FTT_Setup {
 						self::back( 'prices', 'error', $err );
 					}
 					self::back( $next, 'success', array( __( 'Prices imported.', 'film-transfer-toolkit' ) ) );
+				}
+				self::back( $next );
+				break;
+			case 'storage':
+				if ( function_exists( 'ftt_storage_from_form' ) && isset( $_POST['storage'] ) && is_array( $_POST['storage'] ) ) {
+					update_option( 'ftt_storage', ftt_storage_from_form( wp_unslash( $_POST['storage'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- whitelisted by ftt_storage_sanitize_options().
 				}
 				self::back( $next );
 				break;

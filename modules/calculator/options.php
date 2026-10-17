@@ -32,10 +32,45 @@ function ftt_calc_default_options() {
 		'theme'          => 'dark',
 		'accent'         => '',
 		'heading_font'   => 'preset',
-		'show_extras'    => 1,
+		'show_extras'    => 1, // Legacy (1.2.0 and older): "film speed and total seconds". Kept equal to show_speed || show_seconds.
 		'show_switch'    => 1,
 		'show_table'     => 0,
+		'show_meters'    => 1, // 1.3.0 field toggles. All on = the same calculator as before.
+		'show_frames'    => 1,
+		'show_fps'       => 1, // The frame rate picker. When off, the default frame rate is used.
+		'show_speed'     => 1, // Film speed readout (ft/min).
+		'show_seconds'   => 1, // Total seconds readout.
+		'fields_v'       => 1,
 	);
+}
+
+/** Field toggles: option key => shortcode / block attribute. */
+function ftt_calc_field_toggles() {
+	return array(
+		'show_meters'  => 'meters',
+		'show_frames'  => 'frames',
+		'show_fps'     => 'fps_picker',
+		'show_speed'   => 'speed',
+		'show_seconds' => 'seconds',
+	);
+}
+
+/**
+ * Options saved before 1.3.0 have no field toggles: everything stays visible, and the old
+ * "film speed and total seconds" checkbox decides both readouts.
+ */
+function ftt_calc_migrate_options( $saved ) {
+	if ( ! is_array( $saved ) || isset( $saved['fields_v'] ) ) {
+		return $saved;
+	}
+	$extras = ! isset( $saved['show_extras'] ) || ! empty( $saved['show_extras'] ) ? 1 : 0;
+	$saved['show_meters']  = 1;
+	$saved['show_frames']  = 1;
+	$saved['show_fps']     = 1;
+	$saved['show_speed']   = $extras;
+	$saved['show_seconds'] = $extras;
+	$saved['fields_v']     = 1;
+	return $saved;
 }
 
 /** Returns a lowercase #rgb / #rrggbb colour, or '' when invalid. */
@@ -78,9 +113,11 @@ function ftt_calc_sanitize_options( $input ) {
 		'accent'         => ftt_calc_sanitize_hex( isset( $input['accent'] ) ? $input['accent'] : '' ),
 		'heading_font'   => ftt_calc_sanitize_choice( isset( $input['heading_font'] ) ? $input['heading_font'] : '', array( 'preset', 'theme', 'plain', 'yeseva' ), $d['heading_font'] ),
 	);
-	foreach ( array( 'show_extras', 'show_switch', 'show_table' ) as $key ) {
+	foreach ( array( 'show_switch', 'show_table', 'show_meters', 'show_frames', 'show_fps', 'show_speed', 'show_seconds' ) as $key ) {
 		$out[ $key ] = empty( $input[ $key ] ) ? 0 : 1;
 	}
+	$out['show_extras'] = ( $out['show_speed'] || $out['show_seconds'] ) ? 1 : 0;
+	$out['fields_v']    = 1;
 	return $out;
 }
 
@@ -93,5 +130,5 @@ function ftt_calc_get_options() {
 	if ( ! is_array( $saved ) ) {
 		return ftt_calc_default_options();
 	}
-	return ftt_calc_sanitize_options( $saved );
+	return ftt_calc_sanitize_options( ftt_calc_migrate_options( $saved ) );
 }
