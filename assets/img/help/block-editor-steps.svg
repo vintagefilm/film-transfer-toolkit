@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" width="560" height="320" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" role="img" aria-labelledby="t"><title id="t">Adding a Film Transfer Toolkit block in the block editor</title>
+<rect width="560" height="320" fill="#f6f7f7"/>
+<rect x="0" y="0" width="560" height="38" fill="#fff" stroke="#dcdcde"/>
+<rect x="10" y="7" width="24" height="24" rx="3" fill="#1e1e1e"/><path d="M22 12v14M15 19h14" stroke="#fff" stroke-width="2.4"/>
+<rect x="486" y="9" width="62" height="20" rx="2" fill="#2271b1"/><text x="517" y="23" font-size="11" fill="#fff" text-anchor="middle">Publish</text>
+<rect x="456" y="9" width="22" height="20" rx="2" fill="#fff" stroke="#1e1e1e"/><circle cx="467" cy="19" r="5" fill="none" stroke="#1e1e1e" stroke-width="1.6"/>
+<circle cx="22" cy="54" r="10" fill="#d63638"/><text x="22" y="58" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">1</text>
+<text x="38" y="58" font-size="12" fill="#1e1e1e">Click +</text>
+<rect x="10" y="70" width="190" height="220" rx="4" fill="#fff" stroke="#c3c4c7"/>
+<rect x="20" y="80" width="170" height="26" rx="2" fill="#f0f0f1" stroke="#949494"/><text x="28" y="97" font-size="11" fill="#1e1e1e">Film Transfer Toolkit</text>
+<circle cx="194" cy="93" r="10" fill="#d63638"/><text x="194" y="97" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">2</text>
+<text x="20" y="126" font-size="10" fill="#757575" font-weight="600">FILM TRANSFER TOOLKIT</text>
+<g font-size="9" fill="#1e1e1e" text-anchor="middle">
+<rect x="20" y="134" width="52" height="52" rx="3" fill="#e9f3fb" stroke="#2271b1" stroke-width="1.5"/><rect x="38" y="142" width="16" height="18" rx="2" fill="none" stroke="#2271b1" stroke-width="1.6"/><text x="46" y="178">Calculator</text>
+<rect x="79" y="134" width="52" height="52" rx="3" fill="#fff" stroke="#dcdcde"/><circle cx="105" cy="151" r="9" fill="none" stroke="#1e1e1e" stroke-width="1.6"/><text x="105" y="178">Reels</text>
+<rect x="138" y="134" width="52" height="52" rx="3" fill="#fff" stroke="#dcdcde"/><rect x="128" y="144" width="0" height="0"/><path d="M152 145h24M152 151h24M152 157h16" stroke="#1e1e1e" stroke-width="1.6"/><text x="164" y="178">Estimate</text>
+<rect x="20" y="193" width="52" height="52" rx="3" fill="#fff" stroke="#dcdcde"/><path d="M34 205h24v14h-24z" fill="none" stroke="#1e1e1e" stroke-width="1.6"/><text x="46" y="237">Prices</text>
+<rect x="79" y="193" width="52" height="52" rx="3" fill="#fff" stroke="#dcdcde"/><ellipse cx="105" cy="206" rx="10" ry="4" fill="none" stroke="#1e1e1e" stroke-width="1.6"/><path d="M95 206v12c0 2 4 4 10 4s10-2 10-4v-12" fill="none" stroke="#1e1e1e" stroke-width="1.6"/><text x="105" y="237">Storage</text>
+<rect x="138" y="193" width="52" height="52" rx="3" fill="#fff" stroke="#dcdcde"/><text x="164" y="222" font-size="14">…</text><text x="164" y="237">more</text>
+</g>
+<circle cx="72" cy="140" r="10" fill="#d63638"/><text x="72" y="144" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">3</text>
+<text x="20" y="270" font-size="10" fill="#50575e">Search, then click a tool</text>
+<rect x="214" y="70" width="210" height="220" rx="4" fill="#fff" stroke="#c3c4c7"/>
+<text x="226" y="94" font-size="15" fill="#1e1e1e" font-weight="600">Film Calculator</text>
+<rect x="226" y="106" width="186" height="120" rx="5" fill="#f6f7f7" stroke="#8c8f94" stroke-dasharray="4 3"/>
+<rect x="238" y="118" width="70" height="8" rx="2" fill="#c3c4c7"/><rect x="238" y="134" width="160" height="40" rx="3" fill="#1d2327"/><rect x="246" y="142" width="60" height="9" rx="2" fill="#dba617"/><rect x="246" y="157" width="140" height="6" rx="2" fill="#646970"/>
+<text x="238" y="194" font-size="9" fill="#50575e">The working tool shows on the</text><text x="238" y="206" font-size="9" fill="#50575e">published page. Use Preview to try it.</text>
+<text x="226" y="248" font-size="10" fill="#50575e">A grey box stands in for the</text><text x="226" y="262" font-size="10" fill="#50575e">tool while you edit.</text>
+<rect x="436" y="44" width="114" height="246" rx="4" fill="#fff" stroke="#c3c4c7"/>
+<circle cx="544" cy="54" r="10" fill="#d63638"/><text x="544" y="58" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">4</text>
+<text x="446" y="66" font-size="11" fill="#1e1e1e" font-weight="600">Block settings</text>
+<g font-size="9" fill="#1e1e1e"><text x="446" y="88">format</text><rect x="446" y="93" width="94" height="18" rx="2" fill="#fff" stroke="#949494"/><text x="451" y="105">Super 8</text>
+<text x="446" y="128">fps</text><rect x="446" y="133" width="94" height="18" rx="2" fill="#fff" stroke="#949494"/><text x="451" y="145">18</text>
+<text x="446" y="168">theme</text><rect x="446" y="173" width="94" height="18" rx="2" fill="#fff" stroke="#949494"/><text x="451" y="185">Light</text>
+<text x="446" y="208">title</text><rect x="446" y="213" width="94" height="18" rx="2" fill="#fff" stroke="#949494"/></g>
+<text x="446" y="252" font-size="9" fill="#2271b1">Help: options and</text><text x="446" y="264" font-size="9" fill="#2271b1">examples ↗</text>
+
+<text xml:space="preserve" x="280" y="310" font-size="11" fill="#1e1e1e" text-anchor="middle">① Click +  ·  ② Search “Film Transfer Toolkit”  ·  ③ Click a tool  ·  ④ Adjust settings, Publish</text>
+</svg>

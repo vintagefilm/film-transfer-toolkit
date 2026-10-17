@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" width="560" height="320" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" role="img" aria-labelledby="t"><title id="t">Adding a toolkit shortcode in the classic editor</title>
+<rect width="560" height="320" fill="#f0f0f1"/>
+<text x="16" y="30" font-size="17" fill="#1e1e1e">Edit Page</text>
+<rect x="16" y="42" width="370" height="28" rx="2" fill="#fff" stroke="#8c8f94"/><text x="24" y="61" font-size="13" fill="#1e1e1e">Film Calculator</text>
+<rect x="16" y="80" width="370" height="200" fill="#fff" stroke="#dcdcde"/>
+<rect x="16" y="80" width="370" height="30" fill="#f6f7f7" stroke="#dcdcde"/>
+<rect x="24" y="86" width="74" height="18" rx="2" fill="#fff" stroke="#c3c4c7"/><text x="61" y="99" font-size="10" fill="#1e1e1e" text-anchor="middle">Add Media</text>
+<rect x="304" y="80" width="40" height="30" fill="#fff" stroke="#dcdcde"/><text x="324" y="99" font-size="10" fill="#1e1e1e" text-anchor="middle">Visual</text>
+<rect x="344" y="80" width="42" height="30" fill="#f6f7f7" stroke="#dcdcde"/><text x="365" y="99" font-size="10" fill="#50575e" text-anchor="middle">Text</text>
+<text x="28" y="134" font-size="12" fill="#3c434a">Work out how long your home movies run:</text>
+<rect x="24" y="146" width="230" height="26" rx="3" fill="#fff8e5" stroke="#dba617" stroke-width="1.5"/>
+<text x="32" y="164" font-size="13" fill="#1e1e1e" font-family="Menlo,Consolas,monospace">[ftt_calculator format="s8"]</text>
+<circle cx="268" cy="159" r="10" fill="#d63638"/><text x="268" y="163" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">2</text>
+<text x="28" y="196" font-size="12" fill="#3c434a">Questions? Call us on 555-0100.</text>
+<text x="28" y="250" font-size="10" fill="#757575">Put the shortcode on a line of its own.</text>
+<rect x="400" y="42" width="146" height="138" fill="#fff" stroke="#dcdcde"/>
+<rect x="400" y="42" width="146" height="26" fill="#fff" stroke="#dcdcde"/><text x="410" y="59" font-size="12" fill="#1e1e1e" font-weight="600">Publish</text>
+<text x="410" y="88" font-size="10" fill="#3c434a">Status: Published</text>
+<text x="410" y="106" font-size="10" fill="#3c434a">Visibility: Public</text>
+<rect x="400" y="140" width="146" height="40" fill="#f6f7f7" stroke="#dcdcde"/>
+<rect x="474" y="148" width="62" height="24" rx="3" fill="#2271b1"/><text x="505" y="164" font-size="11" fill="#fff" text-anchor="middle">Update</text>
+<circle cx="466" cy="160" r="10" fill="#d63638"/><text x="466" y="164" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">3</text>
+<rect x="400" y="196" width="146" height="84" rx="4" fill="#fff" stroke="#dcdcde"/>
+<text x="410" y="216" font-size="10" fill="#50575e">Toolkit Help page:</text>
+<rect x="410" y="224" width="96" height="20" rx="2" fill="#f6f7f7" stroke="#dcdcde"/><text x="416" y="238" font-size="9" fill="#1e1e1e" font-family="Menlo,Consolas,monospace">[ftt_calculator]</text>
+<rect x="510" y="224" width="30" height="20" rx="3" fill="#f6f7f7" stroke="#2271b1"/><text x="525" y="238" font-size="9" fill="#2271b1" text-anchor="middle">Copy</text>
+<circle cx="540" cy="212" r="10" fill="#d63638"/><text x="540" y="216" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">1</text>
+<text x="410" y="266" font-size="9" fill="#50575e">Options go inside the brackets.</text>
+<text xml:space="preserve" x="280" y="306" font-size="11" fill="#1e1e1e" text-anchor="middle">① Copy the shortcode  ·  ② Paste it on its own line  ·  ③ Click Update</text>
+</svg>

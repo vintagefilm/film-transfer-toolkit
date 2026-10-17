@@ -1,6 +1,6 @@
 <?php
 /**
- * Module loader, shared assets, the Film Transfer Toolkit admin menu, Modules and Mail log pages, WP-CLI.
+ * Module loader, shared assets, the Settings and Mail log pages, WP-CLI. The menu lives in includes/admin/.
  *
  * @package FilmTransferToolkit
  */
@@ -56,6 +56,7 @@ class FTT_Plugin {
 	}
 
 	public static function activate() {
+		$fresh = false === get_option( 'ftt_modules', false );
 		add_option( 'ftt_modules', array_map( function ( $m ) { return (int) $m[0]; }, self::files() ) );
 		add_option( 'ftt_general', array( 'mail_mode' => 'log', 'notify_email' => '' ) );
 		if ( false === get_option( FTT_Price_Table::OPTION, false ) ) {
@@ -64,6 +65,8 @@ class FTT_Plugin {
 		if ( false === get_option( 'ftt_calc_options', false ) && is_array( get_option( 'filmcalc_options', null ) ) ) {
 			add_option( 'ftt_calc_options', get_option( 'filmcalc_options' ) );
 		}
+		require_once FTT_DIR . 'includes/admin/class-ftt-setup.php';
+		FTT_Setup::on_activate( $fresh );
 	}
 
 	public static function boot() {
@@ -82,12 +85,13 @@ class FTT_Plugin {
 			require_once FTT_DIR . $m[1];
 			self::$status[ $k ] = 'on';
 		}
+		FTT_Blocks::init();
 		if ( is_admin() ) {
-			add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+			FTT_Setup::maybe_upgrade();
+			FTT_Setup::init();
+			FTT_Admin::init();
 			add_action( 'admin_init', array( __CLASS__, 'settings' ) );
 			add_action( 'admin_post_ftt_clear_mail_log', array( __CLASS__, 'clear_mail_log' ) );
-			add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_css' ) );
-			add_filter( 'plugin_action_links_' . plugin_basename( FTT_FILE ), array( __CLASS__, 'action_links' ) );
 		}
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::add_command( 'ftt', 'FTT_CLI' );
@@ -97,31 +101,6 @@ class FTT_Plugin {
 	public static function register_assets() {
 		wp_register_script( 'ftt-core', FTT_URL . 'core/ftt-core.js', array(), FTT_VERSION, true );
 		wp_register_style( 'ftt-front', FTT_URL . 'assets/css/ftt.css', array(), FTT_VERSION );
-	}
-
-	public static function admin_css( $hook ) {
-		if ( false !== strpos( (string) $hook, 'ftt' ) ) {
-			wp_enqueue_style( 'ftt-admin', FTT_URL . 'assets/css/admin.css', array(), FTT_VERSION );
-		}
-	}
-
-	public static function action_links( $links ) {
-		array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=ftt' ) ) . '">' . esc_html__( 'Modules', 'film-transfer-toolkit' ) . '</a>' );
-		return $links;
-	}
-
-	public static function menu() {
-		add_menu_page( __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ), __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ), 'manage_options', 'ftt', array( __CLASS__, 'render_modules' ), 'dashicons-video-alt2', 82 );
-		add_submenu_page( 'ftt', __( 'Modules', 'film-transfer-toolkit' ), __( 'Modules', 'film-transfer-toolkit' ), 'manage_options', 'ftt', array( __CLASS__, 'render_modules' ) );
-		$st = self::$status;
-		if ( 'on' === ( $st['calculator'] ?? '' ) ) {
-			add_submenu_page( 'ftt', __( 'Calculator', 'film-transfer-toolkit' ), __( 'Calculator', 'film-transfer-toolkit' ), 'manage_options', 'ftt-calculator', 'ftt_calc_render_settings_page' );
-		}
-		if ( 'on' === ( $st['pricing'] ?? '' ) || 'on' === ( $st['estimate'] ?? '' ) ) {
-			add_submenu_page( 'ftt', __( 'Price table', 'film-transfer-toolkit' ), __( 'Price table', 'film-transfer-toolkit' ), 'manage_options', 'ftt-prices', array( 'FTT_Price_Table', 'render_admin' ) );
-		}
-		do_action( 'ftt/admin_menu' );
-		add_submenu_page( 'ftt', __( 'Mail log', 'film-transfer-toolkit' ), __( 'Mail log', 'film-transfer-toolkit' ), 'manage_options', 'ftt-mail', array( __CLASS__, 'render_mail_log' ) );
 	}
 
 	public static function settings() {
@@ -153,7 +132,7 @@ class FTT_Plugin {
 		$g  = self::general();
 		?>
 		<div class="wrap ftt-admin">
-			<h1><?php esc_html_e( 'Film Transfer Toolkit', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
+			<h1><?php esc_html_e( 'Film Transfer Toolkit settings', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
 			<?php settings_errors(); ?>
 			<form action="options.php" method="post">
 				<?php settings_fields( 'ftt_modules' ); ?>
@@ -182,9 +161,14 @@ class FTT_Plugin {
 				</table>
 				<?php submit_button(); ?>
 			</form>
-			<h2><?php esc_html_e( 'Shortcodes', 'film-transfer-toolkit' ); ?></h2>
-			<p><code>[ftt_calculator]</code> <code>[ftt_reel_estimator]</code> <code>[ftt_price_table]</code> <code>[ftt_estimate]</code> <code>[ftt_storage_calculator]</code> <code>[ftt_clip_selector]</code> <code>[ftt_rfq_providers]</code> <code>[ftt_rfq_form]</code> <code>[ftt_rfq_reply]</code> <code>[ftt_rfq_compare]</code></p>
-			<p class="description"><?php esc_html_e( 'The calculation and pricing logic lives in core/ftt-core.js (no WordPress dependency) with a PHP mirror for server-side re-pricing; both run the shared tests in core/test-vectors/.', 'film-transfer-toolkit' ); ?></p>
+			<h2><?php esc_html_e( 'More settings', 'film-transfer-toolkit' ); ?></h2>
+			<ul class="ftt-list">
+				<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-prices' ) ); ?>"><?php esc_html_e( 'Prices', 'film-transfer-toolkit' ); ?></a></li>
+				<?php if ( 'on' === ( self::$status['calculator'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-calculator' ) ); ?>"><?php esc_html_e( 'Calculator look (colours, fonts, defaults)', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
+				<?php if ( 'on' === ( self::$status['clips'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-clips' ) ); ?>"><?php esc_html_e( 'Clip selector rate card', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
+				<?php if ( 'on' === ( self::$status['rfq'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-rfq' ) ); ?>"><?php esc_html_e( 'Quote comparison (RFQ) settings', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
+				<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-setup' ) ); ?>"><?php esc_html_e( 'Run the setup wizard', 'film-transfer-toolkit' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-help' ) ); ?>"><?php esc_html_e( 'Help: shortcodes, blocks and options', 'film-transfer-toolkit' ); ?></a></li>
+			</ul>
 		</div>
 		<?php
 	}

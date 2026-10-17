@@ -181,7 +181,7 @@ wp('plugin activate film-calculator');wp(`post delete ${al} --force`);
 
 // ---------- admin
 await p.goto(B+'/wp-login.php');await p.fill('#user_login','admin');await p.fill('#user_pass','admin');await p.click('#wp-submit');await p.waitForLoadState();console.log('after login:',p.url(), await p.locator('#login_error').count()? (await p.textContent('#login_error')).trim():'');
-await p.goto(B+'/wp-admin/admin.php?page=ftt');console.log('modules page:',p.url(),(await p.title()));
+await p.goto(B+'/wp-admin/admin.php?page=ftt-settings');console.log('settings page:',p.url(),(await p.title()));
 ok('Modules page lists 7 modules (incl. storage), all active',await p.locator('.ftt-modules tbody tr').count()===7&&await p.locator('.ftt-pill--on').count()===7);
 await p.screenshot({path:SH+'11-admin-modules.png',fullPage:true});
 await p.goto(B+'/wp-admin/admin.php?page=ftt-prices');
@@ -215,6 +215,8 @@ await p.goto(B+'/wp-admin/admin.php?page=ftt-clips');ok('Clip selector settings 
 const c2=await b.newContext();const s=await c2.newPage();
 await s.goto(B+'/wp-login.php');await s.fill('#user_login','sub');await s.fill('#user_pass','sub');await s.click('#wp-submit');await s.waitForLoadState();
 let rs=await s.goto(B+'/wp-admin/admin.php?page=ftt-prices');ok('subscriber cannot open price table admin',(await s.textContent('body')).match(/not allowed|permission/i)!==null);
+for(const pg of ['ftt','ftt-setup','ftt-help','ftt-settings']){await s.goto(B+'/wp-admin/admin.php?page='+pg);ok('subscriber cannot open '+pg,(await s.textContent('body')).match(/not allowed|permission/i)!==null);}
+{const r=await s.request.post(B+'/wp-admin/admin-post.php',{form:{action:'ftt_setup',step:'modules'}});ok('subscriber cannot post setup',r.status()===403||/not allowed|permission|expired/i.test(await r.text()),r.status());}
 rs=await s.request.post(B+'/wp-admin/admin-post.php',{form:{action:'ftt_load_preset',preset:'example'}});ok('subscriber admin-post preset load refused',rs.status()===403||rs.status()===200&&!(await rs.text()).includes('loaded'),rs.status());
 rs=await s.goto(B+'/wp-admin/edit.php?post_type=ftt_estimate');ok('subscriber cannot list quote requests',(await s.textContent('body')).match(/not allowed|permission/i)!==null);
 ok('draft still active after subscriber attempts',wp('ftt export').includes('DRAFT FOR REVIEW'));

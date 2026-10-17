@@ -3,12 +3,19 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
 
-== Modules (Film Transfer Toolkit > Modules) ==
+== Getting started ==
+1. Activate the plugin. On a site that has never had the toolkit, the setup wizard opens: choose tools, create or reuse their pages, pick the calculator look, load EXAMPLE prices or import your own, and set an optional notify address (email stays log-only until you switch it on).
+2. Add any tool to any page: block editor + > "Film Transfer Toolkit" group, or paste its shortcode in the classic editor.
+3. Film Transfer Toolkit > Help has step-by-step instructions, pictures, every option and troubleshooting for each tool.
+Updates and re-activations never start the wizard or create pages. Re-run it any time from Film Transfer Toolkit > Setup wizard; pages that already show a tool are reused, never duplicated, and new pages are not added to menus.
+
+== Modules (Film Transfer Toolkit > Settings) ==
+Every module is also a block (ftt/calculator, ftt/reel-estimator, ftt/price-table, ftt/estimate, ftt/storage-calculator, ftt/clip-selector, ftt/rfq-providers, ftt/rfq-form, ftt/rfq-reply, ftt/rfq-compare) that renders through its shortcode.
 * Film calculator - [ftt_calculator]; also [film_calculator] when the standalone Film Calculator plugin is not active.
 * Reel size / diameter estimator - [ftt_reel_estimator format="s8" fps="18"].
 * Price table - [ftt_price_table service="hd" addons="yes" fees="yes"]; edit under Price table (per foot, per reel, add-ons, setup fee, minimums, volume tiers, JSON import/export, EXAMPLE and DRAFT presets).
@@ -30,6 +37,14 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.2.0 =
+* Setup wizard on first activation (re-runnable): tools, pages (reuse existing, never duplicate, not added to menus, optional drafts), calculator look, EXAMPLE prices or JSON import, optional notify address (mail mode untouched).
+* One "Film Transfer Toolkit" admin menu: Dashboard / Getting started, Setup wizard, Settings, Prices, Help (a page per tool with block and classic editor steps, option tables, copy buttons, examples, bundled illustrations, FAQ), Calculator look, module screens, Mail log.
+* Blocks for every tool in a "Film Transfer Toolkit" inserter category, with sidebar settings and shortcode-to-block conversion.
+* WordPress Help tabs on toolkit screens.
+* Notice while the standalone Film Calculator plugin is active, explaining that it keeps handling [film_calculator] and the toolkit covers it once deactivated. Nothing is deactivated automatically.
+* Existing installs are marked as configured on update, so the wizard never auto-runs on them.
+
 = 1.1.0 =
 * New module: data rate / storage calculator (FTTCore.datarate + FTT_Datarate PHP mirror, shared vectors, parity fuzzer).
 * Calculator: "Film format" label carries the filmcalc_format_badge filter, as in FilmTransfer.ai's film-calculator.php.
