@@ -19,6 +19,7 @@ class FTT_Plugin {
 			'reels'      => array( 1, 'modules/reel-estimator/reel-estimator.php' ),
 			'pricing'    => array( 1, 'modules/pricing/pricing.php' ),
 			'estimate'   => array( 1, 'modules/estimate/estimate.php' ),
+			'storage'    => array( 1, 'modules/storage/storage.php' ),
 			'clips'      => array( 0, 'modules/clip-selector/clip-selector.php' ),
 			'rfq'        => array( 0, 'modules/rfq/rfq.php' ),
 		);
@@ -30,6 +31,7 @@ class FTT_Plugin {
 			'reels'      => array( 'label' => __( 'Reel size / diameter estimator', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_reel_estimator]: footage and running time from a reel size or a measured diameter.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/reel-estimator/reel-estimator.php' ),
 			'pricing'    => array( 'label' => __( 'Price table', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_price_table]: shows the admin price table on a page.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/pricing/pricing.php' ),
 			'estimate'   => array( 'label' => __( 'Multi-reel estimate builder', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_estimate]: customers build an estimate and send a quote request (no payment). Requests are stored privately under Quote requests.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/estimate/estimate.php' ),
+			'storage'    => array( 'label' => __( 'Data rate / storage calculator', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_storage_calculator]: file size per reel and in total for ProRes, H.264/H.265, YouTube, DPX/TIFF and uncompressed deliverables, with a suggested drive size.', 'film-transfer-toolkit' ), 'default' => 1, 'file' => 'modules/storage/storage.php' ),
 			'clips'      => array( 'label' => __( 'Clip selector (optional)', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_clip_selector]: In/Out clip selection into the FluentCart cart (ported from FW Clip Cart). Needs FluentCart; stays off while the FW Clip Cart prototype plugin is active.', 'film-transfer-toolkit' ), 'default' => 0, 'file' => 'modules/clip-selector/clip-selector.php' ),
 			'rfq'        => array( 'label' => __( 'Quote comparison / RFQ (optional)', 'film-transfer-toolkit' ), 'desc' => __( '[ftt_rfq_providers], [ftt_rfq_form], [ftt_rfq_reply], [ftt_rfq_compare]: customers ask several providers for quotes and compare them (ported from filmtransfer.ai).', 'film-transfer-toolkit' ), 'default' => 0, 'file' => 'modules/rfq/rfq.php' ),
 		);
@@ -181,7 +183,7 @@ class FTT_Plugin {
 				<?php submit_button(); ?>
 			</form>
 			<h2><?php esc_html_e( 'Shortcodes', 'film-transfer-toolkit' ); ?></h2>
-			<p><code>[ftt_calculator]</code> <code>[ftt_reel_estimator]</code> <code>[ftt_price_table]</code> <code>[ftt_estimate]</code> <code>[ftt_clip_selector]</code> <code>[ftt_rfq_providers]</code> <code>[ftt_rfq_form]</code> <code>[ftt_rfq_reply]</code> <code>[ftt_rfq_compare]</code></p>
+			<p><code>[ftt_calculator]</code> <code>[ftt_reel_estimator]</code> <code>[ftt_price_table]</code> <code>[ftt_estimate]</code> <code>[ftt_storage_calculator]</code> <code>[ftt_clip_selector]</code> <code>[ftt_rfq_providers]</code> <code>[ftt_rfq_form]</code> <code>[ftt_rfq_reply]</code> <code>[ftt_rfq_compare]</code></p>
 			<p class="description"><?php esc_html_e( 'The calculation and pricing logic lives in core/ftt-core.js (no WordPress dependency) with a PHP mirror for server-side re-pricing; both run the shared tests in core/test-vectors/.', 'film-transfer-toolkit' ); ?></p>
 		</div>
 		<?php

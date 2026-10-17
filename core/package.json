@@ -1,7 +1,7 @@
 {
   "name": "@vft/film-core",
-  "version": "1.0.0",
-  "description": "Film length, reel, pricing and timecode math for the Film Transfer Toolkit. No DOM, no WordPress.",
+  "version": "1.1.0",
+  "description": "Film length, reel, pricing, timecode and storage math for the Film Transfer Toolkit. No DOM, no WordPress.",
   "main": "ftt-core.js",
   "files": ["ftt-core.js", "data/", "test-vectors/"],
   "license": "SEE LICENSE IN LICENSE.txt",

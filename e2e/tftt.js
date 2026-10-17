@@ -5,6 +5,8 @@ const wp=(a)=>cp.execSync('cd /workspace/wp && wp '+a+' 2>/dev/null',{encoding:'
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
 const money=s=>s;
 (async()=>{
+// fixture reset so the suite can be re-run: it loads DRAFT prices, sets a notify address and opts Gamma out along the way
+wp('ftt prices example');try{wp("option patch update ftt_general notify_email ''");}catch(e){}try{wp('post meta delete 24 _ft_rfq_optout');}catch(e){}
 const b=await chromium.launch();
 const ctx=await b.newContext({viewport:{width:1150,height:900}});const p=await ctx.newPage();
 const errs=[],ext=[];p.on('pageerror',e=>errs.push(e.message));p.on('request',r=>{const u=r.url();if(!u.startsWith(B)&&!/^(data|blob):/.test(u))ext.push(u)});
@@ -119,6 +121,7 @@ await p.screenshot({path:SH+'06-clip-selector.png',fullPage:true});
 
 // ---------- RFQ flow
 wp('ftt maillog --clear');
+try{wp('post meta delete 24 _ft_rfq_optout');}catch(e){} // fixture reset: the end of this flow opts Gamma out
 await p.goto(B+'/listings/');
 const cb=n=>p.locator('.ftt-rfq-list label',{hasText:n}).locator('input');
 await cb('Alpha Film Lab').check();await cb('Gamma Scans').check();await cb('Evil').check();
@@ -179,7 +182,7 @@ wp('plugin activate film-calculator');wp(`post delete ${al} --force`);
 // ---------- admin
 await p.goto(B+'/wp-login.php');await p.fill('#user_login','admin');await p.fill('#user_pass','admin');await p.click('#wp-submit');await p.waitForLoadState();console.log('after login:',p.url(), await p.locator('#login_error').count()? (await p.textContent('#login_error')).trim():'');
 await p.goto(B+'/wp-admin/admin.php?page=ftt');console.log('modules page:',p.url(),(await p.title()));
-ok('Modules page lists 6 modules, all active',await p.locator('.ftt-modules tbody tr').count()===6&&await p.locator('.ftt-pill--on').count()===6);
+ok('Modules page lists 7 modules (incl. storage), all active',await p.locator('.ftt-modules tbody tr').count()===7&&await p.locator('.ftt-pill--on').count()===7);
 await p.screenshot({path:SH+'11-admin-modules.png',fullPage:true});
 await p.goto(B+'/wp-admin/admin.php?page=ftt-prices');
 await p.click('button[value=draft]');await p.waitForLoadState();

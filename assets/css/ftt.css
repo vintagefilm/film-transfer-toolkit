@@ -43,3 +43,19 @@ fieldset.ftt-field,fieldset.ftt-est__order{border:0;padding:0;margin:0 0 .8em}
 .ftt-msg--bad{color:var(--ftt-draft-border)}
 .ftt-cta{padding:1em 1.2em;border-radius:10px;background:#e8f5e9;border:1px solid #6aa96e}
 @media (max-width:480px){.ftt-box{padding:1em;border-radius:0}.ftt-line__price{margin-left:0;width:100%}}
+/* storage calculator */
+.ftt-store__h{margin:1.25em 0 .5em;font-size:1em}
+.ftt-store__actions{margin:.5em 0 1em}
+.ftt-store__note{font-size:.85em;opacity:.85;margin:.25em 0}
+.ftt-store__table td,.ftt-store__table th{vertical-align:top}
+.ftt-store__table tfoot th{text-align:right;font-weight:600}
+.ftt-store__grand td,.ftt-store__grand th{font-weight:700;border-top:2px solid currentColor}
+.ftt-store__sum{display:grid;grid-template-columns:auto 1fr;gap:.25em 1em;margin:1em 0}
+.ftt-store__sum dt{opacity:.85}.ftt-store__sum dd{margin:0;font-weight:600}
+.ftt-store__src{margin-top:1em;font-size:.9em}
+.ftt-store__src summary{cursor:pointer}
+@media (max-width:600px){.ftt-store__table{font-size:.85em}.ftt-store__sum{grid-template-columns:1fr}}
+.ftt-box [hidden]{display:none!important}
+.ftt-store__table td:nth-child(n+3),.ftt-store__table tfoot td{white-space:nowrap}
+.ftt-store__bin{display:block;font-size:.85em;opacity:.8}
+.ftt-store__sum dd{white-space:nowrap}

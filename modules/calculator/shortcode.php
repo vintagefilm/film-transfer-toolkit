@@ -54,6 +54,7 @@ function ftt_calc_shortcode( $atts ) {
 
 	// Whitelist / sanitize every attribute.
 	$format       = ftt_calc_sanitize_format( $atts['format'], $o['default_format'] );
+	$atts['format'] = $format; // Sanitized value for the filmcalc_format_badge filter below (as in FilmTransfer.ai's film-calculator.php).
 	$fps          = ftt_calc_sanitize_fps( $atts['fps'], $o['default_fps'] );
 	$theme        = ftt_calc_sanitize_choice( $atts['theme'], array( 'dark', 'light' ), $o['theme'] );
 	$accent       = ftt_calc_sanitize_hex( $atts['accent'] );
@@ -101,7 +102,7 @@ function ftt_calc_shortcode( $atts ) {
 			<p class="filmcalc__mode" id="<?php echo esc_attr( $uid . '-mode' ); ?>" data-fc="mode" data-len="<?php esc_attr_e( 'Length → Time', 'film-transfer-toolkit' ); ?>" data-time="<?php esc_attr_e( 'Time → Length', 'film-transfer-toolkit' ); ?>"><?php esc_html_e( 'Length → Time', 'film-transfer-toolkit' ); ?></p>
 		<?php endif; ?>
 		<div class="filmcalc__grid">
-			<label class="filmcalc__field filmcalc__f-format"><span><?php esc_html_e( 'Film format', 'film-transfer-toolkit' ); ?></span>
+			<label class="filmcalc__field filmcalc__f-format"><span><?php esc_html_e( 'Film format', 'film-transfer-toolkit' ); ?><?php echo apply_filters( 'filmcalc_format_badge', '', $atts['format'] ); ?></span>
 				<select data-fc="format">
 				<?php foreach ( $formats as $key => $f ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>" data-fpf="<?php echo esc_attr( $f['fpf'] ); ?>" <?php selected( $format, $key ); ?>><?php echo esc_html( $f['label'] . ' – ' . $f['fpf_label'] . ' fr/ft' ); ?></option>

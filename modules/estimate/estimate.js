@@ -109,6 +109,9 @@
     var last = null;
     function update() {
       var res = P.quote(T, request()); last = res;
+      /* Share the reel list with other toolkit widgets on the page (storage calculator). */
+      window.FTTEstimateLines = request().lines;
+      try { document.dispatchEvent(new CustomEvent('ftt:estimate-lines', { detail: window.FTTEstimateLines })); } catch (e) { /* old browsers: event not shared */ }
       showErrors(res.errors);
       Array.prototype.forEach.call(root.querySelectorAll('[data-line-price]'), function (n) { n.textContent = ''; });
       res.lines.forEach(function (l) {

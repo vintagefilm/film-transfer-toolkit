@@ -1,0 +1,517 @@
+{
+ "version": "1.0.0",
+ "as_of": "2026-10-16",
+ "note": "Shared by core/ftt-core.js (embedded copy, kept equal by tests) and includes/core/class-ftt-datarate.php. Edit here, then run: node tools/embed-presets.js",
+ "sources": {
+  "apple_prores": {
+   "title": "Apple ProRes White Paper (April 2022), Target Data Rates tables, pp. 19-21",
+   "url": "https://www.apple.com/final-cut-pro/docs/Apple_ProRes_White_Paper.pdf"
+  },
+  "youtube": {
+   "title": "YouTube Help: YouTube recommended upload encoding settings (answer 1722171)",
+   "url": "https://support.google.com/youtube/answer/1722171"
+  },
+  "apple_tn2162": {
+   "title": "Apple Technical Note TN2162: Uncompressed Y'CbCr Video in QuickTime Files ('2vuy', 'v210', 'v410' layouts)",
+   "url": "https://developer.apple.com/library/archive/technotes/tn2162/_index.html"
+  },
+  "loc_dpx": {
+   "title": "Library of Congress FDD000178: Digital Moving-Picture Exchange (DPX), Version 2.0 (SMPTE ST 268; 10-bit components filled into 32-bit words, 12-bit into 16-bit words)",
+   "url": "https://www.loc.gov/preservation/digital/formats/fdd/fdd000178.shtml"
+  },
+  "tiff6": {
+   "title": "TIFF Revision 6.0 (Adobe, 1992): uncompressed RGB, BitsPerSample 8 or 16",
+   "url": "https://download.osgeo.org/libtiff/doc/TIFF6.pdf"
+  },
+  "h264": {
+   "title": "ITU-T H.264 (AVC). File size = bitrate x time; the bitrate is your choice",
+   "url": "https://www.itu.int/rec/T-REC-H.264"
+  },
+  "h265": {
+   "title": "ITU-T H.265 (HEVC). File size = bitrate x time; the bitrate is your choice",
+   "url": "https://www.itu.int/rec/T-REC-H.265"
+  }
+ },
+ "sizes": [
+  {
+   "id": "sd486",
+   "label": "SD NTSC 720×486",
+   "w": 720,
+   "h": 486
+  },
+  {
+   "id": "sd576",
+   "label": "SD PAL 720×576",
+   "w": 720,
+   "h": 576
+  },
+  {
+   "id": "hd",
+   "label": "HD 1920×1080",
+   "w": 1920,
+   "h": 1080
+  },
+  {
+   "id": "2k-dci",
+   "label": "2K DCI 2048×1080",
+   "w": 2048,
+   "h": 1080
+  },
+  {
+   "id": "2k-fa",
+   "label": "2K full aperture 2048×1556",
+   "w": 2048,
+   "h": 1556
+  },
+  {
+   "id": "uhd",
+   "label": "UHD 4K 3840×2160",
+   "w": 3840,
+   "h": 2160
+  },
+  {
+   "id": "4k-dci",
+   "label": "4K DCI 4096×2160",
+   "w": 4096,
+   "h": 2160
+  },
+  {
+   "id": "4k-fa",
+   "label": "4K full aperture 4096×3112",
+   "w": 4096,
+   "h": 3112
+  }
+ ],
+ "prores": {
+  "source": "apple_prores",
+  "fps_tolerance": 0.0011,
+  "profiles": [
+   {
+    "id": "proxy",
+    "label": "ProRes 422 Proxy"
+   },
+   {
+    "id": "lt",
+    "label": "ProRes 422 LT"
+   },
+   {
+    "id": "422",
+    "label": "ProRes 422"
+   },
+   {
+    "id": "hq",
+    "label": "ProRes 422 HQ"
+   },
+   {
+    "id": "4444",
+    "label": "ProRes 4444 (no alpha)"
+   },
+   {
+    "id": "4444xq",
+    "label": "ProRes 4444 XQ (no alpha)"
+   }
+  ],
+  "mbps": {
+   "sd486": {
+    "24": {
+     "proxy": 10,
+     "lt": 23,
+     "422": 34,
+     "hq": 50,
+     "4444": 75,
+     "4444xq": 113
+    },
+    "30": {
+     "proxy": 12,
+     "lt": 29,
+     "422": 42,
+     "hq": 63,
+     "4444": 94,
+     "4444xq": 141
+    }
+   },
+   "sd576": {
+    "25": {
+     "proxy": 12,
+     "lt": 28,
+     "422": 41,
+     "hq": 61,
+     "4444": 92,
+     "4444xq": 138
+    }
+   },
+   "hd": {
+    "24": {
+     "proxy": 36,
+     "lt": 82,
+     "422": 117,
+     "hq": 176,
+     "4444": 264,
+     "4444xq": 396
+    },
+    "25": {
+     "proxy": 38,
+     "lt": 85,
+     "422": 122,
+     "hq": 184,
+     "4444": 275,
+     "4444xq": 413
+    },
+    "30": {
+     "proxy": 45,
+     "lt": 102,
+     "422": 147,
+     "hq": 220,
+     "4444": 330,
+     "4444xq": 495
+    },
+    "50": {
+     "proxy": 76,
+     "lt": 170,
+     "422": 245,
+     "hq": 367,
+     "4444": 551,
+     "4444xq": 826
+    },
+    "60": {
+     "proxy": 91,
+     "lt": 204,
+     "422": 293,
+     "hq": 440,
+     "4444": 660,
+     "4444xq": 990
+    }
+   },
+   "2k-dci": {
+    "24": {
+     "proxy": 41,
+     "lt": 93,
+     "422": 134,
+     "hq": 201,
+     "4444": 302,
+     "4444xq": 453
+    },
+    "25": {
+     "proxy": 43,
+     "lt": 97,
+     "422": 140,
+     "hq": 210,
+     "4444": 315,
+     "4444xq": 472
+    },
+    "30": {
+     "proxy": 52,
+     "lt": 116,
+     "422": 168,
+     "hq": 251,
+     "4444": 377,
+     "4444xq": 566
+    },
+    "50": {
+     "proxy": 86,
+     "lt": 194,
+     "422": 280,
+     "hq": 419,
+     "4444": 629,
+     "4444xq": 944
+    },
+    "60": {
+     "proxy": 103,
+     "lt": 232,
+     "422": 335,
+     "hq": 503,
+     "4444": 754,
+     "4444xq": 1131
+    }
+   },
+   "2k-fa": {
+    "24": {
+     "proxy": 56,
+     "lt": 126,
+     "422": 181,
+     "hq": 272,
+     "4444": 407,
+     "4444xq": 611
+    },
+    "25": {
+     "proxy": 58,
+     "lt": 131,
+     "422": 189,
+     "hq": 283,
+     "4444": 425,
+     "4444xq": 637
+    },
+    "30": {
+     "proxy": 70,
+     "lt": 157,
+     "422": 226,
+     "hq": 340,
+     "4444": 509,
+     "4444xq": 764
+    },
+    "50": {
+     "proxy": 117,
+     "lt": 262,
+     "422": 377,
+     "hq": 567,
+     "4444": 850,
+     "4444xq": 1275
+    },
+    "60": {
+     "proxy": 140,
+     "lt": 314,
+     "422": 452,
+     "hq": 679,
+     "4444": 1019,
+     "4444xq": 1528
+    }
+   },
+   "uhd": {
+    "24": {
+     "proxy": 145,
+     "lt": 328,
+     "422": 471,
+     "hq": 707,
+     "4444": 1061,
+     "4444xq": 1591
+    },
+    "25": {
+     "proxy": 151,
+     "lt": 342,
+     "422": 492,
+     "hq": 737,
+     "4444": 1106,
+     "4444xq": 1659
+    },
+    "30": {
+     "proxy": 182,
+     "lt": 410,
+     "422": 589,
+     "hq": 884,
+     "4444": 1326,
+     "4444xq": 1989
+    },
+    "50": {
+     "proxy": 303,
+     "lt": 684,
+     "422": 983,
+     "hq": 1475,
+     "4444": 2212,
+     "4444xq": 3318
+    },
+    "60": {
+     "proxy": 363,
+     "lt": 821,
+     "422": 1178,
+     "hq": 1768,
+     "4444": 2652,
+     "4444xq": 3977
+    }
+   },
+   "4k-dci": {
+    "24": {
+     "proxy": 155,
+     "lt": 350,
+     "422": 503,
+     "hq": 754,
+     "4444": 1131,
+     "4444xq": 1697
+    },
+    "25": {
+     "proxy": 162,
+     "lt": 365,
+     "422": 524,
+     "hq": 786,
+     "4444": 1180,
+     "4444xq": 1769
+    },
+    "30": {
+     "proxy": 194,
+     "lt": 437,
+     "422": 629,
+     "hq": 943,
+     "4444": 1414,
+     "4444xq": 2121
+    },
+    "50": {
+     "proxy": 323,
+     "lt": 730,
+     "422": 1049,
+     "hq": 1573,
+     "4444": 2359,
+     "4444xq": 3539
+    },
+    "60": {
+     "proxy": 388,
+     "lt": 875,
+     "422": 1257,
+     "hq": 1886,
+     "4444": 2828,
+     "4444xq": 4242
+    }
+   }
+  }
+ },
+ "youtube": {
+  "source": "youtube",
+  "high_fps_from": 48,
+  "res": [
+   {
+    "id": "1080p",
+    "label": "1080p"
+   },
+   {
+    "id": "1440p",
+    "label": "1440p"
+   },
+   {
+    "id": "2160p",
+    "label": "2160p (4K)"
+   }
+  ],
+  "sdr": {
+   "1080p": {
+    "std": [
+     8,
+     8
+    ],
+    "high": [
+     12,
+     12
+    ]
+   },
+   "1440p": {
+    "std": [
+     16,
+     16
+    ],
+    "high": [
+     24,
+     24
+    ]
+   },
+   "2160p": {
+    "std": [
+     35,
+     45
+    ],
+    "high": [
+     53,
+     68
+    ]
+   }
+  },
+  "hdr": {
+   "1080p": {
+    "std": [
+     10,
+     10
+    ],
+    "high": [
+     15,
+     15
+    ]
+   },
+   "1440p": {
+    "std": [
+     20,
+     20
+    ],
+    "high": [
+     30,
+     30
+    ]
+   },
+   "2160p": {
+    "std": [
+     44,
+     56
+    ],
+    "high": [
+     66,
+     85
+    ]
+   }
+  }
+ },
+ "image": {
+  "dpx": {
+   "source": "loc_dpx",
+   "header_bytes": 2048,
+   "row_align": 4,
+   "depths": {
+    "8": 3,
+    "10": 4,
+    "12": 6,
+    "16": 6
+   },
+   "label": "DPX image sequence (RGB)"
+  },
+  "tiff": {
+   "source": "tiff6",
+   "header_bytes": 0,
+   "row_align": 1,
+   "depths": {
+    "8": 3,
+    "16": 6
+   },
+   "label": "TIFF image sequence (RGB, uncompressed)"
+  }
+ },
+ "uncompressed": {
+  "source": "apple_tn2162",
+  "types": [
+   {
+    "id": "v210",
+    "label": "Uncompressed 10-bit 4:2:2 (v210)",
+    "group_px": 48,
+    "group_bytes": 128
+   },
+   {
+    "id": "2vuy",
+    "label": "Uncompressed 8-bit 4:2:2 (2vuy)",
+    "group_px": 2,
+    "group_bytes": 4
+   },
+   {
+    "id": "v410",
+    "label": "Uncompressed 10-bit 4:4:4 (v410)",
+    "group_px": 2,
+    "group_bytes": 8
+   }
+  ]
+ },
+ "drives_gb": [
+  128,
+  256,
+  500,
+  1000,
+  2000,
+  4000,
+  5000,
+  8000,
+  10000,
+  12000,
+  14000,
+  16000,
+  18000,
+  20000,
+  22000,
+  24000
+ ],
+ "limits": {
+  "lines": 50,
+  "deliverables": 10,
+  "reels": 999,
+  "feet": 100000,
+  "seconds": 360000,
+  "mbps_min": 0.01,
+  "mbps_max": 20000,
+  "px_min": 16,
+  "px_max": 16384,
+  "fps_min": 1,
+  "fps_max": 120,
+  "audio_kbps_max": 20000,
+  "headroom_max": 100
+ }
+}

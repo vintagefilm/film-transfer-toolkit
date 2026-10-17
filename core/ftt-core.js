@@ -1,6 +1,6 @@
 /*!
- * FTTCore 1.0.0 - Film Transfer Toolkit portable core.
- * Film length / time / frames, reel size estimates, price quotes and SMPTE timecode.
+ * FTTCore 1.1.0 - Film Transfer Toolkit portable core.
+ * Film length / time / frames, reel size estimates, price quotes, SMPTE timecode and storage / data rates.
  * No DOM, no WordPress, no network. Browser global (window.FTTCore), CommonJS or AMD,
  * so the same file can ship inside a mobile app. PHP mirror: includes/core/*.php
  * (kept in step by the shared files in core/test-vectors/).
@@ -277,8 +277,177 @@
     }
   };
 
+  /* ---------------------------------------------------------------- datarate */
+  /* Storage / data-rate maths. Presets are a copy of core/data/datarate-presets.json
+     (tests fail if they drift; regenerate with: node tools/embed-presets.js). */
+  /* BEGIN DATARATE PRESETS */
+  var DR = {"version":"1.0.0","as_of":"2026-10-16","note":"Shared by core/ftt-core.js (embedded copy, kept equal by tests) and includes/core/class-ftt-datarate.php. Edit here, then run: node tools/embed-presets.js","sources":{"apple_prores":{"title":"Apple ProRes White Paper (April 2022), Target Data Rates tables, pp. 19-21","url":"https://www.apple.com/final-cut-pro/docs/Apple_ProRes_White_Paper.pdf"},"youtube":{"title":"YouTube Help: YouTube recommended upload encoding settings (answer 1722171)","url":"https://support.google.com/youtube/answer/1722171"},"apple_tn2162":{"title":"Apple Technical Note TN2162: Uncompressed Y'CbCr Video in QuickTime Files ('2vuy', 'v210', 'v410' layouts)","url":"https://developer.apple.com/library/archive/technotes/tn2162/_index.html"},"loc_dpx":{"title":"Library of Congress FDD000178: Digital Moving-Picture Exchange (DPX), Version 2.0 (SMPTE ST 268; 10-bit components filled into 32-bit words, 12-bit into 16-bit words)","url":"https://www.loc.gov/preservation/digital/formats/fdd/fdd000178.shtml"},"tiff6":{"title":"TIFF Revision 6.0 (Adobe, 1992): uncompressed RGB, BitsPerSample 8 or 16","url":"https://download.osgeo.org/libtiff/doc/TIFF6.pdf"},"h264":{"title":"ITU-T H.264 (AVC). File size = bitrate x time; the bitrate is your choice","url":"https://www.itu.int/rec/T-REC-H.264"},"h265":{"title":"ITU-T H.265 (HEVC). File size = bitrate x time; the bitrate is your choice","url":"https://www.itu.int/rec/T-REC-H.265"}},"sizes":[{"id":"sd486","label":"SD NTSC 720×486","w":720,"h":486},{"id":"sd576","label":"SD PAL 720×576","w":720,"h":576},{"id":"hd","label":"HD 1920×1080","w":1920,"h":1080},{"id":"2k-dci","label":"2K DCI 2048×1080","w":2048,"h":1080},{"id":"2k-fa","label":"2K full aperture 2048×1556","w":2048,"h":1556},{"id":"uhd","label":"UHD 4K 3840×2160","w":3840,"h":2160},{"id":"4k-dci","label":"4K DCI 4096×2160","w":4096,"h":2160},{"id":"4k-fa","label":"4K full aperture 4096×3112","w":4096,"h":3112}],"prores":{"source":"apple_prores","fps_tolerance":0.0011,"profiles":[{"id":"proxy","label":"ProRes 422 Proxy"},{"id":"lt","label":"ProRes 422 LT"},{"id":"422","label":"ProRes 422"},{"id":"hq","label":"ProRes 422 HQ"},{"id":"4444","label":"ProRes 4444 (no alpha)"},{"id":"4444xq","label":"ProRes 4444 XQ (no alpha)"}],"mbps":{"sd486":{"24":{"422":34,"4444":75,"proxy":10,"lt":23,"hq":50,"4444xq":113},"30":{"422":42,"4444":94,"proxy":12,"lt":29,"hq":63,"4444xq":141}},"sd576":{"25":{"422":41,"4444":92,"proxy":12,"lt":28,"hq":61,"4444xq":138}},"hd":{"24":{"422":117,"4444":264,"proxy":36,"lt":82,"hq":176,"4444xq":396},"25":{"422":122,"4444":275,"proxy":38,"lt":85,"hq":184,"4444xq":413},"30":{"422":147,"4444":330,"proxy":45,"lt":102,"hq":220,"4444xq":495},"50":{"422":245,"4444":551,"proxy":76,"lt":170,"hq":367,"4444xq":826},"60":{"422":293,"4444":660,"proxy":91,"lt":204,"hq":440,"4444xq":990}},"2k-dci":{"24":{"422":134,"4444":302,"proxy":41,"lt":93,"hq":201,"4444xq":453},"25":{"422":140,"4444":315,"proxy":43,"lt":97,"hq":210,"4444xq":472},"30":{"422":168,"4444":377,"proxy":52,"lt":116,"hq":251,"4444xq":566},"50":{"422":280,"4444":629,"proxy":86,"lt":194,"hq":419,"4444xq":944},"60":{"422":335,"4444":754,"proxy":103,"lt":232,"hq":503,"4444xq":1131}},"2k-fa":{"24":{"422":181,"4444":407,"proxy":56,"lt":126,"hq":272,"4444xq":611},"25":{"422":189,"4444":425,"proxy":58,"lt":131,"hq":283,"4444xq":637},"30":{"422":226,"4444":509,"proxy":70,"lt":157,"hq":340,"4444xq":764},"50":{"422":377,"4444":850,"proxy":117,"lt":262,"hq":567,"4444xq":1275},"60":{"422":452,"4444":1019,"proxy":140,"lt":314,"hq":679,"4444xq":1528}},"uhd":{"24":{"422":471,"4444":1061,"proxy":145,"lt":328,"hq":707,"4444xq":1591},"25":{"422":492,"4444":1106,"proxy":151,"lt":342,"hq":737,"4444xq":1659},"30":{"422":589,"4444":1326,"proxy":182,"lt":410,"hq":884,"4444xq":1989},"50":{"422":983,"4444":2212,"proxy":303,"lt":684,"hq":1475,"4444xq":3318},"60":{"422":1178,"4444":2652,"proxy":363,"lt":821,"hq":1768,"4444xq":3977}},"4k-dci":{"24":{"422":503,"4444":1131,"proxy":155,"lt":350,"hq":754,"4444xq":1697},"25":{"422":524,"4444":1180,"proxy":162,"lt":365,"hq":786,"4444xq":1769},"30":{"422":629,"4444":1414,"proxy":194,"lt":437,"hq":943,"4444xq":2121},"50":{"422":1049,"4444":2359,"proxy":323,"lt":730,"hq":1573,"4444xq":3539},"60":{"422":1257,"4444":2828,"proxy":388,"lt":875,"hq":1886,"4444xq":4242}}}},"youtube":{"source":"youtube","high_fps_from":48,"res":[{"id":"1080p","label":"1080p"},{"id":"1440p","label":"1440p"},{"id":"2160p","label":"2160p (4K)"}],"sdr":{"1080p":{"std":[8,8],"high":[12,12]},"1440p":{"std":[16,16],"high":[24,24]},"2160p":{"std":[35,45],"high":[53,68]}},"hdr":{"1080p":{"std":[10,10],"high":[15,15]},"1440p":{"std":[20,20],"high":[30,30]},"2160p":{"std":[44,56],"high":[66,85]}}},"image":{"dpx":{"source":"loc_dpx","header_bytes":2048,"row_align":4,"depths":{"8":3,"10":4,"12":6,"16":6},"label":"DPX image sequence (RGB)"},"tiff":{"source":"tiff6","header_bytes":0,"row_align":1,"depths":{"8":3,"16":6},"label":"TIFF image sequence (RGB, uncompressed)"}},"uncompressed":{"source":"apple_tn2162","types":[{"id":"v210","label":"Uncompressed 10-bit 4:2:2 (v210)","group_px":48,"group_bytes":128},{"id":"2vuy","label":"Uncompressed 8-bit 4:2:2 (2vuy)","group_px":2,"group_bytes":4},{"id":"v410","label":"Uncompressed 10-bit 4:4:4 (v410)","group_px":2,"group_bytes":8}]},"drives_gb":[128,256,500,1000,2000,4000,5000,8000,10000,12000,14000,16000,18000,20000,22000,24000],"limits":{"lines":50,"deliverables":10,"reels":999,"feet":100000,"seconds":360000,"mbps_min":0.01,"mbps_max":20000,"px_min":16,"px_max":16384,"fps_min":1,"fps_max":120,"audio_kbps_max":20000,"headroom_max":100}};
+  /* END DATARATE PRESETS */
+  var DR_DEFAULT_FPS = { '8': 16, 's8': 18, '16': 24, '35-4': 24, '35-3': 24, '35-2': 24 };
+  var DR_KINDS = ['prores', 'h264', 'h265', 'youtube', 'dpx', 'tiff', 'uncompressed', 'custom'];
+  var NUM_RE = /^-?\d+(\.\d+)?$/;
+  /* Strict number parse shared with PHP: real numbers or plain decimal strings only. */
+  function drNum(v) {
+    if (typeof v === 'number') { return isFinite(v) ? v : NaN; }
+    if (typeof v === 'string' && NUM_RE.test(v)) { return Number(v); }
+    return NaN;
+  }
+  function drStr(v) { return typeof v === 'string' ? v : typeof v === 'number' && isFinite(v) ? String(v) : ''; }
+  function drBlank(v) { return v === undefined || v === null || v === ''; }
+  function rnd0(x) { return Math.floor(x + 0.5); }
+  function drErr(line, d, code, message) { return { line: line, deliverable: d, code: code, message: message }; }
+  function drFind(list, id) { for (var i = 0; i < list.length; i++) { if (list[i].id === id) { return list[i]; } } return null; }
+  function drSize(spec, L) {
+    if (spec.size === 'custom') {
+      var w = drNum(spec.width), h = drNum(spec.height);
+      if (!(w >= L.px_min && w <= L.px_max && Math.floor(w) === w && h >= L.px_min && h <= L.px_max && Math.floor(h) === h)) { return null; }
+      return { id: 'custom', label: w + '×' + h, w: w, h: h };
+    }
+    return drFind(DR.sizes, drStr(spec.size));
+  }
+  /* ProRes target rate at an output frame rate: Apple's listed figure when the rate is one Apple lists
+     (24p row also covers 23.976, 30p covers 29.97, 60p covers 59.94); otherwise scaled from the nearest listed rate. */
+  function proresMbps(sizeId, profile, fps) {
+    var tab = DR.prores.mbps[sizeId];
+    if (!tab) { return null; }
+    var keys = Object.keys(tab).map(Number).sort(function (a, b) { return a - b; });
+    var best = keys[0];
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (Math.abs(fps - k) / k <= DR.prores.fps_tolerance) { return { mbps: tab[String(k)][profile], listed: k, scaled: false }; }
+      if (Math.abs(fps - k) < Math.abs(fps - best)) { best = k; }
+    }
+    return { mbps: tab[String(best)][profile] * fps / best, listed: best, scaled: true };
+  }
+  /* Validate one deliverable. Returns { d: normalised } or { error: [code, message] }. */
+  function drDeliverable(spec, L) {
+    spec = spec && typeof spec === 'object' && !Array.isArray(spec) ? spec : {};
+    var kind = drStr(spec.kind), d = { kind: kind, source: '', label: '' };
+    if (DR_KINDS.indexOf(kind) < 0) { return { error: ['bad_kind', 'Unknown deliverable type.'] }; }
+    if (drBlank(spec.fps) || spec.fps === 'film') { d.fps = 'film'; }
+    else { var f = drNum(spec.fps); if (!(f >= L.fps_min && f <= L.fps_max)) { return { error: ['bad_out_fps', 'Output frame rate must be from 1 to 120 fps.'] }; } d.fps = f; }
+    var ak = drBlank(spec.audio_kbps) ? 0 : drNum(spec.audio_kbps);
+    if (!(ak >= 0 && ak <= L.audio_kbps_max)) { return { error: ['bad_audio', 'Audio bitrate must be from 0 to 20000 kbps.'] }; }
+    d.audio_kbps = ak;
+    if (kind === 'prores') {
+      var p = drFind(DR.prores.profiles, drStr(spec.profile));
+      if (!p) { return { error: ['bad_profile', 'Unknown ProRes profile.'] }; }
+      var ps = drFind(DR.sizes, drStr(spec.size));
+      if (!ps) { return { error: ['bad_frame_size', 'Unknown frame size.'] }; }
+      if (!DR.prores.mbps[ps.id]) { return { error: ['prores_size', 'Apple publishes no ProRes target rate for that frame size.'] }; }
+      d.profile = p.id; d.size = ps.id; d.size_label = ps.label; d.label = p.label + ' ' + ps.label; d.source = DR.prores.source;
+    } else if (kind === 'h264' || kind === 'h265' || kind === 'custom') {
+      var m = drNum(spec.mbps);
+      if (!(m >= L.mbps_min && m <= L.mbps_max)) { return { error: ['bad_mbps', 'Bitrate must be from 0.01 to 20000 Mbps.'] }; }
+      d.mbps = m; d.label = (kind === 'h264' ? 'H.264 MP4 ' : kind === 'h265' ? 'H.265 MP4 ' : 'Custom ') + m + ' Mbps'; d.source = kind === 'custom' ? '' : kind;
+    } else if (kind === 'youtube') {
+      var y = drFind(DR.youtube.res, drStr(spec.res));
+      if (!y) { return { error: ['bad_res', 'Unknown YouTube resolution.'] }; }
+      d.res = y.id; d.hdr = spec.hdr === true || spec.hdr === 1 || spec.hdr === '1'; d.label = 'YouTube ' + y.label + (d.hdr ? ' HDR' : ' SDR'); d.source = DR.youtube.source;
+    } else if (kind === 'dpx' || kind === 'tiff') {
+      var im = DR.image[kind], sz = drSize(spec, L), dep = drStr(spec.depth);
+      if (!sz) { return { error: ['bad_frame_size', 'Unknown frame size.'] }; }
+      if (!Object.prototype.hasOwnProperty.call(im.depths, dep)) { return { error: ['bad_depth', 'That bit depth is not offered for this format.'] }; }
+      var row = Math.ceil(sz.w * im.depths[dep] / im.row_align) * im.row_align;
+      d.size = sz.id; d.size_label = sz.label; d.depth = Number(dep); d.frame_bytes = row * sz.h + im.header_bytes;
+      d.label = (kind === 'dpx' ? 'DPX ' : 'TIFF ') + dep + '-bit ' + sz.label; d.source = im.source;
+    } else {
+      var ut = drFind(DR.uncompressed.types, drStr(spec.type)), us = drSize(spec, L);
+      if (!ut) { return { error: ['bad_type', 'Unknown uncompressed type.'] }; }
+      if (!us) { return { error: ['bad_frame_size', 'Unknown frame size.'] }; }
+      d.type = ut.id; d.size = us.id; d.size_label = us.label; d.frame_bytes = Math.ceil(us.w / ut.group_px) * ut.group_bytes * us.h;
+      d.label = ut.label + ' ' + us.label; d.source = DR.uncompressed.source;
+    }
+    return { d: d };
+  }
+  /* Bytes for one reel of one deliverable. */
+  function drItem(d, frames, filmFps) {
+    var out = d.fps === 'film' ? filmFps : d.fps;
+    var n = Math.abs(out - filmFps) < 1e-9 ? frames : rnd0(frames / filmFps * out);
+    var secs = n / out, mbps, scaled = false, range = null, bytes;
+    if (d.frame_bytes) {
+      bytes = n * d.frame_bytes; mbps = d.frame_bytes * 8 * out / 1e6;
+    } else {
+      if (d.kind === 'prores') { var pr = proresMbps(d.size, d.profile, out); mbps = pr.mbps; scaled = pr.scaled; }
+      else if (d.kind === 'youtube') { var t = DR.youtube[d.hdr ? 'hdr' : 'sdr'][d.res][out >= DR.youtube.high_fps_from ? 'high' : 'std']; range = [t[0], t[1]]; mbps = t[1]; }
+      else { mbps = d.mbps; }
+      bytes = rnd0(mbps * 125000 * secs);
+    }
+    if (d.audio_kbps > 0) { bytes += rnd0(d.audio_kbps * 125 * secs); }
+    return { out_fps: out, frames: n, mbps: mbps, scaled: scaled, range: range, bytes_per_reel: bytes };
+  }
+  function units(bytes) { return { bytes: bytes, gb: bytes / 1e9, tb: bytes / 1e12, gib: bytes / 1073741824, tib: bytes / 1099511627776 }; }
+  function suggestDrive(bytes, headroomPct) {
+    if (!(bytes > 0)) { return null; }
+    var need = Math.ceil(bytes * (100 + headroomPct) / 100), list = DR.drives_gb;
+    for (var i = 0; i < list.length; i++) { if (list[i] * 1e9 >= need) { return { gb: list[i], count: 1, need_bytes: need }; } }
+    var big = list[list.length - 1];
+    return { gb: big, count: Math.ceil(need / (big * 1e9)), need_bytes: need };
+  }
+  /* request: { lines: [{ format, fps, reels, size | feet | seconds }], deliverables: [spec], headroom_pct } */
+  function storage(request) {
+    request = request && typeof request === 'object' && !Array.isArray(request) ? request : {};
+    var L = DR.limits, errors = [], dels = [], lines = [];
+    var rd = Array.isArray(request.deliverables) ? request.deliverables : [];
+    if (rd.length > L.deliverables) { errors.push(drErr(-1, -1, 'too_many_deliverables', 'Too many deliverables.')); rd = rd.slice(0, L.deliverables); }
+    for (var j = 0; j < rd.length; j++) {
+      var r = drDeliverable(rd[j], L);
+      if (r.error) { errors.push(drErr(-1, j, r.error[0], r.error[1])); } else { r.d.index = j; r.d.bytes = 0; dels.push(r.d); }
+    }
+    if (!rd.length) { errors.push(drErr(-1, -1, 'no_deliverables', 'Add at least one deliverable.')); }
+    var head = drBlank(request.headroom_pct) ? 20 : drNum(request.headroom_pct);
+    if (!(head >= 0 && head <= L.headroom_max)) { errors.push(drErr(-1, -1, 'bad_headroom', 'Headroom must be from 0 to 100%.')); head = 20; }
+    var rl = Array.isArray(request.lines) ? request.lines : [];
+    if (rl.length > L.lines) { errors.push(drErr(-1, -1, 'too_many_lines', 'Too many lines.')); rl = rl.slice(0, L.lines); }
+    var sumSec = 0, sumFrames = 0, total = 0;
+    for (var i = 0; i < rl.length; i++) {
+      var q = rl[i] && typeof rl[i] === 'object' && !Array.isArray(rl[i]) ? rl[i] : {}, fid = drStr(q.format) === '35' ? '35-4' : drStr(q.format), fmt = getFormat(fid);
+      if (!fmt) { errors.push(drErr(i, -1, 'bad_format', 'Unknown film format.')); continue; }
+      var fps = drBlank(q.fps) ? DR_DEFAULT_FPS[fid] : drNum(q.fps);
+      if (!(fps >= L.fps_min && fps <= L.fps_max)) { errors.push(drErr(i, -1, 'bad_fps', 'Film speed must be from 1 to 120 fps.')); continue; }
+      var reels = drBlank(q.reels) ? 1 : drNum(q.reels);
+      if (!(reels >= 1 && reels <= L.reels && Math.floor(reels) === reels)) { errors.push(drErr(i, -1, 'bad_reels', 'Number of reels must be a whole number from 1 to 999.')); continue; }
+      var frames, method;
+      if (!drBlank(q.seconds)) {
+        var s = drNum(q.seconds);
+        if (!(s > 0 && s <= L.seconds)) { errors.push(drErr(i, -1, 'bad_seconds', 'Running time must be more than 0 and at most 100 hours.')); continue; }
+        frames = rnd0(s / reels * fps); method = 'time';
+      } else if (!drBlank(q.feet)) {
+        var ft = drNum(q.feet);
+        if (!(ft > 0 && ft <= L.feet)) { errors.push(drErr(i, -1, 'bad_feet', 'Footage must be more than 0 and at most 100000 feet.')); continue; }
+        frames = rnd0(ft / reels * fmt.fpf); method = 'feet';
+      } else if (!drBlank(q.size)) {
+        var g = reelGroup(fid), rc = null;
+        for (var k = 0; k < REELS.length; k++) { if (REELS[k].format === g && REELS[k].size === drStr(q.size)) { rc = REELS[k]; } }
+        if (!rc) { errors.push(drErr(i, -1, 'bad_size', 'That reel size is not listed for this format.')); continue; }
+        frames = rnd0(rc.feet * fmt.fpf); method = 'size';
+      } else { errors.push(drErr(i, -1, 'need_length', 'Enter a reel size, footage or running time.')); continue; }
+      if (frames < 1) { errors.push(drErr(i, -1, 'too_short', 'Less than one frame per reel.')); continue; }
+      var items = [], lineBytes = 0;
+      for (var x = 0; x < dels.length; x++) {
+        var it = drItem(dels[x], frames, fps);
+        it.deliverable = dels[x].index; it.bytes = it.bytes_per_reel * reels;
+        items.push(it); lineBytes += it.bytes; dels[x].bytes += it.bytes;
+      }
+      var secs = frames / fps;
+      lines.push({ index: i, format: fid, format_label: fmt.label, fps: fps, reels: reels, method: method,
+        frames_per_reel: frames, feet_per_reel: frames / fmt.fpf, seconds_per_reel: secs, items: items, bytes: lineBytes });
+      sumSec += secs * reels; sumFrames += frames * reels; total += lineBytes;
+    }
+    if (!rl.length) { errors.push(drErr(-1, -1, 'no_lines', 'Add at least one reel.')); }
+    return { ok: errors.length === 0 && lines.length > 0 && dels.length > 0, as_of: DR.as_of, lines: lines, deliverables: dels, errors: errors,
+      totals: { seconds: sumSec, frames: sumFrames, size: units(total), headroom_pct: head, drive: suggestDrive(total, head) } };
+  }
+  function fmtBytes(bytes, binary) {
+    var u = binary ? ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'] : ['B', 'KB', 'MB', 'GB', 'TB', 'PB'], b = binary ? 1024 : 1000, i = 0, v = Number(bytes) || 0;
+    while (v >= b && i < u.length - 1) { v /= b; i++; }
+    var d = i === 0 ? 0 : v < 10 ? 2 : v < 100 ? 1 : 0;
+    return v.toFixed(d) + ' ' + u[i];
+  }
+  function fmtDrive(dr) { if (!dr) { return ''; } var s = dr.gb >= 1000 ? (dr.gb / 1000) + ' TB' : dr.gb + ' GB'; return (dr.count > 1 ? dr.count + ' × ' : '') + s; }
+
   return {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     /* length (same API as FilmCalcCore 1.1.0) */
     M_PER_FT: M_PER_FT, FORMATS: FORMATS, SPEEDS: SPEEDS, getFormat: getFormat, parseTime: parseTime,
     formatTime: formatTime, feetPerMinute: feetPerMinute, compute: compute, round: round,
@@ -287,6 +456,8 @@
     /* pricing */
     pricing: { LIMITS: LIMITS, quote: quote, toCents: toCents, formatMoney: formatMoney, formatMills: formatMills },
     /* timecode */
-    timecode: timecode
+    timecode: timecode,
+    /* storage / data rate */
+    datarate: { PRESETS: DR, storage: storage, proresMbps: proresMbps, units: units, suggestDrive: suggestDrive, fmtBytes: fmtBytes, fmtDrive: fmtDrive }
   };
 }));

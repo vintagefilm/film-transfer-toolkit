@@ -39,5 +39,14 @@ T.invalid.forEach(function (k) { var threw = false; try { tc.tcToFrames(k.tc, k.
 T.seconds.forEach(function (k) { ok(Math.abs(tc.framesToSeconds(k.frames, k.rate) - k.seconds) < 1e-3, 'sec ' + k.frames); });
 T.roundtrip_rates.forEach(function (r) { var bad = 0; for (var f = 0; f <= T.roundtrip_max_frames; f += 7) { if (tc.tcToFrames(tc.framesToTC(f, r), r) !== f) { bad++; } } ok(bad === 0, 'roundtrip ' + r); });
 ok(C.pricing.formatMoney(123456) === '$1,234.56' && C.pricing.formatMills(325) === '$0.325' && C.pricing.formatMills(320) === '$0.32', 'money formatting');
+var D = JSON.parse(fs.readFileSync(path.join(V, 'datarate.json'))), DRP = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'core', 'data', D.presets)));
+ok(JSON.stringify(C.datarate.PRESETS) === JSON.stringify(DRP), 'embedded datarate presets equal core/data/datarate-presets.json (run tools/embed-presets.js)');
+D.cases.forEach(function (c) {
+  var q = C.datarate.storage(c.request), e = JSON.parse(JSON.stringify(c.expect));
+  if (e.error_codes) { ok(JSON.stringify(q.errors.map(function (x) { return x.code; })) === JSON.stringify(e.error_codes), c.name + ' error codes ' + JSON.stringify(q.errors.map(function (x) { return x.code; }))); delete e.error_codes; }
+  sub(e, q, c.name);
+});
+D.fmt_bytes.forEach(function (f) { ok(C.datarate.fmtBytes(f.bytes, f.binary) === f.text, 'fmtBytes ' + f.bytes + ' -> ' + C.datarate.fmtBytes(f.bytes, f.binary)); });
+D.fmt_drive.forEach(function (f) { ok(C.datarate.fmtDrive(f.drive) === f.text, 'fmtDrive ' + f.text); });
 console.log('core-tests.js: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

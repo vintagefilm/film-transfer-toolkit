@@ -1,0 +1,778 @@
+{
+ "presets": "datarate-presets.json",
+ "cases": [
+  {
+   "name": "ProRes 422 HQ HD 29.97 1h = 99 GB (Apple: 220 Mb/s, 99 GB/hr)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 29.97,
+      "seconds": 3600
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "hd"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "frames_per_reel": 107892,
+      "items": [
+       {
+        "mbps": 220,
+        "scaled": false,
+        "bytes": 99000000000
+       }
+      ]
+     }
+    ],
+    "totals": {
+     "drive": {
+      "gb": 128,
+      "count": 1
+     }
+    }
+   }
+  },
+  {
+   "name": "ProRes 422 HQ UHD 24p 1h (Apple: 707 Mb/s, 318 GB/hr)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 3600
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "uhd"
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "mbps": 707,
+        "bytes": 318150000000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "ProRes Proxy HD 24p 1h (Apple: 36 Mb/s, 16 GB/hr)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 3600
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "proxy",
+      "size": "hd"
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "mbps": 36,
+        "bytes": 16200000000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "ProRes 4444 4K DCI 24p 1h (Apple: 1131 Mb/s, 509 GB/hr)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 3600
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "4444",
+      "size": "4k-dci"
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "mbps": 1131,
+        "bytes": 508950000000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "ProRes LT SD NTSC 30p (Apple: 29 Mb/s); SD NTSC at 25 fps scales from 24p (23 x 25/24); 2K FA 25p HQ (Apple: 283)",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 30,
+      "seconds": 100
+     },
+     {
+      "format": "16",
+      "fps": 25,
+      "seconds": 100
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "lt",
+      "size": "sd486"
+     },
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "2k-fa"
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "mbps": 29
+       },
+       {
+        "mbps": 340
+       }
+      ]
+     },
+     {
+      "items": [
+       {
+        "mbps": 23.958333333333332,
+        "scaled": true
+       },
+       {
+        "mbps": 283,
+        "scaled": false
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "16 fps frame-for-frame ProRes HQ HD is scaled from the 24p row",
+   "request": {
+    "lines": [
+     {
+      "format": "8",
+      "fps": 16,
+      "seconds": 60
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "hd"
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "frames_per_reel": 960,
+      "items": [
+       {
+        "out_fps": 16,
+        "frames": 960,
+        "scaled": true,
+        "bytes": 880000000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "YouTube SDR 1080p std, 2160p high (range 53-68), HDR 1440p",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 3600
+     },
+     {
+      "format": "16",
+      "fps": 60,
+      "seconds": 3600
+     },
+     {
+      "format": "16",
+      "fps": 30,
+      "seconds": 3600
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "youtube",
+      "res": "1080p"
+     },
+     {
+      "kind": "youtube",
+      "res": "2160p"
+     },
+     {
+      "kind": "youtube",
+      "res": "1440p",
+      "hdr": true
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "mbps": 8,
+        "bytes": 3600000000
+       },
+       {
+        "mbps": 45,
+        "range": [
+         35,
+         45
+        ]
+       },
+       {
+        "mbps": 20
+       }
+      ]
+     },
+     {
+      "items": [
+       {
+        "mbps": 12
+       },
+       {
+        "mbps": 68,
+        "range": [
+         53,
+         68
+        ],
+        "bytes": 30600000000
+       },
+       {
+        "mbps": 30
+       }
+      ]
+     },
+     {
+      "items": [
+       {
+        "mbps": 8
+       },
+       {
+        "mbps": 45
+       },
+       {
+        "mbps": 20,
+        "bytes": 9000000000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "DPX 10-bit 2K full aperture, one 400 ft Super 8 reel",
+   "request": {
+    "lines": [
+     {
+      "format": "s8",
+      "fps": 18,
+      "size": "7"
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "dpx",
+      "size": "2k-fa",
+      "depth": 10
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "frames_per_reel": 28800,
+      "seconds_per_reel": 1600,
+      "items": [
+       {
+        "frames": 28800,
+        "bytes": 367165440000
+       }
+      ]
+     }
+    ],
+    "deliverables": [
+     {
+      "frame_bytes": 12748800
+     }
+    ]
+   }
+  },
+  {
+   "name": "DPX 8-bit custom 1001x16: rows pad to 4 bytes + 2048 header; TIFF 16-bit 4K FA",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 1
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "dpx",
+      "size": "custom",
+      "width": 1001,
+      "height": 16,
+      "depth": 8
+     },
+     {
+      "kind": "tiff",
+      "size": "4k-fa",
+      "depth": 16
+     }
+    ]
+   },
+   "expect": {
+    "deliverables": [
+     {
+      "frame_bytes": 50112,
+      "size_label": "1001×16"
+     },
+     {
+      "frame_bytes": 76480512
+     }
+    ],
+    "lines": [
+     {
+      "items": [
+       {
+        "bytes": 1202688
+       },
+       {
+        "bytes": 1835532288
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "Uncompressed v210 HD 29.97 = 1326 Mb/s (Apple chart); v210 720p pads to 3456 B/line (TN2162); 2vuy HD",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 29.97,
+      "seconds": 10
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "uncompressed",
+      "type": "v210",
+      "size": "hd"
+     },
+     {
+      "kind": "uncompressed",
+      "type": "v210",
+      "size": "custom",
+      "width": 1280,
+      "height": 720
+     },
+     {
+      "kind": "uncompressed",
+      "type": "2vuy",
+      "size": "hd"
+     }
+    ]
+   },
+   "expect": {
+    "deliverables": [
+     {
+      "frame_bytes": 5529600
+     },
+     {
+      "frame_bytes": 2488320
+     },
+     {
+      "frame_bytes": 4147200
+     }
+    ],
+    "lines": [
+     {
+      "items": [
+       {
+        "frames": 300,
+        "bytes": 1658880000
+       },
+       {},
+       {
+        "bytes": 1244160000
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "H.264 10 Mbps + 384 kbps audio, 100 s",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "fps": 24,
+      "seconds": 100
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "h264",
+      "mbps": 10,
+      "audio_kbps": 384
+     }
+    ]
+   },
+   "expect": {
+    "lines": [
+     {
+      "items": [
+       {
+        "bytes": 129800000
+       }
+      ]
+     }
+    ],
+    "deliverables": [
+     {
+      "label": "H.264 MP4 10 Mbps"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Multiple deliverables summed: 3 x 7in Super 8, ProRes HQ HD at 24 + H.264 20 Mbps frame-for-frame",
+   "request": {
+    "lines": [
+     {
+      "format": "s8",
+      "fps": 18,
+      "reels": 3,
+      "size": "7"
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "hd",
+      "fps": 24
+     },
+     {
+      "kind": "h264",
+      "mbps": 20
+     }
+    ],
+    "headroom_pct": 20
+   },
+   "expect": {
+    "ok": true,
+    "lines": [
+     {
+      "items": [
+       {
+        "out_fps": 24,
+        "frames": 38400,
+        "bytes_per_reel": 35200000000,
+        "bytes": 105600000000
+       },
+       {
+        "out_fps": 18,
+        "bytes_per_reel": 4000000000,
+        "bytes": 12000000000
+       }
+      ],
+      "bytes": 117600000000
+     }
+    ],
+    "deliverables": [
+     {
+      "bytes": 105600000000
+     },
+     {
+      "bytes": 12000000000
+     }
+    ],
+    "totals": {
+     "seconds": 4800,
+     "size": {
+      "bytes": 117600000000
+     },
+     "drive": {
+      "gb": 256,
+      "count": 1,
+      "need_bytes": 141120000000
+     }
+    }
+   }
+  },
+  {
+   "name": "Large job: 20 x 2000 ft 35mm as DPX 16-bit 4K full aperture ((76480512 + 2048 header) x 640000 frames) needs 3 x 24 TB",
+   "request": {
+    "lines": [
+     {
+      "format": "35",
+      "fps": 24,
+      "reels": 20,
+      "size": "15"
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "dpx",
+      "size": "4k-fa",
+      "depth": 16
+     }
+    ],
+    "headroom_pct": 0
+   },
+   "expect": {
+    "ok": true,
+    "totals": {
+     "frames": 640000,
+     "size": {
+      "bytes": 48948838400000
+     },
+     "drive": {
+      "gb": 24000,
+      "count": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "Errors are reported and bad lines skipped",
+   "request": {
+    "lines": [
+     {
+      "format": "s8",
+      "size": "9"
+     },
+     {
+      "format": "s8"
+     },
+     {
+      "format": "8",
+      "reels": 1.5,
+      "size": "3"
+     },
+     {
+      "format": "x"
+     },
+     {
+      "format": "16",
+      "fps": 0,
+      "feet": 10
+     },
+     {
+      "format": "16",
+      "feet": 100
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "prores",
+      "profile": "hq",
+      "size": "4k-fa"
+     },
+     {
+      "kind": "tiff",
+      "size": "hd",
+      "depth": 10
+     },
+     {
+      "kind": "h265",
+      "mbps": 0
+     },
+     {
+      "kind": "zip"
+     },
+     {
+      "kind": "custom",
+      "mbps": "1e3"
+     },
+     {
+      "kind": "h265",
+      "mbps": "12.5",
+      "fps": 200
+     },
+     {
+      "kind": "custom",
+      "mbps": "12.5"
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_codes": [
+     "prores_size",
+     "bad_depth",
+     "bad_mbps",
+     "bad_kind",
+     "bad_mbps",
+     "bad_out_fps",
+     "bad_size",
+     "need_length",
+     "bad_reels",
+     "bad_format",
+     "bad_fps"
+    ],
+    "lines": [
+     {
+      "index": 5,
+      "frames_per_reel": 4000,
+      "items": [
+       {
+        "bytes": 260416667
+       }
+      ]
+     }
+    ],
+    "deliverables": [
+     {
+      "label": "Custom 12.5 Mbps"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Nothing to compute",
+   "request": {},
+   "expect": {
+    "ok": false,
+    "error_codes": [
+     "no_deliverables",
+     "no_lines"
+    ],
+    "totals": {
+     "drive": null
+    }
+   }
+  },
+  {
+   "name": "Custom frame below 16 px is rejected",
+   "request": {
+    "lines": [
+     {
+      "format": "16",
+      "seconds": 1
+     }
+    ],
+    "deliverables": [
+     {
+      "kind": "dpx",
+      "size": "custom",
+      "width": 1001,
+      "height": 10,
+      "depth": 8
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_codes": [
+     "bad_frame_size"
+    ]
+   }
+  }
+ ],
+ "fmt_bytes": [
+  {
+   "bytes": 99000000000,
+   "binary": false,
+   "text": "99.0 GB"
+  },
+  {
+   "bytes": 1200000000000,
+   "binary": true,
+   "text": "1.09 TiB"
+  },
+  {
+   "bytes": 512,
+   "binary": false,
+   "text": "512 B"
+  },
+  {
+   "bytes": 367165440000,
+   "binary": false,
+   "text": "367 GB"
+  }
+ ],
+ "fmt_drive": [
+  {
+   "drive": {
+    "gb": 24000,
+    "count": 2
+   },
+   "text": "2 × 24 TB"
+  },
+  {
+   "drive": {
+    "gb": 500,
+    "count": 1
+   },
+   "text": "500 GB"
+  },
+  {
+   "drive": {
+    "gb": 5000,
+    "count": 1
+   },
+   "text": "5 TB"
+  }
+ ]
+}
