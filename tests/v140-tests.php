@@ -29,7 +29,7 @@ $norm = function ( $h ) {
 if ( ! function_exists( 'get_plugin_data' ) ) { require_once ABSPATH . 'wp-admin/includes/plugin.php'; }
 $pd = get_plugin_data( FTT_FILE, false, false );
 $ok( 'plugin header Name is FTT', 'FTT' === $pd['Name'], $pd['Name'] );
-$ok( 'version 1.4.0', '1.4.0' === $pd['Version'] && '1.4.0' === FTT_VERSION );
+$ok( 'version 1.4.x', version_compare( $pd['Version'], '1.4.0', '>=' ) && $pd['Version'] === FTT_VERSION );
 $ok( 'text domain unchanged', 'film-transfer-toolkit' === $pd['TextDomain'] );
 $ok( 'folder/file (plugin slug) unchanged', 'film-transfer-toolkit/film-transfer-toolkit.php' === plugin_basename( FTT_FILE ), plugin_basename( FTT_FILE ) );
 $ok( 'plugin still active under the same slug', is_plugin_active( 'film-transfer-toolkit/film-transfer-toolkit.php' ) );

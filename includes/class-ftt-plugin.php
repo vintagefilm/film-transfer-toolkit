@@ -69,6 +69,9 @@ class FTT_Plugin {
 		FTT_Setup::on_activate( $fresh );
 	}
 
+	/** True when the FW Clip Cart prototype plugin is active next to the clip selector module. */
+	public static $fwcc_shared = false;
+
 	public static function boot() {
 		FTT_Price_Table::init();
 		add_action( 'init', array( __CLASS__, 'register_assets' ), 5 );
@@ -79,17 +82,16 @@ class FTT_Plugin {
 				continue;
 			}
 			if ( 'clips' === $k && class_exists( 'FWCC_Clip' ) ) {
-				self::$status[ $k ] = 'wait_fwcc';
-				continue;
+				// 1.4.1: the FW Clip Cart prototype keeps [fw_clip_cart] and its FluentCart hooks; [ftt_clip_selector] and the block still work.
+				self::$fwcc_shared = true;
+				define( 'FTT_CLIP_SHARED_FWCC', true );
 			}
 			require_once FTT_DIR . $m[1];
 			self::$status[ $k ] = 'on';
 		}
 		FTT_Blocks::init();
 		FTT_Testbench::init();
-		if ( 'off' === self::$status['clips'] ) {
-			add_action( 'init', array( __CLASS__, 'register_clip_preview' ), 20 );
-		}
+		add_action( 'init', array( __CLASS__, 'register_off_placeholders' ), 20 );
 		if ( is_admin() ) {
 			FTT_Setup::maybe_upgrade();
 			FTT_Setup::init();
@@ -102,17 +104,45 @@ class FTT_Plugin {
 		}
 	}
 
-	/** Clip selector module off: [ftt_clip_selector] renders nothing, except a preview-only copy for editors (test bench, previews). */
-	public static function register_clip_preview() {
-		if ( ! shortcode_exists( 'ftt_clip_selector' ) ) {
-			add_shortcode( 'ftt_clip_selector', array( __CLASS__, 'clip_preview' ) );
+	/**
+	 * Module switched off: its shortcodes (and blocks) never show as raw text. Visitors see nothing; editors see a
+	 * short note. The clip selector also shows a preview-only copy to editors on the test bench and in previews.
+	 */
+	public static function register_off_placeholders() {
+		foreach ( FTT_Registry::embeds() as $tag => $e ) {
+			if ( 'on' === ( self::$status[ $e['module'] ] ?? '' ) ) {
+				continue;
+			}
+			foreach ( array_merge( array( $tag ), $e['aliases'] ?? array() ) as $t ) {
+				if ( ! shortcode_exists( $t ) ) {
+					add_shortcode(
+						$t,
+						function ( $atts ) use ( $tag, $e ) {
+							return FTT_Plugin::off_placeholder( $tag, $e, $atts );
+						}
+					);
+				}
+			}
 		}
 	}
 
-	public static function clip_preview( $atts ) {
-		if ( ! FTT_Testbench::clip_preview_allowed() ) {
+	public static function off_placeholder( $tag, $e, $atts ) {
+		if ( 'ftt_clip_selector' === $tag && FTT_Testbench::clip_preview_allowed() ) {
+			return self::clip_preview( $atts );
+		}
+		$id = (int) get_the_ID();
+		if ( ! ( $id ? current_user_can( 'edit_post', $id ) : current_user_can( 'edit_posts' ) ) ) {
 			return '';
 		}
+		$tools = FTT_Registry::tools();
+		$name  = $tools[ $e['module'] ]['label'] ?? $e['label'];
+		return '<div class="ftt-off-note" data-ftt-off="' . esc_attr( $tag ) . '" role="note" style="border:1px dashed currentColor;padding:.75em 1em;margin:1em 0;border-radius:4px;opacity:.8;font-size:.9em"><strong>' . esc_html__( 'FTT:', 'film-transfer-toolkit' ) . '</strong> '
+			/* translators: %s: tool name */
+			. esc_html( sprintf( __( '%s is switched off, so this spot is empty for visitors. Turn it on under FTT > Settings > Modules. Only editors see this note.', 'film-transfer-toolkit' ), $name ) )
+			. '</div>';
+	}
+
+	public static function clip_preview( $atts ) {
 		if ( ! class_exists( 'FTT_Clip_Shortcode' ) ) {
 			// Load the module's classes only (no shortcodes, REST routes or FluentCart hooks are registered).
 			if ( ! defined( 'FTT_CLIP_DIR' ) ) {
@@ -175,7 +205,7 @@ class FTT_Plugin {
 						<tr>
 							<td><input type="checkbox" id="ftt-mod-<?php echo esc_attr( $k ); ?>" name="ftt_modules[<?php echo esc_attr( $k ); ?>]" value="1" <?php checked( ! empty( $on[ $k ] ) ); ?>></td>
 							<td><label for="ftt-mod-<?php echo esc_attr( $k ); ?>"><strong><?php echo esc_html( $m['label'] ); ?></strong></label><br><span class="description"><?php echo esc_html( $m['desc'] ); ?></span></td>
-							<td><?php echo 'on' === $s ? '<span class="ftt-pill ftt-pill--on">' . esc_html__( 'Active', 'film-transfer-toolkit' ) . '</span>' : ( 'off' === $s ? '<span class="ftt-pill">' . esc_html__( 'Off', 'film-transfer-toolkit' ) . '</span>' : '<span class="ftt-pill ftt-pill--wait">' . esc_html__( 'Waiting', 'film-transfer-toolkit' ) . '</span> ' . esc_html( 'wait_fwcc' === $s ? __( 'The FW Clip Cart prototype plugin is active and keeps handling [fw_clip_cart]. Deactivate it to switch to this module.', 'film-transfer-toolkit' ) : $s ) ); ?></td>
+							<td><?php echo 'on' === $s ? '<span class="ftt-pill ftt-pill--on">' . esc_html__( 'Active', 'film-transfer-toolkit' ) . '</span>' . ( 'clips' === $k && self::$fwcc_shared ? ' ' . esc_html__( 'The FW Clip Cart prototype plugin is also active: it keeps [fw_clip_cart] and the cart hooks; [ftt_clip_selector] and the block work too.', 'film-transfer-toolkit' ) : '' ) : ( 'off' === $s ? '<span class="ftt-pill">' . esc_html__( 'Off', 'film-transfer-toolkit' ) . '</span>' : '<span class="ftt-pill ftt-pill--wait">' . esc_html__( 'Waiting', 'film-transfer-toolkit' ) . '</span> ' . esc_html( 'wait_fwcc' === $s ? __( 'The FW Clip Cart prototype plugin is active and keeps handling [fw_clip_cart]. Deactivate it to switch to this module.', 'film-transfer-toolkit' ) : $s ) ); ?></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>

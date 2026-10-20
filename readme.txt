@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,11 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.4.1 =
+* Fix: with the clip selector switched on while the FW Clip Cart prototype plugin is also active, [ftt_clip_selector] showed as raw text and the Clip selector block was missing. The module now runs next to the prototype: the prototype keeps [fw_clip_cart] and the FluentCart cart hooks, and [ftt_clip_selector] and the block work.
+* A switched-off tool's shortcode or block never shows as raw text: visitors see nothing, editors see a short note saying it is switched off and where to turn it on. All blocks stay registered so they can be placed and set up before a tool is switched on.
+* tests/v141-tests.sh covers both cases, with and without the prototype.
+
 = 1.4.0 =
 * Renamed to FTT (formerly "Film Transfer Toolkit") in the plugin list, admin menu, block inserter category, help, readme and docs. Nothing else changed: the plugin folder and file (film-transfer-toolkit/film-transfer-toolkit.php), text domain, every shortcode ([ftt_*] and [film_calculator]), block name (ftt/*), option key, script/style handle, filter (including filmcalc_format_badge), CSS class and data attribute are the same, so existing pages and settings keep working. tests/v140-tests.php checks this against a snapshot of 1.3.0.
 * Help > All options: one page listing every shortcode and block with every option, its block sidebar label, allowed values, default (and, where a setting supplies it, the site's current value) and copy-ready examples: the hand-written ones, a shortcode with every option at its default, and block markup. Built from the tool registry, like the per-tool option tables, so it cannot drift.

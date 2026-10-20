@@ -42,10 +42,8 @@ class FTT_Blocks {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			return;
 		}
-		$embeds = self::active_embeds();
-		if ( ! $embeds ) {
-			return;
-		}
+		// 1.4.1: every block is registered, even when its module is off (it then renders the editor-only note, nothing for visitors).
+		$embeds = FTT_Registry::embeds();
 		wp_register_script( 'ftt-blocks', FTT_URL . 'assets/js/blocks.js', array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ), FTT_VERSION, true );
 		wp_register_style( 'ftt-blocks-editor', FTT_URL . 'assets/css/blocks-editor.css', array( 'dashicons' ), FTT_VERSION );
 		$client = array();
