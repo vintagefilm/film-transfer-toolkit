@@ -12,5 +12,5 @@ const s=await C.nth(1).locator('[data-fc="summary"]').textContent();
 ok('toggled summary: 400 ft = 11:06.67 at 24 fps, no meters/frames',/400 ft = 11:06\.67 at 24 fps/.test(s)&&!/frames/.test(s),s);
 ok('defaults summary unchanged',/m\) = .*frames/.test(await C.nth(0).locator('[data-fc="summary"]').textContent()));
 ok('no JS errors',errs.length===0,errs.join('|'));
-await p.screenshot({path:'/workspace/ftt130-shots/standalone-film-calculator-1.2.0-toggles.png',fullPage:true});
+await p.screenshot({path:'/workspace/ftt140-shots/regression/standalone-film-calculator-1.2.0-toggles.png',fullPage:true});
 console.log(out.join('\n'));console.log(out.filter(x=>x.startsWith('PASS')).length+' passed, '+out.filter(x=>x.startsWith('FAIL')).length+' failed');await b.close();})();

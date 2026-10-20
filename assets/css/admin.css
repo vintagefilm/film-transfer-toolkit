@@ -79,3 +79,11 @@
 .ftt-st-grid{display:flex;flex-wrap:wrap;gap:.75em 1.25em}
 .ftt-st-field{display:flex;flex-direction:column;gap:.25em}
 .ftt-st-field[hidden]{display:none}
+
+/* 1.4.0 Help > All options */
+.ftt-help--options .ftt-toc { columns: 2 18em; margin: 0 0 1.5em; }
+.ftt-help--options .ftt-toc li { break-inside: avoid; }
+.ftt-help--options .ftt-opt { margin: 2em 0; padding-top: 1em; border-top: 1px solid #dcdcde; scroll-margin-top: 48px; }
+.ftt-atts th[scope="row"] code { white-space: nowrap; }
+.ftt-atts td:nth-child(2) { font-weight: 600; }
+.ftt-examples .ftt-ex-all code, .ftt-examples .ftt-ex-block code { word-break: break-all; }

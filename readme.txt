@@ -1,20 +1,20 @@
-=== Film Transfer Toolkit ===
+=== FTT ===
 Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
 
 == Getting started ==
 1. Activate the plugin. On a site that has never had the toolkit, the setup wizard opens: choose tools, create or reuse their pages, pick the calculator look, load EXAMPLE prices or import your own, and set an optional notify address (email stays log-only until you switch it on).
-2. Add any tool to any page: block editor + > "Film Transfer Toolkit" group, or paste its shortcode in the classic editor.
-3. Film Transfer Toolkit > Help has step-by-step instructions, pictures, every option and troubleshooting for each tool.
-Updates and re-activations never start the wizard or create pages. Re-run it any time from Film Transfer Toolkit > Setup wizard; pages that already show a tool are reused, never duplicated, and new pages are not added to menus.
+2. Add any tool to any page: block editor + > "FTT" group, or paste its shortcode in the classic editor.
+3. FTT > Help has step-by-step instructions, pictures, every option and troubleshooting for each tool.
+Updates and re-activations never start the wizard or create pages. Re-run it any time from FTT > Setup wizard; pages that already show a tool are reused, never duplicated, and new pages are not added to menus.
 
-== Modules (Film Transfer Toolkit > Settings) ==
+== Modules (FTT > Settings) ==
 Every module is also a block (ftt/calculator, ftt/reel-estimator, ftt/price-table, ftt/estimate, ftt/storage-calculator, ftt/clip-selector, ftt/rfq-providers, ftt/rfq-form, ftt/rfq-reply, ftt/rfq-compare) that renders through its shortcode.
 * Film calculator - [ftt_calculator]; also [film_calculator] when the standalone Film Calculator plugin is not active.
 * Reel size / diameter estimator - [ftt_reel_estimator format="s8" fps="18"].
@@ -37,19 +37,23 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.4.0 =
+* Renamed to FTT (formerly "Film Transfer Toolkit") in the plugin list, admin menu, block inserter category, help, readme and docs. Nothing else changed: the plugin folder and file (film-transfer-toolkit/film-transfer-toolkit.php), text domain, every shortcode ([ftt_*] and [film_calculator]), block name (ftt/*), option key, script/style handle, filter (including filmcalc_format_badge), CSS class and data attribute are the same, so existing pages and settings keep working. tests/v140-tests.php checks this against a snapshot of 1.3.0.
+* Help > All options: one page listing every shortcode and block with every option, its block sidebar label, allowed values, default (and, where a setting supplies it, the site's current value) and copy-ready examples: the hand-written ones, a shortcode with every option at its default, and block markup. Built from the tool registry, like the per-tool option tables, so it cannot drift.
+* Block sidebars: every shortcode option is in its block's Settings panel with the same default, a plain-English label and help text that gives the default, the allowed values and the matching shortcode option. "Use the settings default" choices show what the setting currently is. New "Reset all to defaults" button. A test fails if any shortcode option is missing from its block or the defaults differ.
 = 1.3.0 =
 * Film calculator: the Length (meters) field, the Frames field, the Frame rate picker, the film speed (ft/min) readout and the total seconds readout can each be switched off for the site (Calculator look > Fields, and the setup wizard's Look step) or per page (meters, frames, fps_picker, speed, seconds attributes; block Settings panel). Defaults show everything. Settings saved by 1.2.0 carry over (the old extras checkbox becomes the speed and seconds toggles). The summary line leaves out hidden fields.
 * Clip selector works on any page with a video player: core Video block and other HTML5 video, YouTube and Vimeo embeds (driven through each player's own postMessage interface; no third-party script is added), FluentPlayer and FV Player. player_selector attaches it to one player; player="html5|youtube|vimeo|fluent|fv" limits automatic detection. Optional automatic placement under pages/posts that contain a video (off by default).
 * Clip selector without FluentCart: the button reads "Send clip request"; visitors give a name and email and the list is saved privately under Clip requests (server-side prices from the rate card; honeypot, nonce and rate limit) and the owner is notified through the mail log / Send mode. "Copy list" copies the clip names and timecodes. With FluentCart active and a clip product (product_id or the new default clip product setting), clips go to the cart as before.
 * Clip selector settings: default timecode frame rate, default clip product, automatic placement.
-* Storage calculator starts with 16mm and two deliverables: ProRes 422 HQ UHD 3840x2160 and H.264 16 Mbps, both at the film frame rate with PCM audio. Each site can choose its own default film format and up to four default deliverables (Film Transfer Toolkit > Storage calculator, and a new Storage step in the setup wizard). New format attribute; preset still starts with one particular format; new preset prores-hq-uhd.
+* Storage calculator starts with 16mm and two deliverables: ProRes 422 HQ UHD 3840x2160 and H.264 16 Mbps, both at the film frame rate with PCM audio. Each site can choose its own default film format and up to four default deliverables (FTT > Storage calculator, and a new Storage step in the setup wizard). New format attribute; preset still starts with one particular format; new preset prores-hq-uhd.
 * Test bench: "wp ftt testbench" builds a draft page with every tool (plus the standalone [film_calculator]) and sample videos; "wp ftt testbench --check" renders and checks it. The page always stays a draft (publishing is refused), is noindex, and is kept out of menus. While the Clip selector module is off, editors previewing it see a "Preview only" selector that cannot send anything.
 * Uninstall also removes ftt_storage and ftt_clip_settings (clip requests are kept unless FTT_UNINSTALL_DELETE_DATA is set).
 
 = 1.2.0 =
 * Setup wizard on first activation (re-runnable): tools, pages (reuse existing, never duplicate, not added to menus, optional drafts), calculator look, EXAMPLE prices or JSON import, optional notify address (mail mode untouched).
-* One "Film Transfer Toolkit" admin menu: Dashboard / Getting started, Setup wizard, Settings, Prices, Help (a page per tool with block and classic editor steps, option tables, copy buttons, examples, bundled illustrations, FAQ), Calculator look, module screens, Mail log.
-* Blocks for every tool in a "Film Transfer Toolkit" inserter category, with sidebar settings and shortcode-to-block conversion.
+* One "FTT" admin menu: Dashboard / Getting started, Setup wizard, Settings, Prices, Help (a page per tool with block and classic editor steps, option tables, copy buttons, examples, bundled illustrations, FAQ), Calculator look, module screens, Mail log.
+* Blocks for every tool in a "FTT" inserter category, with sidebar settings and shortcode-to-block conversion.
 * WordPress Help tabs on toolkit screens.
 * Notice while the standalone Film Calculator plugin is active, explaining that it keeps handling [film_calculator] and the toolkit covers it once deactivated. Nothing is deactivated automatically.
 * Existing installs are marked as configured on update, so the wizard never auto-runs on them.

@@ -1,4 +1,4 @@
-# Film Transfer Toolkit - data rate / storage presets
+# FTT - data rate / storage presets
 
 Presets version 1.0.0, rates checked 2026-10-16. Generated from `core/data/datarate-presets.json` by `node tools/presets-doc.js`; the same numbers drive `FTTCore.datarate` (JS) and `FTT_Datarate` (PHP).
 

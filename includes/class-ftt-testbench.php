@@ -97,7 +97,7 @@ class FTT_Testbench {
 
 	/** Block markup for the whole bench. $video: URL of an HTML5 sample video; $youtube: a YouTube watch URL. */
 	public static function content( $video = '', $youtube = '' ) {
-		$c  = self::p( esc_html( sprintf( 'Internal test page for Film Transfer Toolkit %s. Keep it a DRAFT: do not publish it or add it to a menu. Rebuilt with "wp ftt testbench" and checked with "wp ftt testbench --check" at every release.', FTT_VERSION ) ) );
+		$c  = self::p( esc_html( sprintf( 'Internal test page for FTT %s. Keep it a DRAFT: do not publish it or add it to a menu. Rebuilt with "wp ftt testbench" and checked with "wp ftt testbench --check" at every release.', FTT_VERSION ) ) );
 		$st = FTT_Plugin::$status;
 		foreach ( FTT_Registry::tools() as $key => $t ) {
 			$state = 'on' === ( $st[ $key ] ?? 'off' ) ? 'module on' : 'module OFF on this site';

@@ -1,6 +1,6 @@
 <?php
 /**
- * The Film Transfer Toolkit admin menu: Dashboard, Setup wizard, Settings, Prices, Help, plus WordPress help tabs
+ * The FTT admin menu: Dashboard, Setup wizard, Settings, Prices, Help, plus WordPress help tabs
  * and the notice shown while the standalone Film Calculator plugin is active.
  *
  * @package FilmTransferToolkit
@@ -35,7 +35,7 @@ class FTT_Admin {
 
 	public static function menu() {
 		$cap = 'manage_options';
-		add_menu_page( __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ), __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ), $cap, 'ftt', array( __CLASS__, 'render_dashboard' ), 'dashicons-video-alt2', 82 );
+		add_menu_page( __( 'FTT', 'film-transfer-toolkit' ), __( 'FTT', 'film-transfer-toolkit' ), $cap, 'ftt', array( __CLASS__, 'render_dashboard' ), 'dashicons-video-alt2', 82 );
 		add_submenu_page( 'ftt', __( 'Dashboard', 'film-transfer-toolkit' ), __( 'Dashboard', 'film-transfer-toolkit' ), $cap, 'ftt', array( __CLASS__, 'render_dashboard' ) );
 		add_submenu_page( 'ftt', __( 'Setup wizard', 'film-transfer-toolkit' ), __( 'Setup wizard', 'film-transfer-toolkit' ), $cap, 'ftt-setup', array( 'FTT_Setup', 'render' ) );
 		add_submenu_page( 'ftt', __( 'Settings', 'film-transfer-toolkit' ), __( 'Settings', 'film-transfer-toolkit' ), $cap, 'ftt-settings', array( 'FTT_Plugin', 'render_modules' ) );
@@ -126,7 +126,7 @@ class FTT_Admin {
 		$state = FTT_Setup::state();
 		?>
 		<div class="wrap ftt-admin ftt-dash">
-			<h1><?php esc_html_e( 'Film Transfer Toolkit', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
+			<h1><?php esc_html_e( 'FTT', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
 			<?php if ( 'pending' === $state ) : ?>
 				<div class="ftt-hero">
 					<h2><?php esc_html_e( 'Welcome! Let\'s get your tools on your site.', 'film-transfer-toolkit' ); ?></h2>
@@ -141,7 +141,7 @@ class FTT_Admin {
 			<h2><?php esc_html_e( 'Getting started', 'film-transfer-toolkit' ); ?></h2>
 			<ol class="ftt-getting-started">
 				<li><?php esc_html_e( 'Switch on the tools you want under Settings (or in the setup wizard).', 'film-transfer-toolkit' ); ?></li>
-				<li><?php esc_html_e( 'Add a tool to a page: in the block editor click +, search "Film Transfer Toolkit" and pick the tool; in the classic editor paste its shortcode. Help has step-by-step pictures.', 'film-transfer-toolkit' ); ?></li>
+				<li><?php esc_html_e( 'Add a tool to a page: in the block editor click +, search "FTT" and pick the tool; in the classic editor paste its shortcode. Help has step-by-step pictures.', 'film-transfer-toolkit' ); ?></li>
 				<li><?php esc_html_e( 'Replace the EXAMPLE prices with yours under Prices and mark them Final.', 'film-transfer-toolkit' ); ?></li>
 				<li><?php esc_html_e( 'When you are happy with your test requests in the Mail log, switch email to Send under Settings.', 'film-transfer-toolkit' ); ?></li>
 			</ol>
@@ -193,17 +193,25 @@ class FTT_Admin {
 		}
 		$tools = FTT_Registry::tools();
 		$tool  = isset( $_GET['tool'] ) ? sanitize_key( wp_unslash( $_GET['tool'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
+		$all   = 'options' === $tool ? 'options' : '';
 		$tool  = isset( $tools[ $tool ] ) ? $tool : '';
 		?>
 		<div class="wrap ftt-admin ftt-help">
-			<h1><?php esc_html_e( 'Film Transfer Toolkit help', 'film-transfer-toolkit' ); ?></h1>
+			<h1><?php esc_html_e( 'FTT help', 'film-transfer-toolkit' ); ?></h1>
 			<nav class="nav-tab-wrapper ftt-help__tabs" aria-label="<?php esc_attr_e( 'Help topics', 'film-transfer-toolkit' ); ?>">
-				<a class="nav-tab<?php echo '' === $tool ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( self::help_url() ); ?>"<?php echo '' === $tool ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Start here', 'film-transfer-toolkit' ); ?></a>
+				<a class="nav-tab<?php echo '' === $tool && '' === $all ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( self::help_url() ); ?>"<?php echo '' === $tool && '' === $all ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Start here', 'film-transfer-toolkit' ); ?></a>
 				<?php foreach ( $tools as $k => $t ) : ?>
 					<a class="nav-tab<?php echo $k === $tool ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( self::help_url( $k ) ); ?>"<?php echo $k === $tool ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $t['title'] ); ?></a>
 				<?php endforeach; ?>
+				<a class="nav-tab<?php echo 'options' === $all ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'tool', 'options', self::help_url() ) ); ?>"<?php echo 'options' === $all ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'All options', 'film-transfer-toolkit' ); ?></a>
 			</nav>
-			<?php '' === $tool ? self::help_start() : self::help_tool( $tool, $tools[ $tool ] ); ?>
+			<?php
+			if ( 'options' === $all ) {
+				self::help_all_options();
+			} else {
+				'' === $tool ? self::help_start() : self::help_tool( $tool, $tools[ $tool ] );
+			}
+			?>
 		</div>
 		<?php
 	}
@@ -214,11 +222,11 @@ class FTT_Admin {
 			<h2><?php esc_html_e( 'How the toolkit works', 'film-transfer-toolkit' ); ?></h2>
 			<p><?php esc_html_e( 'Each tool (calculator, estimator, price table and so on) is something you place on a page. There are two ways to place one, and they give exactly the same result:', 'film-transfer-toolkit' ); ?></p>
 			<ul class="ftt-list">
-				<li><strong><?php esc_html_e( 'A block', 'film-transfer-toolkit' ); ?></strong> — <?php esc_html_e( 'if your site uses the block editor (the default since WordPress 5.0). The tools are in the "Film Transfer Toolkit" group of the block inserter.', 'film-transfer-toolkit' ); ?></li>
+				<li><strong><?php esc_html_e( 'A block', 'film-transfer-toolkit' ); ?></strong> — <?php esc_html_e( 'if your site uses the block editor (the default since WordPress 5.0). The tools are in the "FTT" group of the block inserter.', 'film-transfer-toolkit' ); ?></li>
 				<li><strong><?php esc_html_e( 'A shortcode', 'film-transfer-toolkit' ); ?></strong> — <?php esc_html_e( 'a short code in square brackets, such as [ftt_calculator], that you paste into the classic editor, a Shortcode block, a page builder\'s shortcode widget, or a text widget.', 'film-transfer-toolkit' ); ?></li>
 			</ul>
 			<div class="ftt-help__two">
-				<figure class="ftt-figure"><img src="<?php echo esc_url( self::img( 'block-editor-steps.svg' ) ); ?>" alt="<?php esc_attr_e( 'The block editor: click the plus button, search for Film Transfer Toolkit, click a tool, then adjust its settings in the right-hand panel.', 'film-transfer-toolkit' ); ?>" width="560" height="320" loading="lazy"><figcaption><?php esc_html_e( 'Block editor: + → search → click the tool → settings on the right.', 'film-transfer-toolkit' ); ?></figcaption></figure>
+				<figure class="ftt-figure"><img src="<?php echo esc_url( self::img( 'block-editor-steps.svg' ) ); ?>" alt="<?php esc_attr_e( 'The block editor: click the plus button, search for FTT, click a tool, then adjust its settings in the right-hand panel.', 'film-transfer-toolkit' ); ?>" width="560" height="320" loading="lazy"><figcaption><?php esc_html_e( 'Block editor: + → search → click the tool → settings on the right.', 'film-transfer-toolkit' ); ?></figcaption></figure>
 				<figure class="ftt-figure"><img src="<?php echo esc_url( self::img( 'classic-editor-steps.svg' ) ); ?>" alt="<?php esc_attr_e( 'The classic editor: the shortcode typed on its own line in the editor, then Update.', 'film-transfer-toolkit' ); ?>" width="560" height="320" loading="lazy"><figcaption><?php esc_html_e( 'Classic editor: paste the shortcode on its own line → Update.', 'film-transfer-toolkit' ); ?></figcaption></figure>
 			</div>
 			<h2><?php esc_html_e( 'Pick a tool', 'film-transfer-toolkit' ); ?></h2>
@@ -237,7 +245,7 @@ class FTT_Admin {
 
 	private static function help_general_faq() {
 		$faq = array(
-			__( 'The page shows the shortcode as text, like [ftt_estimate].', 'film-transfer-toolkit' ) => __( 'The tool is switched off. Turn it on under Film Transfer Toolkit > Settings. Also check the shortcode is spelled exactly as shown, with straight square brackets.', 'film-transfer-toolkit' ),
+			__( 'The page shows the shortcode as text, like [ftt_estimate].', 'film-transfer-toolkit' ) => __( 'The tool is switched off. Turn it on under FTT > Settings. Also check the shortcode is spelled exactly as shown, with straight square brackets.', 'film-transfer-toolkit' ),
 			__( 'The block says "Your site doesn\'t include support for this block".', 'film-transfer-toolkit' ) => __( 'The tool behind that block is switched off. Turn it on under Settings and reload the editor.', 'film-transfer-toolkit' ),
 			__( 'The tool shows but nothing happens when I type.', 'film-transfer-toolkit' ) => __( 'A speed or caching plugin may be delaying or combining JavaScript. Clear its cache, and if that does not help, exclude files containing "film-transfer-toolkit" from JavaScript optimisation.', 'film-transfer-toolkit' ),
 			__( 'I changed a setting but the page looks the same.', 'film-transfer-toolkit' ) => __( 'Clear your caching plugin or host cache (for example SiteGround Speed Optimizer > Purge cache), then reload the page.', 'film-transfer-toolkit' ),
@@ -285,11 +293,11 @@ class FTT_Admin {
 					<ol class="ftt-steps-list">
 						<li><?php echo esc_html( 'clips' === $key ? __( 'Open the product page for editing and click just below the video player.', 'film-transfer-toolkit' ) : __( 'Go to Pages and open the page you want (or click Add New Page).', 'film-transfer-toolkit' ) ); ?></li>
 						<li><?php esc_html_e( 'Click the + button where you want the tool to appear (top left of the editor, or the + that shows between blocks).', 'film-transfer-toolkit' ); ?></li>
-						<li><?php /* translators: %s: block name */ echo esc_html( sprintf( __( 'Type "Film Transfer Toolkit" in the search box, or scroll to the Film Transfer Toolkit group, then click "%s".', 'film-transfer-toolkit' ), $first['label'] ) ); ?></li>
+						<li><?php /* translators: %s: block name */ echo esc_html( sprintf( __( 'Type "FTT" in the search box, or scroll to the FTT group, then click "%s".', 'film-transfer-toolkit' ), $first['label'] ) ); ?></li>
 						<li><?php esc_html_e( 'A grey box appears in the editor. That is normal: the working tool only shows on the real page. Change its options in the Block settings panel on the right (click the gear icon at the top right if the panel is closed).', 'film-transfer-toolkit' ); ?></li>
 						<li><?php esc_html_e( 'Click Publish (or Update / Save), then View Page to try it.', 'film-transfer-toolkit' ); ?></li>
 					</ol>
-					<figure class="ftt-figure"><img src="<?php echo esc_url( self::img( 'block-editor-steps.svg' ) ); ?>" alt="<?php esc_attr_e( 'Block editor steps: plus button, search for Film Transfer Toolkit, click the tool, settings panel on the right.', 'film-transfer-toolkit' ); ?>" width="560" height="320" loading="lazy"></figure>
+					<figure class="ftt-figure"><img src="<?php echo esc_url( self::img( 'block-editor-steps.svg' ) ); ?>" alt="<?php esc_attr_e( 'Block editor steps: plus button, search for FTT, click the tool, settings panel on the right.', 'film-transfer-toolkit' ); ?>" width="560" height="320" loading="lazy"></figure>
 					<p class="description"><?php esc_html_e( 'Pasting a shortcode into the block editor also works: it turns into the matching block (or a Shortcode block).', 'film-transfer-toolkit' ); ?></p>
 				</section>
 				<section class="ftt-card">
@@ -310,43 +318,10 @@ class FTT_Admin {
 				<p><?php esc_html_e( 'Shortcode:', 'film-transfer-toolkit' ); ?> <?php echo self::copy( '[' . $e['shortcode'] . ']' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy(). ?>
 				<?php if ( ! empty( $e['aliases'] ) ) : ?><span class="description"><?php /* translators: %s: shortcodes */ echo esc_html( sprintf( __( '(also answers to %s)', 'film-transfer-toolkit' ), '[' . implode( '], [', $e['aliases'] ) . ']' ) ); ?></span><?php endif; ?>
 				&nbsp; <?php esc_html_e( 'Block:', 'film-transfer-toolkit' ); ?> <strong><?php echo esc_html( $e['label'] ); ?></strong></p>
-				<?php if ( $e['atts'] ) : ?>
-					<table class="widefat striped ftt-atts">
-						<thead><tr><th scope="col"><?php esc_html_e( 'Option (attribute)', 'film-transfer-toolkit' ); ?></th><th scope="col"><?php esc_html_e( 'Values', 'film-transfer-toolkit' ); ?></th><th scope="col"><?php esc_html_e( 'Default', 'film-transfer-toolkit' ); ?></th><th scope="col"><?php esc_html_e( 'What it does', 'film-transfer-toolkit' ); ?></th></tr></thead>
-						<tbody>
-						<?php foreach ( $e['atts'] as $a ) : ?>
-							<tr>
-								<th scope="row"><code><?php echo esc_html( $a['name'] ); ?></code></th>
-								<td><?php
-								if ( ! empty( $a['options'] ) ) {
-									$vals = array();
-									foreach ( $a['options'] as $v => $l ) {
-										if ( '' !== (string) $v ) {
-											$vals[] = '<code>' . esc_html( (string) $v ) . '</code>' . ( (string) $v !== $l ? ' ' . esc_html( $l ) : '' );
-										}
-									}
-									echo implode( '<br>', $vals ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above.
-								} else {
-									echo esc_html( 'number' === $a['type'] ? __( 'A number', 'film-transfer-toolkit' ) : ( 'color' === $a['type'] ? __( 'A hex colour', 'film-transfer-toolkit' ) : __( 'Text', 'film-transfer-toolkit' ) ) );
-									if ( ! empty( $a['example'] ) ) {
-										echo '<br><span class="description">' . esc_html__( 'e.g.', 'film-transfer-toolkit' ) . ' <code>' . esc_html( $a['example'] ) . '</code></span>';
-									}
-								}
-								?></td>
-								<td><?php echo '' === (string) $a['default'] ? '<em>' . esc_html( 'calculator' === $key && in_array( $a['name'], array( 'format', 'fps', 'theme', 'accent', 'heading_font', 'extras', 'switch', 'table' ), true ) ? __( 'from Calculator look', 'film-transfer-toolkit' ) : __( 'none', 'film-transfer-toolkit' ) ) . '</em>' : '<code>' . esc_html( $a['default'] ) . '</code>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped. ?></td>
-								<td><?php echo esc_html( $a['help'] ); ?></td>
-							</tr>
-						<?php endforeach; ?>
-						</tbody>
-					</table>
-				<?php else : ?>
-					<p class="description"><?php esc_html_e( 'This piece has no options: just add it to its page.', 'film-transfer-toolkit' ); ?></p>
-				<?php endif; ?>
+				<?php self::atts_table( $e ); ?>
 				<h3><?php esc_html_e( 'Examples', 'film-transfer-toolkit' ); ?></h3>
 				<ul class="ftt-examples">
-				<?php foreach ( $e['examples'] as $code => $what ) : ?>
-					<li><?php echo self::copy( $code ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy(). ?> <span><?php echo esc_html( $what ); ?></span></li>
-				<?php endforeach; ?>
+				<?php self::example_items( $e ); ?>
 				</ul>
 				<?php
 				if ( ! empty( $e['page'] ) && $on ) :
@@ -363,6 +338,73 @@ class FTT_Admin {
 		<?php
 	}
 
+	/** Options table for one shortcode/block, generated from the registry (same data as the block sidebar). */
+	public static function atts_table( $e ) {
+		if ( ! $e['atts'] ) {
+			echo '<p class="description">' . esc_html__( 'This piece has no options: just add it to its page.', 'film-transfer-toolkit' ) . '</p>';
+			return;
+		}
+		echo '<table class="widefat striped ftt-atts" data-ftt-atts="' . esc_attr( $e['shortcode'] ) . '"><thead><tr>'
+			. '<th scope="col">' . esc_html__( 'Shortcode option', 'film-transfer-toolkit' ) . '</th>'
+			. '<th scope="col">' . esc_html__( 'Block sidebar label', 'film-transfer-toolkit' ) . '</th>'
+			. '<th scope="col">' . esc_html__( 'Allowed values', 'film-transfer-toolkit' ) . '</th>'
+			. '<th scope="col">' . esc_html__( 'Default (when left out)', 'film-transfer-toolkit' ) . '</th>'
+			. '<th scope="col">' . esc_html__( 'What it does', 'film-transfer-toolkit' ) . '</th></tr></thead><tbody>';
+		foreach ( $e['atts'] as $a ) {
+			$vals = FTT_Registry::att_values( $a );
+			if ( $vals ) {
+				$cells = array();
+				foreach ( $vals as $v => $l ) {
+					$cells[] = '<code>' . esc_html( $v ) . '</code>' . ( $v !== $l ? ' ' . esc_html( $l ) : '' );
+				}
+				$vt = implode( '<br>', $cells );
+			} else {
+				$vt = esc_html( FTT_Registry::att_values_text( $a ) ) . ( ! empty( $a['example'] ) ? '<br><span class="description">' . esc_html__( 'e.g.', 'film-transfer-toolkit' ) . ' <code>' . esc_html( $a['example'] ) . '</code></span>' : '' );
+			}
+			$d = '' !== (string) $a['default'] ? '<code>' . esc_html( FTT_Registry::default_text( $a ) ) . '</code>' : '<em>' . esc_html( FTT_Registry::default_text( $a ) ) . '</em>';
+			echo '<tr data-att="' . esc_attr( $a['name'] ) . '"><th scope="row"><code>' . esc_html( $a['name'] ) . '</code></th><td>' . esc_html( FTT_Registry::att_label( $a ) ) . '</td><td>' . $vt . '</td><td>' . $d . '</td><td>' . esc_html( $a['help'] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- every piece escaped above.
+		}
+		echo '</tbody></table>';
+	}
+
+	/** Copy-ready examples: the hand-written ones, then every option at its default, then the block markup. */
+	private static function example_items( $e ) {
+		foreach ( $e['examples'] as $code => $what ) {
+			echo '<li>' . self::copy( $code ) . ' <span>' . esc_html( $what ) . '</span></li>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy().
+		}
+		if ( $e['atts'] ) {
+			echo '<li class="ftt-ex-all">' . self::copy( FTT_Registry::full_example( $e ) ) . ' <span>' . esc_html__( 'Every option, at its default. Fill in only the ones you want to change; empty ones keep their default.', 'film-transfer-toolkit' ) . '</span></li>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy().
+		}
+		echo '<li class="ftt-ex-block">' . self::copy( FTT_Registry::block_example( $e ) ) . ' <span>' . esc_html__( 'The same tool as block markup (paste into the Code editor view of the block editor).', 'film-transfer-toolkit' ) . '</span></li>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy().
+	}
+
+	/** Help > All options: every shortcode and block with every option, generated from the registry. */
+	private static function help_all_options() {
+		$tools = FTT_Registry::tools();
+		echo '<div class="ftt-help__body ftt-help--options"><h2>' . esc_html__( 'All options for every tool', 'film-transfer-toolkit' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Each tool works as a shortcode or as a block. The options are the same in both: in a shortcode you type them inside the brackets; in the block editor they are in the block\'s Settings panel on the right, under the label shown here. This page is built from the same list the blocks use, so it is always up to date.', 'film-transfer-toolkit' ) . '</p>';
+		echo '<ul class="ftt-toc">';
+		foreach ( FTT_Registry::embeds() as $tag => $e ) {
+			echo '<li><a href="#ftt-opt-' . esc_attr( $tag ) . '">' . esc_html( $e['label'] ) . '</a> <code>[' . esc_html( $tag ) . ']</code></li>';
+		}
+		echo '</ul>';
+		foreach ( FTT_Registry::embeds() as $tag => $e ) {
+			$on = 'on' === ( FTT_Plugin::$status[ $e['module'] ] ?? '' );
+			echo '<section class="ftt-opt" id="ftt-opt-' . esc_attr( $tag ) . '"><h3>' . esc_html( $e['label'] ) . ( $on ? '' : ' <span class="ftt-pill ftt-pill--off">' . esc_html__( 'switched off', 'film-transfer-toolkit' ) . '</span>' ) . '</h3>';
+			echo '<p>' . esc_html__( 'Shortcode:', 'film-transfer-toolkit' ) . ' ' . self::copy( '[' . $tag . ']' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy().
+			if ( ! empty( $e['aliases'] ) ) {
+				/* translators: %s: shortcodes */
+				echo ' <span class="description">' . esc_html( sprintf( __( '(also answers to %s)', 'film-transfer-toolkit' ), '[' . implode( '], [', $e['aliases'] ) . ']' ) ) . '</span>';
+			}
+			echo ' &nbsp; ' . esc_html__( 'Block:', 'film-transfer-toolkit' ) . ' <strong>' . esc_html( $e['label'] ) . '</strong> <code>' . esc_html( $e['block'] ) . '</code> &nbsp; <a href="' . esc_url( self::help_url( $e['module'] ) ) . '">' . esc_html__( 'Step-by-step help', 'film-transfer-toolkit' ) . '</a></p>';
+			self::atts_table( $e );
+			echo '<h4>' . esc_html__( 'Examples (click Copy)', 'film-transfer-toolkit' ) . '</h4><ul class="ftt-examples">';
+			self::example_items( $e );
+			echo '</ul></section>';
+		}
+		echo '</div>';
+	}
+
 	/* ------------------------------------------------------------- help tabs */
 
 	public static function help_tabs( $screen ) {
@@ -372,8 +414,8 @@ class FTT_Admin {
 		$screen->add_help_tab(
 			array(
 				'id'      => 'ftt-overview',
-				'title'   => __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ),
-				'content' => '<p>' . esc_html__( 'Each toolkit tool can be placed on any page as a block (search "Film Transfer Toolkit" in the block inserter) or as a shortcode (paste it into the classic editor).', 'film-transfer-toolkit' ) . '</p><p>' . esc_html__( 'Switch tools on or off under Settings. Emails stay in the Mail log until Mail mode is set to Send.', 'film-transfer-toolkit' ) . '</p>',
+				'title'   => __( 'FTT', 'film-transfer-toolkit' ),
+				'content' => '<p>' . esc_html__( 'Each toolkit tool can be placed on any page as a block (search "FTT" in the block inserter) or as a shortcode (paste it into the classic editor).', 'film-transfer-toolkit' ) . '</p><p>' . esc_html__( 'Switch tools on or off under Settings. Emails stay in the Mail log until Mail mode is set to Send.', 'film-transfer-toolkit' ) . '</p>',
 			)
 		);
 		$rows = '';
@@ -402,7 +444,7 @@ class FTT_Admin {
 		}
 		$screen->set_help_sidebar(
 			'<p><strong>' . esc_html__( 'More help', 'film-transfer-toolkit' ) . '</strong></p>'
-			. '<p><a href="' . esc_url( self::help_url() ) . '">' . esc_html__( 'Toolkit help pages', 'film-transfer-toolkit' ) . '</a></p>'
+			. '<p><a href="' . esc_url( self::help_url() ) . '">' . esc_html__( 'FTT help pages', 'film-transfer-toolkit' ) . '</a></p>'
 			. '<p><a href="' . esc_url( FTT_Setup::url() ) . '">' . esc_html__( 'Setup wizard', 'film-transfer-toolkit' ) . '</a></p>'
 			. '<p><a href="' . esc_url( admin_url( 'admin.php?page=ftt-settings' ) ) . '">' . esc_html__( 'Settings', 'film-transfer-toolkit' ) . '</a></p>'
 		);
@@ -421,12 +463,12 @@ class FTT_Admin {
 		}
 		?>
 		<div class="notice notice-info ftt-standalone-notice">
-			<p><strong><?php esc_html_e( 'Film Transfer Toolkit and the standalone Film Calculator plugin', 'film-transfer-toolkit' ); ?></strong></p>
+			<p><strong><?php esc_html_e( 'FTT and the standalone Film Calculator plugin', 'film-transfer-toolkit' ); ?></strong></p>
 			<p><?php
 			/* translators: %s: version */
 			echo esc_html( sprintf( __( 'The standalone Film Calculator plugin (version %s) is active. The toolkit includes the same calculator, so you do not need both. While the standalone plugin is active it keeps drawing every [film_calculator] on your site, exactly as before. The toolkit\'s own calculator is [ftt_calculator] and the "Film calculator" block.', 'film-transfer-toolkit' ), FILMCALC_VERSION ) );
 			?></p>
-			<p><?php esc_html_e( 'If you deactivate the standalone plugin, your existing [film_calculator] pages switch to the toolkit automatically and use the settings under Film Transfer Toolkit > Calculator look. Nothing has been deactivated; this is your choice.', 'film-transfer-toolkit' ); ?></p>
+			<p><?php esc_html_e( 'If you deactivate the standalone plugin, your existing [film_calculator] pages switch to the toolkit automatically and use the settings under FTT > Calculator look. Nothing has been deactivated; this is your choice.', 'film-transfer-toolkit' ); ?></p>
 			<?php if ( ! $toolkit ) : ?>
 				<p><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=ftt_dismiss_notice' ), 'ftt_dismiss_notice' ) ); ?>"><?php esc_html_e( 'Hide this message on the Plugins screen', 'film-transfer-toolkit' ); ?></a></p>
 			<?php endif; ?>

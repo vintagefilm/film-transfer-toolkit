@@ -1,4 +1,4 @@
-/* Film Transfer Toolkit blocks (editor only). Plain ES5, no build step. Dynamic blocks: save() returns null and
+/* FTT blocks (editor only). Plain ES5, no build step. Dynamic blocks: save() returns null and
  * the server renders each block through its shortcode handler. */
 (function (wp, cfg) {
   'use strict';
@@ -17,13 +17,27 @@
     return parts.join(' ') + ']';
   }
 
+  // Sidebar help: what it does, its default, allowed values (free-text options) and the matching shortcode option.
+  function helpText(a) {
+    var t = a.help + ' ' + i18n['default'] + ' ' + a.defaultText + '.';
+    if (a.type !== 'select') { t += ' ' + i18n.allowed + ' ' + a.values + '.'; }
+    return t + ' ' + i18n.option + ' ' + a.name + '="…"';
+  }
+
   function control(a, attrs, setAttributes) {
     var val = attrs[a.name] === undefined ? '' : attrs[a.name];
     var onChange = function (v) { var o = {}; o[a.name] = v === undefined || v === null ? '' : String(v); setAttributes(o); };
+    var common = { key: a.name, label: a.label || a.name, help: helpText(a), value: val, onChange: onChange, className: 'ftt-ctl ftt-ctl--' + a.name, __nextHasNoMarginBottom: true };
     if (a.type === 'select' && a.options.length) {
-      return el(C.SelectControl, { key: a.name, label: a.name, help: a.help, value: val, options: a.options, onChange: onChange });
+      return el(C.SelectControl, Object.assign(common, { options: a.options }));
     }
-    return el(C.TextControl, { key: a.name, label: a.name, help: a.help, value: val, placeholder: a.placeholder || '', type: a.type === 'number' ? 'number' : 'text', onChange: onChange });
+    return el(C.TextControl, Object.assign(common, { placeholder: a.placeholder || (a['default'] || ''), type: a.type === 'number' ? 'number' : 'text', __next40pxDefaultSize: true }));
+  }
+
+  function resetAll(b, setAttributes) {
+    var o = {};
+    b.atts.forEach(function (a) { o[a.name] = a['default']; });
+    return el(C.Button, { variant: 'secondary', onClick: function () { setAttributes(o); } }, i18n.reset);
   }
 
   cfg.blocks.forEach(function (b) {
@@ -42,7 +56,7 @@
       description: b.summary,
       category: 'film-transfer-toolkit',
       icon: b.icon,
-      keywords: ['film', 'transfer', 'ftt'],
+      keywords: ['film', 'transfer', 'ftt', 'toolkit'],
       attributes: attributes,
       supports: { html: false, customClassName: false, className: false },
       example: { attributes: {} },
@@ -52,11 +66,12 @@
         var blockProps = be.useBlockProps ? be.useBlockProps({ className: 'ftt-block-ph' }) : { className: 'ftt-block-ph' };
         var changed = b.atts.filter(function (a) { return attrs[a.name] !== undefined && attrs[a.name] !== '' && attrs[a.name] !== a['default']; });
         var inspector = b.atts.length ? el(be.InspectorControls, null,
-          el(C.PanelBody, { title: i18n.settings, initialOpen: true },
+          el(C.PanelBody, { title: i18n.settings, initialOpen: true, className: 'ftt-panel' },
             b.atts.map(function (a) { return control(a, attrs, props.setAttributes); }),
+            changed.length ? el('p', null, resetAll(b, props.setAttributes)) : null,
             el('p', null, el(C.ExternalLink, { href: b.help }, i18n.help))
           )
-        ) : el(be.InspectorControls, null, el(C.PanelBody, { title: i18n.settings }, el('p', null, el(C.ExternalLink, { href: b.help }, i18n.help))));
+        ) : el(be.InspectorControls, null, el(C.PanelBody, { title: i18n.settings, className: 'ftt-panel' }, el('p', null, i18n.none), el('p', null, el(C.ExternalLink, { href: b.help }, i18n.help))));
         return el('div', blockProps,
           inspector,
           el('div', { className: 'ftt-block-ph__head' },

@@ -1,6 +1,6 @@
 Copyright (c) 2026 Joanne Kesel / Vintage Film Transfer. All rights reserved.
 
-This core module is distributed inside the Film Transfer Toolkit WordPress plugin under the
+This core module is distributed inside the FTT WordPress plugin under the
 GNU General Public License v2 or later (see the plugin's readme.txt). The copyright holder may
 also license it separately (for example for a mobile app); see toolkit-plan.md section 6.
 No third-party GPL code is included in this folder. The timecode functions are ported from

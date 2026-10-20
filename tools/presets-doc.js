@@ -2,7 +2,7 @@
 'use strict';
 var C = require('../core/ftt-core.js'), D = C.datarate, P = D.PRESETS, o = [];
 function src(k) { var s = P.sources[k]; return '[' + s.title + '](' + s.url + ')'; }
-o.push('# Film Transfer Toolkit - data rate / storage presets', '', 'Presets version ' + P.version + ', rates checked ' + P.as_of + '. Generated from `core/data/datarate-presets.json` by `node tools/presets-doc.js`; the same numbers drive `FTTCore.datarate` (JS) and `FTT_Datarate` (PHP).', '');
+o.push('# FTT - data rate / storage presets', '', 'Presets version ' + P.version + ', rates checked ' + P.as_of + '. Generated from `core/data/datarate-presets.json` by `node tools/presets-doc.js`; the same numbers drive `FTTCore.datarate` (JS) and `FTT_Datarate` (PHP).', '');
 o.push('## Sources', '');
 Object.keys(P.sources).forEach(function (k) { o.push('- `' + k + '`: ' + src(k)); });
 o.push('', '## Apple ProRes target data rates (Mb/s)', '', 'Source: ' + src('apple_prores') + '. Apple\'s 24p/30p/60p rows also cover 23.976/29.97/59.94 (Apple quotes 220 Mb/s for 422 HQ at 1920x1080 29.97). Rates not listed (e.g. 16 or 18 fps frame-for-frame film) are scaled linearly from the nearest listed rate; Apple\'s own table is linear in frame rate (176 x 30/24 = 220). Apple publishes no figure for 4096x3112, so ProRes is not offered at that size. GB/hr = Mb/s x 0.45.', '');

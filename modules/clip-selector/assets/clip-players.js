@@ -71,7 +71,7 @@
     if (cache && cache.has(el)) return cache.get(el);
     var origin = (function () { try { return new URL(el.src, location.href).origin; } catch (e) { return '*'; } })();
     var handlers = [], st = { t: 0, at: 0, playing: false, dur: 0, rate: 1, rates: [1], ready: false };
-    var holdUntil = 0, seekTarget = null, seekAt = 0;
+    var holdUntil = 0, seekTarget = null, seekAt = 0, keepPaused = 0, reseek = null;
     function nowMs() { return Date.now(); }
     function post(msg) { try { el.contentWindow && el.contentWindow.postMessage(JSON.stringify(msg), origin); } catch (e) {} }
     function fire() { handlers.slice().forEach(function (h) { try { h(); } catch (er) {} }); }
@@ -95,7 +95,14 @@
       st.ready = true;
       if (kind === 'youtube') {
         var i = d.info; if (!i || typeof i !== 'object') return;
-        if (typeof i.playerState === 'number') { st.playing = i.playerState === 1; if (!st.playing) st.at = nowMs(); }
+        if (typeof i.playerState === 'number') {
+          // YouTube starts playback when an unstarted or cued video is seeked. A seek made while paused must leave the
+          // player paused (the trim buttons nudge by a second or a frame), so pause again and return to the target.
+          if (i.playerState === 1 && nowMs() < keepPaused) {
+            cmd('pauseVideo'); if (reseek !== null) { cmd('seekTo', [reseek, true]); reseek = null; }
+            st.playing = false; st.at = nowMs();
+          } else { st.playing = i.playerState === 1; if (!st.playing) st.at = nowMs(); }
+        }
         if (typeof i.currentTime === 'number') setTime(i.currentTime);
         if (typeof i.duration === 'number' && i.duration > 0) st.dur = i.duration;
         if (typeof i.playbackRate === 'number') st.rate = i.playbackRate;
@@ -124,7 +131,11 @@
     var ad = {
       kind: kind, element: el,
       get currentTime() { return liveTime(); },
-      set currentTime(t) { t = Math.max(0, t); seekTarget = t; seekAt = nowMs(); st.t = t; st.at = nowMs(); if (kind === 'youtube') cmd('seekTo', [t, true]); else cmd('setCurrentTime', t); },
+      set currentTime(t) {
+        t = Math.max(0, t); var wasPaused = !st.playing; seekTarget = t; seekAt = nowMs(); st.t = t; st.at = nowMs();
+        if (kind === 'youtube') { if (wasPaused) { keepPaused = nowMs() + 2500; reseek = t; } cmd('seekTo', [t, true]); if (wasPaused) cmd('pauseVideo'); }
+        else cmd('setCurrentTime', t);
+      },
       get paused() { return !st.playing || nowMs() < holdUntil; },
       get duration() { return st.dur; },
       get playbackRate() { return st.rate; },
@@ -135,7 +146,7 @@
         if (kind === 'youtube') cmd('setPlaybackRate', [best]); else cmd('setPlaybackRate', best);
         st.rate = best;
       },
-      play: function () { holdUntil = 0; st.at = nowMs(); cmd(kind === 'youtube' ? 'playVideo' : 'play'); },
+      play: function () { holdUntil = 0; keepPaused = 0; reseek = null; st.at = nowMs(); cmd(kind === 'youtube' ? 'playVideo' : 'play'); },
       pause: function () { st.t = liveTime(); st.at = nowMs(); st.playing = false; holdUntil = nowMs() + 400; cmd(kind === 'youtube' ? 'pauseVideo' : 'pause'); },
       addEventListener: function (ev, h) { if (ev === 'timeupdate' || ev === 'time-update') { if (handlers.indexOf(h) < 0) handlers.push(h); } else el.addEventListener(ev, h); },
       removeEventListener: function (ev, h) { if (ev === 'timeupdate' || ev === 'time-update') { var i = handlers.indexOf(h); if (i >= 0) handlers.splice(i, 1); } else el.removeEventListener(ev, h); },

@@ -3,7 +3,7 @@
  * [ftt_storage_calculator] - data rate / storage calculator for film transfer deliverables.
  * Optional attributes: title="", headroom="20" (percent, 0-100), format="16" (first reel row; default from settings),
  * preset="prores-hq-uhd|prores-hq-hd|prores-422-uhd|h264|youtube-4k|dpx-2k|tiff-4k" (start with this one deliverable
- * instead of the default deliverables list from Film Transfer Toolkit > Storage calculator).
+ * instead of the default deliverables list from FTT > Storage calculator).
  * All maths runs in FTTCore.datarate (core/ftt-core.js); the PHP mirror is FTT_Datarate (WP-CLI: wp ftt storage).
  *
  * @package FilmTransferToolkit

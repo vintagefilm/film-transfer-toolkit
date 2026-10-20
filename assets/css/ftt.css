@@ -1,4 +1,4 @@
-/* Film Transfer Toolkit shared front-end styles. Inherits the theme's fonts and colors; override the --ftt-* properties. */
+/* FTT shared front-end styles. Inherits the theme's fonts and colors; override the --ftt-* properties. */
 .ftt-box{--ftt-bg:#fff;--ftt-text:inherit;--ftt-muted:#5c5c5c;--ftt-border:#d9d9d9;--ftt-soft:#f5f3ee;--ftt-accent:#9a5b00;--ftt-on-accent:#fff;--ftt-warn-bg:#fff4d6;--ftt-warn-border:#c98a00;--ftt-draft-bg:#ffe9e3;--ftt-draft-border:#c0391b;
   box-sizing:border-box;margin:1.5em 0;padding:1.4em 1.5em;border:1px solid var(--ftt-border);border-radius:14px;background:var(--ftt-bg);color:var(--ftt-text);line-height:1.5}
 .ftt-box *,.ftt-box *::before,.ftt-box *::after{box-sizing:border-box}

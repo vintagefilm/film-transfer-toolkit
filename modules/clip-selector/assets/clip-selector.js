@@ -1,4 +1,4 @@
-/* Film Transfer Toolkit clip selector (ported from FW Clip Cart 0.4.0). Reads the playhead via FTT_PLAYERS adapters
+/* FTT clip selector (ported from FW Clip Cart 0.4.0). Reads the playhead via FTT_PLAYERS adapters
    (HTML5 video, YouTube, Vimeo, FluentPlayer/Vidstack, FV Player). data-mode="cart" adds clips to the FluentCart cart;
    data-mode="request" (no FluentCart or no clip product) sends the list as a clip request instead. */
 (function () {

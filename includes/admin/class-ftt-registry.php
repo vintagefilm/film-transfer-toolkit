@@ -40,23 +40,23 @@ class FTT_Registry {
 						'label'     => __( 'Film calculator', 'film-transfer-toolkit' ),
 						'page'      => array( 'title' => __( 'Film Calculator', 'film-transfer-toolkit' ), 'slug' => 'film-calculator' ),
 						'atts'      => array(
-							array( 'name' => 'format', 'type' => 'select', 'default' => '', 'options' => $fmt8, 'help' => __( 'Film format selected when the page opens. Visitors can still change it.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'fps', 'type' => 'text', 'default' => '', 'example' => '18', 'help' => __( 'Frame rate selected when the page opens, for example 16, 18, 24 or 25.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'theme', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'dark' => __( 'Dark', 'film-transfer-toolkit' ), 'light' => __( 'Light', 'film-transfer-toolkit' ) ), 'help' => __( 'Dark or light colour scheme.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'accent', 'type' => 'color', 'default' => '', 'example' => '#c0392b', 'help' => __( 'Accent colour as a hex code, for example #c0392b. Leave empty for the built-in colour.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'heading_font', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'preset' => __( 'Built-in display font', 'film-transfer-toolkit' ), 'yeseva' => 'Yeseva One', 'theme' => __( 'Your theme font', 'film-transfer-toolkit' ), 'plain' => __( 'Plain system font', 'film-transfer-toolkit' ) ), 'help' => __( 'Font used for the calculator heading.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'meters', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Length (meters) field.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'frames', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Frames field (frame count).', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'fps_picker', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Frame rate (fps) picker. When hidden, the calculator uses the fps attribute or the default frame rate.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'speed', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the film speed readout (feet per minute) under the result.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'seconds', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the total seconds readout under the result.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'extras', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Older shortcut for speed and seconds together. speed="" and seconds="" win when both are given.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'switch', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the button that swaps between "length to time" and "time to length".', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'table', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the format reference table (frames per foot, common frame rates, feet per minute).', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'title', 'type' => 'text', 'default' => '', 'example' => 'How long is my film?', 'help' => __( 'Heading shown above the calculator.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'format', 'label' => __( 'Film format', 'film-transfer-toolkit' ), 'default_note' => __( 'The default film format (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:default_format', 'type' => 'select', 'default' => '', 'options' => $fmt8, 'help' => __( 'Film format selected when the page opens. Visitors can still change it.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'fps', 'label' => __( 'Starting frame rate (fps)', 'film-transfer-toolkit' ), 'default_note' => __( 'The default frame rate (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:default_fps', 'type' => 'text', 'default' => '', 'example' => '18', 'help' => __( 'Frame rate selected when the page opens, for example 16, 18, 24 or 25.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'theme', 'label' => __( 'Colour scheme', 'film-transfer-toolkit' ), 'default_note' => __( 'The colour scheme (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:theme', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'dark' => __( 'Dark', 'film-transfer-toolkit' ), 'light' => __( 'Light', 'film-transfer-toolkit' ) ), 'help' => __( 'Dark or light colour scheme.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'accent', 'label' => __( 'Accent colour', 'film-transfer-toolkit' ), 'default_note' => __( 'The accent colour (Calculator look settings), or the built-in colour', 'film-transfer-toolkit' ), 'setting' => 'calc:accent', 'type' => 'color', 'default' => '', 'example' => '#c0392b', 'help' => __( 'Accent colour as a hex code, for example #c0392b. Leave empty for the built-in colour.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'heading_font', 'label' => __( 'Heading font', 'film-transfer-toolkit' ), 'default_note' => __( 'The heading font (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:heading_font', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'preset' => __( 'Built-in display font', 'film-transfer-toolkit' ), 'yeseva' => 'Yeseva One', 'theme' => __( 'Your theme font', 'film-transfer-toolkit' ), 'plain' => __( 'Plain system font', 'film-transfer-toolkit' ) ), 'help' => __( 'Font used for the calculator heading.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'meters', 'label' => __( 'Show Length (meters)', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_meters', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Length (meters) field.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'frames', 'label' => __( 'Show Frames', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_frames', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Frames field (frame count).', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'fps_picker', 'label' => __( 'Show frame rate picker', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_fps', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Frame rate (fps) picker. When hidden, the calculator uses the fps attribute or the default frame rate.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'speed', 'label' => __( 'Show film speed (ft/min)', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_speed', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the film speed readout (feet per minute) under the result.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'seconds', 'label' => __( 'Show total seconds', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_seconds', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the total seconds readout under the result.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'extras', 'label' => __( 'Show speed and seconds (older option)', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_extras', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Older shortcut for speed and seconds together. speed="" and seconds="" win when both are given.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'switch', 'label' => __( 'Show the direction switch', 'film-transfer-toolkit' ), 'default_note' => __( 'The Calculator look setting', 'film-transfer-toolkit' ), 'setting' => 'calc:show_switch', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the button that swaps between "length to time" and "time to length".', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'table', 'label' => __( 'Show the format reference table', 'film-transfer-toolkit' ), 'default_note' => __( 'The Calculator look setting', 'film-transfer-toolkit' ), 'setting' => 'calc:show_table', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the format reference table (frames per foot, common frame rates, feet per minute).', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'title', 'label' => __( 'Heading', 'film-transfer-toolkit' ), 'default_note' => __( '"Film Calculator"', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'How long is my film?', 'help' => __( 'Heading shown above the calculator.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
-							'[ftt_calculator]'                                 => __( 'Uses the defaults from Film Transfer Toolkit > Calculator look.', 'film-transfer-toolkit' ),
+							'[ftt_calculator]'                                 => __( 'Uses the defaults from FTT > Calculator look.', 'film-transfer-toolkit' ),
 							'[ftt_calculator format="s8" fps="18"]'            => __( 'Opens on Super 8 at 18 frames per second.', 'film-transfer-toolkit' ),
 							'[ftt_calculator theme="light" accent="#c0392b" table="yes"]' => __( 'Light scheme, red accent, with the reel table.', 'film-transfer-toolkit' ),
 							'[ftt_calculator meters="no" frames="no" seconds="no"]' => __( 'Feet, running time and film speed only.', 'film-transfer-toolkit' ),
@@ -64,7 +64,7 @@ class FTT_Registry {
 					),
 				),
 				'faq'     => array(
-					__( 'The page shows [film_calculator] as plain text.', 'film-transfer-toolkit' ) => __( 'Make sure the Film calculator module is switched on under Film Transfer Toolkit > Settings. If the standalone Film Calculator plugin is active it handles [film_calculator] itself; [ftt_calculator] always uses the toolkit.', 'film-transfer-toolkit' ),
+					__( 'The page shows [film_calculator] as plain text.', 'film-transfer-toolkit' ) => __( 'Make sure the Film calculator module is switched on under FTT > Settings. If the standalone Film Calculator plugin is active it handles [film_calculator] itself; [ftt_calculator] always uses the toolkit.', 'film-transfer-toolkit' ),
 					__( 'Which shortcode should I use?', 'film-transfer-toolkit' ) => __( 'Use [ftt_calculator] or the "Film calculator" block. [film_calculator] is kept so pages built with the older standalone plugin keep working.', 'film-transfer-toolkit' ),
 					__( 'The colours clash with my theme.', 'film-transfer-toolkit' ) => __( 'Try theme="light" and set an accent colour that matches your site, or change the defaults once under Calculator look.', 'film-transfer-toolkit' ),
 					__( 'Can I hide the meters, frames, frame rate or seconds fields?', 'film-transfer-toolkit' ) => __( 'Yes. Untick them under Calculator look > Fields for the whole site, or use meters="no", frames="no", fps_picker="no", speed="no" or seconds="no" (block: Fields panel) on one page.', 'film-transfer-toolkit' ),
@@ -82,9 +82,9 @@ class FTT_Registry {
 						'label'     => __( 'Reel size estimator', 'film-transfer-toolkit' ),
 						'page'      => array( 'title' => __( 'How Much Film Do I Have?', 'film-transfer-toolkit' ), 'slug' => 'reel-size-estimator' ),
 						'atts'      => array(
-							array( 'name' => 'format', 'type' => 'select', 'default' => 's8', 'options' => array( '8' => '8mm', 's8' => 'Super 8', '16' => '16mm', '35' => '35mm' ), 'help' => __( 'Film format selected when the page opens.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'fps', 'type' => 'text', 'default' => '', 'example' => '18', 'help' => __( 'Frame rate used for the running time. Empty means the usual rate for the chosen format.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'title', 'type' => 'text', 'default' => '', 'example' => 'How much film do I have?', 'help' => __( 'Heading shown above the estimator.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'format', 'label' => __( 'Film format', 'film-transfer-toolkit' ), 'type' => 'select', 'default' => 's8', 'options' => array( '8' => '8mm', 's8' => 'Super 8', '16' => '16mm', '35' => '35mm' ), 'help' => __( 'Film format selected when the page opens.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'fps', 'label' => __( 'Frame rate (fps)', 'film-transfer-toolkit' ), 'default_note' => __( 'The usual speed for the chosen format', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => '18', 'help' => __( 'Frame rate used for the running time. Empty means the usual rate for the chosen format.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'title', 'label' => __( 'Heading', 'film-transfer-toolkit' ), 'default_note' => __( '"How much film do I have?"', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'How much film do I have?', 'help' => __( 'Heading shown above the estimator.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_reel_estimator]'                        => __( 'Opens on Super 8.', 'film-transfer-toolkit' ),
@@ -101,7 +101,7 @@ class FTT_Registry {
 				'title'   => __( 'Price table', 'film-transfer-toolkit' ),
 				'icon'    => 'money-alt',
 				'image'   => 'prices.webp',
-				'summary' => __( 'Shows your prices from Film Transfer Toolkit > Prices as a tidy table. Change a price once and every page that shows the table (and the estimate builder) updates.', 'film-transfer-toolkit' ),
+				'summary' => __( 'Shows your prices from FTT > Prices as a tidy table. Change a price once and every page that shows the table (and the estimate builder) updates.', 'film-transfer-toolkit' ),
 				'embeds'  => array(
 					array(
 						'shortcode' => 'ftt_price_table',
@@ -109,9 +109,9 @@ class FTT_Registry {
 						'label'     => __( 'Price table', 'film-transfer-toolkit' ),
 						'page'      => array( 'title' => __( 'Film Transfer Prices', 'film-transfer-toolkit' ), 'slug' => 'film-transfer-prices' ),
 						'atts'      => array(
-							array( 'name' => 'service', 'type' => 'text', 'default' => '', 'example' => 'hd', 'help' => __( 'Show only one service, using its ID from the Prices page (for example hd or 4k). Empty shows every service.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'addons', 'type' => 'select', 'default' => 'yes', 'options' => array( 'yes' => __( 'Yes', 'film-transfer-toolkit' ), 'no' => __( 'No', 'film-transfer-toolkit' ) ), 'help' => __( 'Show the add-ons (sound, wet-gate cleaning, repairs, colour correction, USB drive and so on).', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'fees', 'type' => 'select', 'default' => 'yes', 'options' => array( 'yes' => __( 'Yes', 'film-transfer-toolkit' ), 'no' => __( 'No', 'film-transfer-toolkit' ) ), 'help' => __( 'Show order fees and minimums.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'service', 'label' => __( 'Service ID', 'film-transfer-toolkit' ), 'default_note' => __( 'All services', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'hd', 'help' => __( 'Show only one service, using its ID from the Prices page (for example hd or 4k). Empty shows every service.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'addons', 'label' => __( 'Show add-ons', 'film-transfer-toolkit' ), 'type' => 'select', 'default' => 'yes', 'options' => array( 'yes' => __( 'Yes', 'film-transfer-toolkit' ), 'no' => __( 'No', 'film-transfer-toolkit' ) ), 'help' => __( 'Show the add-ons (sound, wet-gate cleaning, repairs, colour correction, USB drive and so on).', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'fees', 'label' => __( 'Show fees', 'film-transfer-toolkit' ), 'type' => 'select', 'default' => 'yes', 'options' => array( 'yes' => __( 'Yes', 'film-transfer-toolkit' ), 'no' => __( 'No', 'film-transfer-toolkit' ) ), 'help' => __( 'Show order fees and minimums.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_price_table]'                         => __( 'All services, add-ons and fees.', 'film-transfer-toolkit' ),
@@ -121,7 +121,7 @@ class FTT_Registry {
 				),
 				'faq'     => array(
 					__( 'There is a yellow "EXAMPLE" banner above the table.', 'film-transfer-toolkit' ) => __( 'That shows until you enter your own prices and mark the table Final on the Prices page. It stops visitors mistaking sample prices for real ones.', 'film-transfer-toolkit' ),
-					__( 'Where do I find a service ID?', 'film-transfer-toolkit' ) => __( 'On Film Transfer Toolkit > Prices, in the ID column of the Services table.', 'film-transfer-toolkit' ),
+					__( 'Where do I find a service ID?', 'film-transfer-toolkit' ) => __( 'On FTT > Prices, in the ID column of the Services table.', 'film-transfer-toolkit' ),
 				),
 			),
 			'estimate'   => array(
@@ -136,7 +136,7 @@ class FTT_Registry {
 						'label'     => __( 'Estimate builder', 'film-transfer-toolkit' ),
 						'page'      => array( 'title' => __( 'Get an Estimate', 'film-transfer-toolkit' ), 'slug' => 'film-transfer-estimate' ),
 						'atts'      => array(
-							array( 'name' => 'title', 'type' => 'text', 'default' => '', 'example' => 'Price my film', 'help' => __( 'Heading shown above the estimate builder.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'title', 'label' => __( 'Heading', 'film-transfer-toolkit' ), 'default_note' => __( '"Build your film transfer estimate"', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'Price my film', 'help' => __( 'Heading shown above the estimate builder.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_estimate]'                      => __( 'The full estimate builder with the quote request form.', 'film-transfer-toolkit' ),
@@ -190,7 +190,7 @@ class FTT_Registry {
 				),
 				'faq'     => array(
 					__( 'Do the reply and comparison pages show up in search engines?', 'film-transfer-toolkit' ) => __( 'No. The toolkit marks the form, reply and comparison pages noindex automatically, and the private links contain random keys.', 'film-transfer-toolkit' ),
-					__( 'Where do I add providers?', 'film-transfer-toolkit' ) => __( 'Under Film Transfer Toolkit > Quote providers (or your own listing post type, set on the RFQ requests settings page). Each provider needs an email address.', 'film-transfer-toolkit' ),
+					__( 'Where do I add providers?', 'film-transfer-toolkit' ) => __( 'Under FTT > Quote providers (or your own listing post type, set on the RFQ requests settings page). Each provider needs an email address.', 'film-transfer-toolkit' ),
 					__( 'I put the pages at other addresses.', 'film-transfer-toolkit' ) => __( 'That is fine. Choose the pages on the RFQ requests settings page (the setup wizard does this for you) so the emailed links point to the right place.', 'film-transfer-toolkit' ),
 				),
 			),
@@ -207,12 +207,12 @@ class FTT_Registry {
 						'label'     => __( 'Clip selector', 'film-transfer-toolkit' ),
 						'page'      => null,
 						'atts'      => array(
-							array( 'name' => 'player', 'type' => 'select', 'default' => 'auto', 'options' => array( 'auto' => __( 'Find it automatically', 'film-transfer-toolkit' ), 'html5' => __( 'Video block / uploaded video', 'film-transfer-toolkit' ), 'youtube' => 'YouTube', 'vimeo' => 'Vimeo', 'fluent' => 'FluentPlayer', 'fv' => 'FV Player' ), 'help' => __( 'Which kind of player the selector works with. Automatic picks the nearest player above the selector (or the first on the page).', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'player_selector', 'type' => 'text', 'default' => '', 'example' => '#interview video', 'help' => __( 'Attach to one particular player: a CSS selector such as #interview (an HTML anchor set on the video block) or .my-player iframe.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'clip_id', 'type' => 'text', 'default' => '', 'example' => 'FIRE-0001', 'help' => __( 'Your reference for the footage (letters, numbers, dot, dash, underscore). Empty uses the page slug.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'title', 'type' => 'text', 'default' => '', 'example' => 'Fire engines, 1950s', 'help' => __( 'Clip title used for clip names. Empty uses the product or page title.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'fps', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the product or settings frame rate', 'film-transfer-toolkit' ), '23.976' => '23.976', '24' => '24', '25' => '25', '29.97df' => '29.97 drop-frame', '29.97ndf' => '29.97 non-drop', '30' => '30' ), 'help' => __( 'Timecode frame rate of the video.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'product_id', 'type' => 'number', 'default' => '', 'example' => '123', 'help' => __( 'FluentCart only: the product the clips are added under. Empty uses the default clip product from the Clip selector settings; with neither (or without FluentCart) visitors send a clip request instead.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'player', 'label' => __( 'Video player', 'film-transfer-toolkit' ), 'type' => 'select', 'default' => 'auto', 'options' => array( 'auto' => __( 'Find it automatically', 'film-transfer-toolkit' ), 'html5' => __( 'Video block / uploaded video', 'film-transfer-toolkit' ), 'youtube' => 'YouTube', 'vimeo' => 'Vimeo', 'fluent' => 'FluentPlayer', 'fv' => 'FV Player' ), 'help' => __( 'Which kind of player the selector works with. Automatic picks the nearest player above the selector (or the first on the page).', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'player_selector', 'label' => __( 'Player CSS selector', 'film-transfer-toolkit' ), 'default_note' => __( 'The nearest video player above the selector (or the first on the page)', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => '#interview video', 'help' => __( 'Attach to one particular player: a CSS selector such as #interview (an HTML anchor set on the video block) or .my-player iframe.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'clip_id', 'label' => __( 'Clip ID', 'film-transfer-toolkit' ), 'default_note' => __( 'The product\'s clip ID, otherwise the page slug in capitals', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'FIRE-0001', 'help' => __( 'Your reference for the footage (letters, numbers, dot, dash, underscore). Empty uses the page slug.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'title', 'label' => __( 'Footage title', 'film-transfer-toolkit' ), 'default_note' => __( 'The product title, otherwise the page title', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'Fire engines, 1950s', 'help' => __( 'Clip title used for clip names. Empty uses the product or page title.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'fps', 'label' => __( 'Timecode frame rate', 'film-transfer-toolkit' ), 'default_note' => __( 'The product\'s frame rate, otherwise the default fps (Clip selector settings)', 'film-transfer-toolkit' ), 'setting' => 'clip:default_fps', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the product or settings frame rate', 'film-transfer-toolkit' ), '23.976' => '23.976', '24' => '24', '25' => '25', '29.97df' => '29.97 drop-frame', '29.97ndf' => '29.97 non-drop', '30' => '30' ), 'help' => __( 'Timecode frame rate of the video.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'product_id', 'label' => __( 'FluentCart product ID', 'film-transfer-toolkit' ), 'default_note' => __( 'The default clip product (Clip selector settings); with no product the selector sends a request instead of adding to a cart', 'film-transfer-toolkit' ), 'setting' => 'clip:default_product_id', 'type' => 'number', 'default' => '', 'example' => '123', 'help' => __( 'FluentCart only: the product the clips are added under. Empty uses the default clip product from the Clip selector settings; with neither (or without FluentCart) visitors send a clip request instead.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_clip_selector]'                                     => __( 'Put it under any video. Clips are priced from the rate card and sent as a request (or to the cart when FluentCart and a clip product are set up).', 'film-transfer-toolkit' ),
@@ -241,10 +241,10 @@ class FTT_Registry {
 						'label'     => __( 'Storage calculator', 'film-transfer-toolkit' ),
 						'page'      => array( 'title' => __( 'Film Storage Calculator', 'film-transfer-toolkit' ), 'slug' => 'film-storage-calculator' ),
 						'atts'      => array(
-							array( 'name' => 'title', 'type' => 'text', 'default' => '', 'example' => 'How big will my files be?', 'help' => __( 'Heading shown above the calculator.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'headroom', 'type' => 'number', 'default' => '20', 'example' => '25', 'help' => __( 'Extra space, in percent, added before suggesting a drive size (0 to 100).', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'format', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), '8' => '8mm', 's8' => 'Super 8', '16' => '16mm', '35-4' => '35mm 4-perf', '35-3' => '35mm 3-perf', '35-2' => '35mm 2-perf' ), 'help' => __( 'Film format in the first reel row when the page opens.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'preset', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default deliverables', 'film-transfer-toolkit' ), 'prores-hq-uhd' => 'ProRes 422 HQ, UHD 4K', 'prores-hq-hd' => 'ProRes 422 HQ, HD', 'prores-422-uhd' => 'ProRes 422, UHD 4K', 'h264' => 'H.264', 'youtube-4k' => 'YouTube 4K upload', 'dpx-2k' => 'DPX 2K 10-bit', 'tiff-4k' => 'TIFF 4K 16-bit' ), 'help' => __( 'Start with this one file format instead of the default deliverables list from the Storage calculator settings.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'title', 'label' => __( 'Heading', 'film-transfer-toolkit' ), 'default_note' => __( '"How much storage will my transfer need?"', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'How big will my files be?', 'help' => __( 'Heading shown above the calculator.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'headroom', 'label' => __( 'Drive headroom (%)', 'film-transfer-toolkit' ), 'type' => 'number', 'default' => '20', 'example' => '25', 'help' => __( 'Extra space, in percent, added before suggesting a drive size (0 to 100).', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'format', 'label' => __( 'Starting film format', 'film-transfer-toolkit' ), 'default_note' => __( 'The starting film format (Storage calculator settings)', 'film-transfer-toolkit' ), 'setting' => 'storage:default_format', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), '8' => '8mm', 's8' => 'Super 8', '16' => '16mm', '35-4' => '35mm 4-perf', '35-3' => '35mm 3-perf', '35-2' => '35mm 2-perf' ), 'help' => __( 'Film format in the first reel row when the page opens.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'preset', 'label' => __( 'Starting deliverable', 'film-transfer-toolkit' ), 'default_note' => __( 'The default deliverables (Storage calculator settings)', 'film-transfer-toolkit' ), 'setting' => 'storage:deliverables', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default deliverables', 'film-transfer-toolkit' ), 'prores-hq-uhd' => 'ProRes 422 HQ, UHD 4K', 'prores-hq-hd' => 'ProRes 422 HQ, HD', 'prores-422-uhd' => 'ProRes 422, UHD 4K', 'h264' => 'H.264', 'youtube-4k' => 'YouTube 4K upload', 'dpx-2k' => 'DPX 2K 10-bit', 'tiff-4k' => 'TIFF 4K 16-bit' ), 'help' => __( 'Start with this one file format instead of the default deliverables list from the Storage calculator settings.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_storage_calculator]'                              => __( 'Starts with your default film format and deliverables (as shipped: 16mm, ProRes 422 HQ UHD and H.264 16 Mbps, both at the film frame rate with PCM audio) and 20% headroom.', 'film-transfer-toolkit' ),
@@ -254,7 +254,7 @@ class FTT_Registry {
 				),
 				'faq'     => array(
 					__( 'Why are there two sizes (GB and GiB)?', 'film-transfer-toolkit' ) => __( 'Drive makers use decimal units (1 TB = 1,000 GB). Windows and some apps use binary units (1 TiB = 1,024 GiB), so a "1 TB" drive shows as about 931 GB on a PC. The calculator shows both.', 'film-transfer-toolkit' ),
-					__( 'Can I change what the calculator starts with?', 'film-transfer-toolkit' ) => __( 'Yes. Under Film Transfer Toolkit > Storage calculator (or the Storage step of the setup wizard) choose the film format and up to four deliverables every storage calculator starts with.', 'film-transfer-toolkit' ),
+					__( 'Can I change what the calculator starts with?', 'film-transfer-toolkit' ) => __( 'Yes. Under FTT > Storage calculator (or the Storage step of the setup wizard) choose the film format and up to four deliverables every storage calculator starts with.', 'film-transfer-toolkit' ),
 					__( 'Where do the data rates come from?', 'film-transfer-toolkit' ) => __( 'ProRes rates are from Apple\'s ProRes White Paper; YouTube rates from YouTube Help; DPX and TIFF sizes from the file format specifications. The full list with sources is in the plugin\'s docs/datarate-presets.md.', 'film-transfer-toolkit' ),
 				),
 			),
@@ -317,5 +317,111 @@ class FTT_Registry {
 			}
 		}
 		return (bool) preg_match( '/<!-- wp:' . preg_quote( $embed['block'], '/' ) . '[\s]/', $content );
+	}
+
+	/* ---------------------------------------------------------- option docs (1.4.0)
+	 * Everything below is derived from tools(), so the Help tables, the "All options" page and every block's
+	 * sidebar always list the same options with the same defaults. */
+
+	/** Human label for an attribute (falls back to the attribute name). */
+	public static function att_label( $a ) {
+		return isset( $a['label'] ) && '' !== $a['label'] ? (string) $a['label'] : (string) $a['name'];
+	}
+
+	/** Allowed values as [ value => label ] (select), or an empty array for free text / numbers / colours. */
+	public static function att_values( $a ) {
+		$out = array();
+		foreach ( $a['options'] ?? array() as $v => $l ) {
+			if ( '' !== (string) $v ) {
+				$out[ (string) $v ] = (string) $l;
+			}
+		}
+		return $out;
+	}
+
+	/** One-line description of the allowed values, e.g. "8, s8, 16" or "A number". */
+	public static function att_values_text( $a ) {
+		$vals = self::att_values( $a );
+		if ( $vals ) {
+			return implode( ', ', array_keys( $vals ) );
+		}
+		switch ( $a['type'] ) {
+			case 'number':
+				return __( 'A number', 'film-transfer-toolkit' );
+			case 'color':
+				return __( 'A hex colour such as #c0392b', 'film-transfer-toolkit' );
+			default:
+				return isset( $a['example'] ) && is_numeric( $a['example'] ) ? __( 'A number', 'film-transfer-toolkit' ) : __( 'Any text', 'film-transfer-toolkit' );
+		}
+	}
+
+	/** The value a site setting currently supplies when the attribute is left empty ('' if none). */
+	public static function current_value( $a ) {
+		if ( empty( $a['setting'] ) ) {
+			return '';
+		}
+		list( $src, $key ) = explode( ':', $a['setting'], 2 );
+		$v = null;
+		if ( 'calc' === $src && function_exists( 'ftt_calc_get_options' ) ) {
+			$o = ftt_calc_get_options();
+			$v = $o[ $key ] ?? null;
+			if ( 0 === strpos( $key, 'show_' ) ) {
+				return $v ? __( 'Yes', 'film-transfer-toolkit' ) : __( 'No', 'film-transfer-toolkit' );
+			}
+			if ( 'accent' === $key && '' === (string) $v ) {
+				return __( 'built-in colour', 'film-transfer-toolkit' );
+			}
+		} elseif ( 'clip' === $src && class_exists( 'FTT_Clip_Settings' ) ) {
+			$o = FTT_Clip_Settings::get();
+			$v = $o[ $key ] ?? null;
+			if ( 'default_product_id' === $key ) {
+				$v = (int) $v;
+				return $v ? '#' . $v . ' ' . get_the_title( $v ) : __( 'none (request mode)', 'film-transfer-toolkit' );
+			}
+		} elseif ( 'storage' === $src && function_exists( 'ftt_storage_get_options' ) ) {
+			$o = ftt_storage_get_options();
+			if ( 'deliverables' === $key ) {
+				return implode( ' + ', array_map( 'ftt_storage_deliverable_label', $o['deliverables'] ) );
+			}
+			$v = $o[ $key ] ?? null;
+		}
+		if ( null === $v || '' === (string) $v ) {
+			return '';
+		}
+		$vals = self::att_values( $a );
+		return isset( $vals[ (string) $v ] ) ? $vals[ (string) $v ] . ' (' . $v . ')' : (string) $v;
+	}
+
+	/** What happens when the attribute is left out: the fixed default, or the setting it comes from and its current value. */
+	public static function default_text( $a ) {
+		if ( '' !== (string) $a['default'] ) {
+			$vals = self::att_values( $a );
+			$d    = (string) $a['default'];
+			return isset( $vals[ $d ] ) && $vals[ $d ] !== $d ? $d . ' (' . $vals[ $d ] . ')' : $d;
+		}
+		$note = isset( $a['default_note'] ) ? (string) $a['default_note'] : __( 'none', 'film-transfer-toolkit' );
+		$cur  = self::current_value( $a );
+		/* translators: 1: where the default comes from, 2: its current value */
+		return '' !== $cur ? sprintf( __( '%1$s, currently %2$s', 'film-transfer-toolkit' ), $note, $cur ) : $note;
+	}
+
+	/** Copy-ready shortcode listing every option at its default (empty = use the default). */
+	public static function full_example( $e ) {
+		$parts = array( $e['shortcode'] );
+		foreach ( $e['atts'] as $a ) {
+			$parts[] = $a['name'] . '="' . str_replace( '"', '', (string) $a['default'] ) . '"';
+		}
+		return '[' . implode( ' ', $parts ) . ']';
+	}
+
+	/** Copy-ready block markup with the same options (only non-empty example values are filled in). */
+	public static function block_example( $e ) {
+		$attrs = array();
+		foreach ( $e['atts'] as $a ) {
+			if ( '' !== (string) $a['default'] ) {
+				$attrs[ $a['name'] ] = (string) $a['default'];
+			}
+		}
+		return '<!-- wp:' . $e['block'] . ( $attrs ? ' ' . wp_json_encode( $attrs ) : '' ) . ' /-->';
 	}
 }

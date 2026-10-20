@@ -1,4 +1,4 @@
-/* Film Transfer Toolkit admin: Copy buttons. No innerHTML. */
+/* FTT admin: Copy buttons. No innerHTML. */
 (function () {
   'use strict';
   var L = window.FTT_ADMIN_UI || { copied: 'Copied', copy: 'Copy', failed: 'Press Ctrl+C to copy' };

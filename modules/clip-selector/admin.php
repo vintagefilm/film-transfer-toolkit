@@ -1,6 +1,6 @@
 <?php
 /**
- * Film Transfer Toolkit > Clip selector: EXAMPLE rate card settings.
+ * FTT > Clip selector: EXAMPLE rate card settings.
  *
  * @package FilmTransferToolkit
  */

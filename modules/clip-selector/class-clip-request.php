@@ -1,8 +1,8 @@
 <?php
 /**
  * Clip requests (1.3.0): when FluentCart is not active, or a selector has no clip product, visitors send their
- * clip list to the site owner instead of adding it to a cart. Requests are saved privately (Film Transfer
- * Toolkit > Clip requests) and the owner is told through FTT_Mail (log-only until mail is switched to Send).
+ * clip list to the site owner instead of adding it to a cart. Requests are saved privately (FTT > Clip
+ * requests) and the owner is told through FTT_Mail (log-only until mail is switched to Send).
  *
  * @package FilmTransferToolkit
  */

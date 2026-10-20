@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * Clip rate card. Values come from Film Transfer Toolkit > Clip selector settings.
+ * Clip rate card. Values come from FTT > Clip selector settings.
  * Defaults are EXAMPLE placeholders (the same as the fw-clip-cart 0.4.0 prototype), not real pricing.
  * All money is integer cents (FluentCart convention).
  */

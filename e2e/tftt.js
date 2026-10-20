@@ -1,4 +1,4 @@
-// Film Transfer Toolkit local end-to-end tests (real typing). node tftt.js
+// FTT local end-to-end tests (real typing). node tftt.js
 const {chromium}=require('playwright');const cp=require('child_process');
 const B='http://localhost:8088', SH='/workspace/ftt-shots/';
 const wp=(a)=>cp.execSync('cd /workspace/wp && wp '+a+' 2>/dev/null',{encoding:'utf8'});

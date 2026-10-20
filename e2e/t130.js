@@ -1,6 +1,6 @@
 // FTT 1.3.0 local end-to-end tests (real clicks and typing). node t130.js
 const {chromium}=require('playwright');const cp=require('child_process');
-const B='http://localhost:8088', SH='/workspace/ftt130-shots/';
+const B='http://localhost:8088', SH='/workspace/ftt140-shots/regression/';
 const wp=(a)=>cp.execSync('cd /workspace/wp && wp '+a+' 2>/dev/null',{encoding:'utf8'}).trim();
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
 const skip=(n,why)=>out.push('SKIP '+n+' :: '+why);
@@ -189,11 +189,12 @@ for(const [slug,kind] of [['clip-youtube-test','youtube'],['clip-vimeo-test','vi
     for(let i=0;i<60&&!(pl.duration>0);i++)await new Promise(r=>setTimeout(r,250));
     if(!(pl.duration>0))return {err:'no duration',kind:pl.kind,src:pl.element&&pl.element.src};
     pl.currentTime=30;await new Promise(r=>setTimeout(r,2500));
-    return {kind:pl.kind,dur:pl.duration,t:pl.currentTime,src:pl.element.src};},kind);
+    return {kind:pl.kind,dur:pl.duration,t:pl.currentTime,paused:pl.paused,src:pl.element.src};},kind);
   if(r.err==='no duration'){skip(kind+' adapter (player did not answer in headless Chromium)',JSON.stringify(r));continue;}
   ok(kind+' adapter found',r.kind===kind,JSON.stringify(r));
   ok(kind+' duration reported',r.dur>0,JSON.stringify(r));
   ok(kind+' seek to 30 s',Math.abs(r.t-30)<1.5,JSON.stringify(r));
+  ok(kind+' seek keeps a paused player paused (1.4.0)',r.paused===true,JSON.stringify(r));
   if(kind==='youtube')ok('youtube enablejsapi added',/enablejsapi=1/.test(r.src),r.src);
   await p.locator('.fwcc .fwcc-set[data-which=in]').click();
   const tc=(await p.locator('.fwcc [data-tc=in]').textContent()).trim();

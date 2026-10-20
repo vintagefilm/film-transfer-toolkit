@@ -21,7 +21,7 @@
 <rect x="474" y="148" width="62" height="24" rx="3" fill="#2271b1"/><text x="505" y="164" font-size="11" fill="#fff" text-anchor="middle">Update</text>
 <circle cx="466" cy="160" r="10" fill="#d63638"/><text x="466" y="164" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">3</text>
 <rect x="400" y="196" width="146" height="84" rx="4" fill="#fff" stroke="#dcdcde"/>
-<text x="410" y="216" font-size="10" fill="#50575e">Toolkit Help page:</text>
+<text x="410" y="216" font-size="10" fill="#50575e">FTT Help page:</text>
 <rect x="410" y="224" width="96" height="20" rx="2" fill="#f6f7f7" stroke="#dcdcde"/><text x="416" y="238" font-size="9" fill="#1e1e1e" font-family="Menlo,Consolas,monospace">[ftt_calculator]</text>
 <rect x="510" y="224" width="30" height="20" rx="3" fill="#f6f7f7" stroke="#2271b1"/><text x="525" y="238" font-size="9" fill="#2271b1" text-anchor="middle">Copy</text>
 <circle cx="540" cy="212" r="10" fill="#d63638"/><text x="540" y="216" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">1</text>

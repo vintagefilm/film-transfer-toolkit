@@ -163,7 +163,7 @@ class FTT_Plugin {
 		$g  = self::general();
 		?>
 		<div class="wrap ftt-admin">
-			<h1><?php esc_html_e( 'Film Transfer Toolkit settings', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
+			<h1><?php esc_html_e( 'FTT settings', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
 			<?php settings_errors(); ?>
 			<form action="options.php" method="post">
 				<?php settings_fields( 'ftt_modules' ); ?>
@@ -239,7 +239,7 @@ class FTT_Plugin {
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Film Transfer Toolkit commands.
+	 * FTT commands.
 	 */
 	class FTT_CLI {
 		/**

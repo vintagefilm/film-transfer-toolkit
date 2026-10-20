@@ -1,5 +1,5 @@
 /*!
- * FTTCore 1.1.0 - Film Transfer Toolkit portable core.
+ * FTTCore 1.1.0 - FTT portable core.
  * Film length / time / frames, reel size estimates, price quotes, SMPTE timecode and storage / data rates.
  * No DOM, no WordPress, no network. Browser global (window.FTTCore), CommonJS or AMD,
  * so the same file can ship inside a mobile app. PHP mirror: includes/core/*.php

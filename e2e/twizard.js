@@ -1,6 +1,6 @@
 // Fresh-site walkthrough of the 1.2.0 setup wizard (real clicks/typing), plus re-run, front-end, block editor checks.
 const {chromium}=require('playwright');const cp=require('child_process');const fs=require('fs');
-const B='http://localhost:8090', SH='/workspace/ftt130-shots/wizard/';fs.mkdirSync(SH,{recursive:true});
+const B='http://localhost:8090', SH='/workspace/ftt140-shots/wizard/';fs.mkdirSync(SH,{recursive:true});
 const wp=(a)=>cp.execSync('cd /workspace/wpfresh && wp '+a+' 2>/dev/null',{encoding:'utf8'}).trim();
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
 (async()=>{
@@ -13,7 +13,7 @@ ok('toolkit inactive before test',wp('plugin is-active film-transfer-toolkit; ec
 const pagesBefore=+wp('post list --post_type=page --post_status=any --format=count');
 // --- activate from the Plugins screen
 await p.goto(B+'/wp-admin/plugins.php');await shot('plugins-before-activate');
-await p.click('tr[data-slug="film-transfer-toolkit"] .activate a');await p.waitForLoadState();
+await p.click('tr[data-plugin="film-transfer-toolkit/film-transfer-toolkit.php"] .activate a');await p.waitForLoadState();
 ok('first activation redirects to the setup wizard',p.url().includes('page=ftt-setup'),p.url());
 ok('setup state pending',wp('option get ftt_setup --format=json').includes('"pending"'));
 ok('no pages created by activation',+wp('post list --post_type=page --post_status=any --format=count')===pagesBefore);
@@ -26,7 +26,8 @@ ok('step 2 pages',p.url().includes('step=pages'),p.url());
 ok('modules saved (rfq on)',JSON.parse(wp('option get ftt_modules --format=json')).rfq===1);
 await shot('wizard-2-pages');
 const calcVal=await p.inputValue('input[name="pages[ftt_calculator]"]:checked');
-ok('calculator: existing /film-calculator/ page with [film_calculator] preselected for reuse',calcVal==='reuse:5',calcVal);
+const FCID=+wp('post list --post_type=page --name=film-calculator --field=ID'),PRID=+wp('post list --post_type=page --name=film-transfer-prices --field=ID');
+ok('calculator: existing /film-calculator/ page with [film_calculator] preselected for reuse',calcVal==='reuse:'+FCID,calcVal);
 ok('price table: create (no page has it yet)',await p.inputValue('input[name="pages[ftt_price_table]"]:checked')==='create');
 ok('slug-taken warning shown for /film-transfer-prices/',(await p.textContent('.ftt-pages-table')).includes('Another page already uses /film-transfer-prices/'));
 ok('rfq rows present (4)',await p.locator('input[name^="pages[ftt_rfq_"][value=create]').count()===4);
@@ -37,10 +38,10 @@ ok('pages notes listed',notes.includes('using the existing page "Film Calculator
 await shot('wizard-3-look');
 const pages=JSON.parse(wp('option get ftt_pages --format=json'));
 ok('ftt_pages has 9 entries',Object.keys(pages).length===9,JSON.stringify(pages));
-ok('calculator mapped to page 5',pages.ftt_calculator===5);
+ok('calculator mapped to the existing page',pages.ftt_calculator===FCID);
 const rfq=JSON.parse(wp('option get ftt_rfq --format=json'));
 ok('RFQ pages wired into ftt_rfq',rfq.form_page===pages.ftt_rfq_form&&rfq.reply_page===pages.ftt_rfq_reply&&rfq.compare_page===pages.ftt_rfq_compare&&rfq.providers_page===pages.ftt_rfq_providers&&rfq.zip_required===1,JSON.stringify(rfq));
-ok('price page got a distinct address (old Pricing page untouched)',wp('post get '+pages.ftt_price_table+' --field=post_name')!=='film-transfer-prices'&&wp('post get 6 --field=post_content').includes('Our old price list'));
+ok('price page got a distinct address (old Pricing page untouched)',wp('post get '+pages.ftt_price_table+' --field=post_name')!=='film-transfer-prices'&&wp('post get '+PRID+' --field=post_content').includes('Our old price list'));
 ok('created pages contain the block',wp('post get '+pages.ftt_storage_calculator+' --field=post_content')==='<!-- wp:ftt/storage-calculator /-->');
 ok('no pages added to the auto-add menu',wp('menu item list Main --format=count')==='0');
 await p.check('input[name=theme][value=light]');
@@ -120,7 +121,7 @@ for(const [tag,sel] of [['ftt_calculator','[data-ftt-calc]'],['ftt_reel_estimato
  const url=wp('post url '+pages[tag]);await q.goto(url);ok('front-end '+tag+' renders at '+url.replace(B,''),await q.locator(sel).count()>=1);}
 await q.goto(wp('post url '+pages.ftt_rfq_form));const pl=await q.locator('main a:has-text("Choose providers")').first().getAttribute('href');ok('RFQ form (no providers picked) links to the wizard-created picker page',pl===wp('post url '+pages.ftt_rfq_providers),pl);
 await q.goto(wp('post url '+pages.ftt_storage_calculator));await q.screenshot({path:SH+'front-storage-page.png',fullPage:true});
-await q.goto(wp('post url 5'));
+await q.goto(wp('post url '+FCID));
 const fc=await q.locator('[data-ftt-calc]').getAttribute('class');ok('reused [film_calculator] page served by toolkit with wizard look (light)',/light|filmcalc--light/.test(fc)||(await q.locator('[data-ftt-calc]').evaluate(e=>e.outerHTML)).includes('light'),fc);
 await q.click('[data-ftt-calc] [data-fc=feet]');await q.keyboard.press('Control+A');await q.keyboard.type('400');
 ok('typed 400 ft Super 8 @18 -> 26:40',await q.inputValue('[data-ftt-calc] [data-fc=time]')==='26:40');
@@ -136,7 +137,7 @@ const bl=await p.evaluate(()=>wp.blocks.getBlockTypes().filter(t=>t.category==='
 ok('9 toolkit blocks in category (4 RFQ; clip selector off so hidden)',bl.length===9&&!bl.includes('ftt/clip-selector'),bl.join(','));
 const canvas=p.frameLocator('iframe[name="editor-canvas"]');
 await p.click('button.editor-document-tools__inserter-toggle, button[aria-label="Block Inserter"], button[aria-label="Toggle block inserter"]');
-await p.waitForTimeout(800);await p.keyboard.type('Film Transfer Toolkit');await p.waitForTimeout(1200);await shot('block-inserter-search');
+await p.waitForTimeout(800);await p.keyboard.type('FTT');await p.waitForTimeout(1200);await shot('block-inserter-search');
 const items=await p.$$eval('.block-editor-block-types-list__item, .block-editor-inserter__panel-content [role=option]',xs=>xs.map(x=>x.textContent.trim()));
 ok('inserter search lists toolkit blocks',items.some(t=>t.includes('Storage calculator'))&&items.some(t=>t.includes('Film calculator')),items.join('|'));
 await p.locator('.block-editor-block-types-list__item:has-text("Storage calculator")').first().click();await p.waitForTimeout(1200);
@@ -163,9 +164,9 @@ const tr=await p.evaluate(()=>{const r=wp.blocks.rawHandler({HTML:'<p>[ftt_reel_
 ok('pasting a shortcode converts to the block',tr.join(',').includes('ftt/reel-estimator')&&tr.join(',').includes('"format":"16"'),tr.join(','));
 ok('no admin JS errors',errs.length===0,errs.join(' | '));
 // --- re-activation does not redirect / no pages
-await p.goto(B+'/wp-admin/plugins.php');await p.click('tr[data-slug="film-transfer-toolkit"] .deactivate a');await p.waitForLoadState();
+await p.goto(B+'/wp-admin/plugins.php');await p.click('tr[data-plugin="film-transfer-toolkit/film-transfer-toolkit.php"] .deactivate a');await p.waitForLoadState();
 const cnt2=+wp('post list --post_type=page --post_status=any --format=count');
-await p.click('tr[data-slug="film-transfer-toolkit"] .activate a');await p.waitForLoadState();
+await p.click('tr[data-plugin="film-transfer-toolkit/film-transfer-toolkit.php"] .activate a');await p.waitForLoadState();
 ok('re-activation does not start the wizard',!p.url().includes('ftt-setup'),p.url());
 ok('re-activation creates no pages and keeps settings',+wp('post list --post_type=page --post_status=any --format=count')===cnt2&&JSON.parse(wp('option get ftt_calc_options --format=json')).theme==='light');
 const log=php();ok('no PHP warnings/notices in debug.log',!/PHP (Warning|Notice|Fatal|Deprecated)/.test(log),log.slice(-600));

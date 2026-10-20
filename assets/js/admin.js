@@ -1,4 +1,4 @@
-/* Film Transfer Toolkit admin helpers: add/remove table rows from <template>, confirm buttons. No innerHTML. */
+/* FTT admin helpers: add/remove table rows from <template>, confirm buttons. No innerHTML. */
 (function () {
   'use strict';
   var n = 1000;

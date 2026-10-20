@@ -1,6 +1,6 @@
 <?php
 /**
- * Dynamic blocks for every toolkit tool, in a "Film Transfer Toolkit" inserter category.
+ * Dynamic blocks for every toolkit tool, in a "FTT" inserter category.
  * Each block renders through the same function as its shortcode, so blocks and shortcodes always match.
  *
  * @package FilmTransferToolkit
@@ -23,7 +23,7 @@ class FTT_Blocks {
 				return $cats;
 			}
 		}
-		array_unshift( $cats, array( 'slug' => self::CATEGORY, 'title' => __( 'Film Transfer Toolkit', 'film-transfer-toolkit' ), 'icon' => null ) );
+		array_unshift( $cats, array( 'slug' => self::CATEGORY, 'title' => __( 'FTT', 'film-transfer-toolkit' ), 'icon' => null ) );
 		return $cats;
 	}
 
@@ -62,7 +62,7 @@ class FTT_Blocks {
 					'description'     => $e['summary'],
 					'category'        => self::CATEGORY,
 					'icon'            => $e['icon'],
-					'keywords'        => array( 'film', 'transfer', 'ftt' ),
+					'keywords'        => array( 'film', 'transfer', 'ftt', 'toolkit' ),
 					'attributes'      => $attrs,
 					'supports'        => array( 'html' => false, 'customClassName' => false, 'className' => false ),
 					'editor_script'   => 'ftt-blocks',
@@ -85,10 +85,22 @@ class FTT_Blocks {
 				'atts'      => array_map(
 					function ( $a ) {
 						$opts = array();
+						$cur  = FTT_Registry::current_value( $a );
 						foreach ( $a['options'] ?? array() as $v => $l ) {
-							$opts[] = array( 'value' => (string) $v, 'label' => (string) $l );
+							/* translators: %s: current value of the site setting */
+							$opts[] = array( 'value' => (string) $v, 'label' => '' === (string) $v && '' !== $cur ? sprintf( __( '%1$s (now: %2$s)', 'film-transfer-toolkit' ), $l, $cur ) : (string) $l );
 						}
-						return array( 'name' => $a['name'], 'type' => $a['type'], 'default' => (string) $a['default'], 'help' => $a['help'], 'options' => $opts, 'placeholder' => $a['example'] ?? '' );
+						return array(
+							'name'        => $a['name'],
+							'label'       => FTT_Registry::att_label( $a ),
+							'type'        => $a['type'],
+							'default'     => (string) $a['default'],
+							'help'        => $a['help'],
+							'defaultText' => FTT_Registry::default_text( $a ),
+							'values'      => FTT_Registry::att_values_text( $a ),
+							'options'     => $opts,
+							'placeholder' => $a['example'] ?? '',
+						);
 					},
 					$e['atts']
 				),
@@ -105,6 +117,11 @@ class FTT_Blocks {
 						'note'     => __( 'This box stands in for the tool while you edit. Visitors see the working tool; use Preview to try it.', 'film-transfer-toolkit' ),
 						'defaults' => __( 'All options at their defaults.', 'film-transfer-toolkit' ),
 						'shortcode'=> __( 'Same as the shortcode', 'film-transfer-toolkit' ),
+						'default'  => __( 'Default:', 'film-transfer-toolkit' ),
+						'allowed'  => __( 'Allowed:', 'film-transfer-toolkit' ),
+						'option'   => __( 'Shortcode option:', 'film-transfer-toolkit' ),
+						'reset'    => __( 'Reset all to defaults', 'film-transfer-toolkit' ),
+						'none'     => __( 'This block has no options.', 'film-transfer-toolkit' ),
 					),
 				)
 			) . ';',

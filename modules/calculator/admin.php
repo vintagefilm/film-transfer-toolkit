@@ -1,6 +1,6 @@
 <?php
 /**
- * wp-admin: Film Transfer Toolkit > Calculator (settings + help).
+ * wp-admin: FTT > Calculator (settings + help).
  * Settings use the Settings API (options.php handles the nonce and capability check).
  */
 
