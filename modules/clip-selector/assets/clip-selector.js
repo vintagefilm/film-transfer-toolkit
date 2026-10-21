@@ -7,7 +7,10 @@
   var TP = C.tips || { edit: 'Edit this clip name', remove: 'Remove this clip', rowname: 'Clip name' };
   function money(c) { return '$' + (c / 100).toFixed(2); }
   function estimate(dur) {
-    var k = C.card; var b = Math.max(k.min_seconds, Math.ceil(Math.round(dur * 1000) / 1000));
+    // Same rule as FTT_Clip_Rate_Card::billable_seconds(): millisecond first, then the card's rounding mode.
+    var k = C.card; var ms = Math.round(dur * 1000) / 1000;
+    var w = k.rounding === 'down' ? Math.floor(ms) : (k.rounding === 'nearest' ? Math.round(ms) : Math.ceil(ms));
+    var b = Math.max(k.min_seconds, w);
     return Math.max(k.min_charge_cents, b * k.per_second_cents);
   }
   var TC = window.FTTCore.timecode;

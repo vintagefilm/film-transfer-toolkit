@@ -154,5 +154,5 @@ $h = apply_filters( 'the_content', '<!-- wp:ftt/calculator /-->' );
 $ok( 'block-only calculator renders data-ftt-calc', false !== strpos( $h, 'data-ftt-calc' ) );
 wp_delete_post( $pid, true );
 
-$ok( 'version 1.5.0', '1.5.0' === FTT_VERSION );
+$ok( 'version 1.5.x', version_compare( FTT_VERSION, '1.5.0', '>=' ) );
 echo "v150: $pass passed, $fail failed\n";

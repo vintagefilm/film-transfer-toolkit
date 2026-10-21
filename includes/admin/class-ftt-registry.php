@@ -222,6 +222,7 @@ class FTT_Registry {
 					),
 				),
 				'faq'     => array(
+					__( 'How is a clip\'s length rounded?', 'film-transfer-toolkit' ) => __( 'Clips are billed in whole seconds. FTT > Settings > Clip selector > Advanced > "Rounding of clip length": up (default; a 30.03 s clip bills 31 s), down (in the customer\'s favour; 30 s) or nearest. The minimum billed seconds and minimum charge still apply, and the on-page estimate uses the same rule as the cart. Developers: rate card key "rounding" (filter ftt/clip/rate_card) and filter ftt/clip/billable_seconds.', 'film-transfer-toolkit' ),
 					__( 'Which video players work?', 'film-transfer-toolkit' ) => __( 'The core Video block and any uploaded video (HTML5), YouTube and Vimeo embeds (including the Embed block), FluentPlayer and FV Player. YouTube and Vimeo are controlled through their own player messages, so the video must allow embedding.', 'film-transfer-toolkit' ),
 					__( 'Do I need FluentCart?', 'film-transfer-toolkit' ) => __( 'No. Without FluentCart (or without a clip product) the button reads "Send clip request": visitors enter their name and email and the list is saved under Clip requests, with an email to you when mail is switched to Send.', 'film-transfer-toolkit' ),
 					__( 'The module shows "Waiting".', 'film-transfer-toolkit' ) => __( 'The older FW Clip Cart plugin is active and still handles clips. Deactivate it when you are ready to switch.', 'film-transfer-toolkit' ),

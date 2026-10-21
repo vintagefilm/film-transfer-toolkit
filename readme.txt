@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,9 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.5.1 =
+* Clip selector: new rate card setting "rounding" (up | down | nearest) for turning a clip's length into whole billed seconds. Default "up" (unchanged behaviour). The on-page estimate and the cart/request price use the same rule. New filter ftt/clip/billable_seconds ($secs, $duration, $card).
+
 = 1.5.0 =
 * One look for every tool: a shared base stylesheet (ftt-base.css) with --ftt-* tokens that inherit the site theme (Kadence palette, then theme.json presets). Every tool has the same width, padding, border radius, buttons, fields and heading sizes, on desktop and mobile. Only ftt-base.css may contain literal colours or fonts; a test checks this.
 * The film calculator has a new colour scheme, "Site theme", which is now the default. Dark and Light are unchanged. A site that never saved a scheme now shows the site-theme look.

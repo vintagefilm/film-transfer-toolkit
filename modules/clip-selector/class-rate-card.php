@@ -8,6 +8,9 @@ if (!defined('ABSPATH')) exit;
  */
 class FTT_Clip_Rate_Card
 {
+    /** How a clip's length becomes whole billed seconds. 'up' was the only behaviour before 1.5.1. */
+    const ROUNDING = ['up', 'down', 'nearest'];
+
     public static function defaults()
     {
         return [
@@ -16,6 +19,7 @@ class FTT_Clip_Rate_Card
             'min_seconds'      => 5,
             'max_seconds'      => 300,
             'min_charge_cents' => 1000,
+            'rounding'         => 'up', // up | down | nearest (whole billed seconds)
         ];
     }
 
@@ -30,6 +34,7 @@ class FTT_Clip_Rate_Card
             'min_seconds'      => $int('min_seconds', 0, 3600),
             'max_seconds'      => $int('max_seconds', 1, 36000),
             'min_charge_cents' => $int('min_charge_cents', 0, 10000000),
+            'rounding'         => isset($in['rounding']) && in_array($in['rounding'], self::ROUNDING, true) ? $in['rounding'] : $d['rounding'],
         ];
     }
 
@@ -40,17 +45,28 @@ class FTT_Clip_Rate_Card
         return self::sanitize(apply_filters('ftt/clip/rate_card', $card));
     }
 
-    /** Billable seconds: whole seconds, rounded up, never below the minimum. */
-    public static function billable_seconds($duration)
+    /**
+     * Billable seconds: whole seconds (rounded per the card's 'rounding': up | down | nearest), never below the minimum.
+     * The duration is first rounded to the millisecond, exactly like clip-selector.js estimate(), so quote and cart match.
+     * Filter: ftt/clip/billable_seconds ($secs, $duration, $card). Note the browser estimate cannot see this filter.
+     */
+    public static function billable_seconds($duration, $card = null)
     {
-        $c = self::get();
-        return (int) max($c['min_seconds'], ceil(round($duration, 3)));
+        $c = is_array($card) ? $card : self::get();
+        $ms = round((float) $duration, 3);
+        switch ($c['rounding'] ?? 'up') {
+            case 'down':    $whole = floor($ms); break;
+            case 'nearest': $whole = round($ms); break;
+            default:        $whole = ceil($ms);
+        }
+        $secs = (int) max($c['min_seconds'], $whole);
+        return (int) apply_filters('ftt/clip/billable_seconds', $secs, $duration, $c);
     }
 
     public static function price_cents($duration)
     {
         $c = self::get();
-        $cents = self::billable_seconds($duration) * (int) $c['per_second_cents'];
+        $cents = self::billable_seconds($duration, $c) * (int) $c['per_second_cents'];
         return (int) max($c['min_charge_cents'], $cents);
     }
 }

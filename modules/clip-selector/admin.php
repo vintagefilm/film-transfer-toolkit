@@ -44,8 +44,13 @@ function ftt_clip_render_settings() {
 					<tr><th><label for="ftt-clip-<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $l ); ?></label></th><td><input id="ftt-clip-<?php echo esc_attr( $k ); ?>" type="number" min="0" class="small-text" name="ftt_clip_rate_card[<?php echo esc_attr( $k ); ?>]" value="<?php echo esc_attr( $c[ $k ] ); ?>"></td></tr>
 				<?php endforeach; ?>
 			</table>
-			<details class="ftt-advanced" id="ftt-adv-clips"><summary><?php esc_html_e( 'Advanced: frame rate, FluentCart product and automatic placement', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body">
+			<details class="ftt-advanced" id="ftt-adv-clips"><summary><?php esc_html_e( 'Advanced: rounding, frame rate, FluentCart product and automatic placement', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body">
 			<table class="form-table" role="presentation">
+				<tr><th><?php esc_html_e( 'Rounding of clip length', 'film-transfer-toolkit' ); ?></th><td>
+					<?php foreach ( array( 'up' => __( 'Round up to the next whole second (default)', 'film-transfer-toolkit' ), 'down' => __( 'Round down (in the customer\'s favour)', 'film-transfer-toolkit' ), 'nearest' => __( 'Round to the nearest second', 'film-transfer-toolkit' ) ) as $k => $l ) : ?>
+						<label class="ftt-radio" style="display:block"><input type="radio" name="ftt_clip_rate_card[rounding]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $c['rounding'], $k ); ?>> <?php echo esc_html( $l ); ?></label>
+					<?php endforeach; ?>
+					<p class="description"><?php esc_html_e( 'Clips are billed in whole seconds. Example: a 30.03 s clip bills 31 s rounded up, 30 s rounded down or to the nearest. The minimum billed seconds and minimum charge still apply.', 'film-transfer-toolkit' ); ?></p></td></tr>
 				<tr><th><label for="ftt-clip-fps"><?php esc_html_e( 'Default timecode frame rate', 'film-transfer-toolkit' ); ?></label></th><td><select id="ftt-clip-fps" name="<?php echo esc_attr( $n ); ?>[default_fps]"><?php foreach ( FTT_Timecode::LABELS as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $o['default_fps'], $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Used when a selector has no fps attribute and no clip product.', 'film-transfer-toolkit' ); ?></p></td></tr>
 				<tr><th><label for="ftt-clip-product"><?php esc_html_e( 'Default clip product (FluentCart)', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-clip-product" type="number" min="0" class="small-text" name="<?php echo esc_attr( $n ); ?>[default_product_id]" value="<?php echo esc_attr( $o['default_product_id'] ? $o['default_product_id'] : '' ); ?>">
