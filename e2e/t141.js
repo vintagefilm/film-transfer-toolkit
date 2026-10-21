@@ -25,8 +25,8 @@ ok('ON: clip assets enqueued',await v.locator('script[src*="clip-selector"]').co
 await v.screenshot({path:SH+'01-clips-on-visitor.png',fullPage:true});
 const a=await (await b.newContext({viewport:{width:1280,height:900}})).newPage();a.on('pageerror',e=>errs.push(e.message));
 await a.goto(B+'/wp-login.php');await a.fill('#user_login','admin');await a.fill('#user_pass','admin');await a.click('#wp-submit');await a.waitForLoadState();
-await a.goto(B+'/wp-admin/admin.php?page=ftt-settings');const dash=await a.textContent('#wpbody');
-ok('settings: clip selector Active with prototype note',dash.includes('FW Clip Cart prototype plugin is also active')&&!dash.includes('Deactivate it to switch'));
+await a.goto(B+'/wp-admin/admin.php?page=ftt-tools');const dash=await a.textContent('#wpbody');
+ok('tools: clip selector Active with prototype note',dash.includes('FW Clip Cart prototype plugin is also active')&&!dash.includes('Deactivate it to switch'));
 await a.screenshot({path:SH+'02-settings-clips-active-with-prototype.png',fullPage:true});
 await a.goto(B+'/wp-admin/post-new.php?post_type=page');await a.waitForTimeout(2500);
 await a.evaluate(()=>{try{wp.data.dispatch('core/edit-post').toggleFeature&&0;}catch(e){}});

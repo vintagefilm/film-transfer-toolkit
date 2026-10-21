@@ -44,7 +44,7 @@ function ftt_clip_render_settings() {
 					<tr><th><label for="ftt-clip-<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $l ); ?></label></th><td><input id="ftt-clip-<?php echo esc_attr( $k ); ?>" type="number" min="0" class="small-text" name="ftt_clip_rate_card[<?php echo esc_attr( $k ); ?>]" value="<?php echo esc_attr( $c[ $k ] ); ?>"></td></tr>
 				<?php endforeach; ?>
 			</table>
-			<h2><?php esc_html_e( 'Players and orders', 'film-transfer-toolkit' ); ?></h2>
+			<details class="ftt-advanced" id="ftt-adv-clips"><summary><?php esc_html_e( 'Advanced: frame rate, FluentCart product and automatic placement', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body">
 			<table class="form-table" role="presentation">
 				<tr><th><label for="ftt-clip-fps"><?php esc_html_e( 'Default timecode frame rate', 'film-transfer-toolkit' ); ?></label></th><td><select id="ftt-clip-fps" name="<?php echo esc_attr( $n ); ?>[default_fps]"><?php foreach ( FTT_Timecode::LABELS as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $o['default_fps'], $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select>
 					<p class="description"><?php esc_html_e( 'Used when a selector has no fps attribute and no clip product.', 'film-transfer-toolkit' ); ?></p></td></tr>
@@ -55,7 +55,8 @@ function ftt_clip_render_settings() {
 						<label class="ftt-radio" style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[auto_attach]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $o['auto_attach'], $k ); ?>> <?php echo esc_html( $l ); ?></label>
 					<?php endforeach; ?></td></tr>
 			</table>
-			<?php submit_button(); ?>
+			</div></details>
+			<?php submit_button( __( 'Save changes', 'film-transfer-toolkit' ) ); ?>
 		</form>
 	</div>
 	<?php

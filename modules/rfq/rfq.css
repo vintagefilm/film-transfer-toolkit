@@ -1,11 +1,11 @@
 .ftt-rfq-list{list-style:none;margin:0 0 1em;padding:0;columns:2 16em}
 .ftt-rfq-list li{margin:0 0 .4em;break-inside:avoid}
-.ftt-rfq-bar{position:sticky;bottom:12px;display:flex;gap:1em;align-items:center;justify-content:space-between;padding:.6em .8em .6em 1.2em;border-radius:100px;background:var(--ftt-text,#1d1d1d);color:var(--ftt-bg,#fff);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.ftt-rfq-bar{position:sticky;bottom:12px;display:flex;gap:1em;align-items:center;justify-content:space-between;padding:.6em .8em .6em 1.2em;border-radius:100px;background:var(--ftt-bar-bg);color:var(--ftt-bar-text);box-shadow:var(--ftt-bar-shadow)}
 .ftt-rfq-bar[hidden]{display:none}
-.ftt-rfq-form fieldset{border:1px solid var(--ftt-border,#d9d9d9);border-radius:12px;padding:1em 1.2em;margin:0 0 1em}
+.ftt-rfq-form fieldset{border:1px solid var(--ftt-border);border-radius:var(--ftt-radius);padding:var(--ftt-gap);margin:0 0 var(--ftt-gap)}
 .ftt-rfq-form legend{font-weight:700;padding:0 .3em}
 .ftt-rfq-qty input{max-width:8em}
 .ftt-rfq-labs{margin:0 0 .4em 1.2em}
-.ftt-privacy{font-size:.92em;padding:.7em 1em;border-radius:8px;background:var(--ftt-soft,#f4f4f4)}
+.ftt-privacy{font-size:var(--ftt-size-small);padding:.7em 1em;border-radius:var(--ftt-radius-sm);background:var(--ftt-soft)}
 .ftt-rfq-compare{overflow-x:auto}.ftt-rfq-compare td,.ftt-rfq-compare th{min-width:12em;vertical-align:top}
 .ftt-rfq-pick{display:inline-flex;gap:.35em;align-items:center;margin-top:.6em;cursor:pointer}

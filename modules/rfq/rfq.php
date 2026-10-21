@@ -144,7 +144,7 @@ class FTT_RFQ {
 		$list = get_posts( array( 'post_type' => $o['provider_type'], 'post_status' => 'publish', 'numberposts' => 200, 'orderby' => 'title', 'order' => 'ASC' ) );
 		wp_enqueue_style( 'ftt-rfq' );
 		wp_enqueue_script( 'ftt-rfq' );
-		$out = '<div class="ftt-box ftt-rfq-providers" data-ftt-rfq-picker data-max="' . esc_attr( $o['max'] ) . '" data-go="' . esc_url( self::page_url( 'form_page', 'request-quotes' ) ) . '">';
+		$out = '<div class="ftt-tool ftt-box ftt-rfq-providers" data-ftt-rfq-picker data-max="' . esc_attr( $o['max'] ) . '" data-go="' . esc_url( self::page_url( 'form_page', 'request-quotes' ) ) . '">';
 		$out .= '<p>' . esc_html( sprintf( /* translators: %d: max */ __( 'Tick up to %d providers, then press Request quotes.', 'film-transfer-toolkit' ), $o['max'] ) ) . '</p><ul class="ftt-rfq-list">';
 		$n = 0;
 		foreach ( $list as $p ) {
@@ -190,17 +190,17 @@ class FTT_RFQ {
 		if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && isset( $_POST['ftt_rfq_submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- verified in handle_submit().
 			$r = self::handle_submit( $labs );
 			if ( true === $r ) {
-				return '<div class="ftt-box ftt-cta"><strong>' . esc_html__( 'Check your email.', 'film-transfer-toolkit' ) . '</strong> ' . esc_html__( 'We sent a confirmation link. Your request goes to the providers only after you confirm.', 'film-transfer-toolkit' ) . '</div>';
+				return '<div class="ftt-tool ftt-box ftt-cta"><strong>' . esc_html__( 'Check your email.', 'film-transfer-toolkit' ) . '</strong> ' . esc_html__( 'We sent a confirmation link. Your request goes to the providers only after you confirm.', 'film-transfer-toolkit' ) . '</div>';
 			}
 			$msg = '<p class="ftt-msg ftt-msg--bad" role="alert">' . esc_html( $r ) . '</p>';
 		}
 		$pick = self::page_url( 'providers_page', 'listings' );
 		if ( ! $labs ) {
-			return '<p>' . esc_html( sprintf( /* translators: %d: max */ __( 'Choose up to %d providers first.', 'film-transfer-toolkit' ), $o['max'] ) ) . ' <a href="' . esc_url( $pick ) . '">' . esc_html__( 'Choose providers', 'film-transfer-toolkit' ) . '</a></p>';
+			return '<div class="ftt-tool ftt-box ftt-rfq-form"><p>' . esc_html( sprintf( /* translators: %d: max */ __( 'Choose up to %d providers first.', 'film-transfer-toolkit' ), $o['max'] ) ) . ' <a href="' . esc_url( $pick ) . '">' . esc_html__( 'Choose providers', 'film-transfer-toolkit' ) . '</a></p></div>';
 		}
 		$v = function ( $k ) { return isset( $_POST[ $k ] ) && is_scalar( $_POST[ $k ] ) ? esc_attr( sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) ) : ''; }; // phpcs:ignore WordPress.Security.NonceVerification -- redisplay only.
 		$arr = function ( $k, $f ) { return isset( $_POST[ $k ][ $f ] ) && is_scalar( $_POST[ $k ][ $f ] ) ? esc_attr( absint( $_POST[ $k ][ $f ] ) ?: '' ) : ''; }; // phpcs:ignore WordPress.Security.NonceVerification -- redisplay only.
-		$out  = '<form method="post" class="ftt-box ftt-rfq-form">' . $msg . wp_nonce_field( 'ftt_rfq', '_ftt_rfq', true, false ) . '<input type="hidden" name="labs" value="' . esc_attr( implode( ',', $labs ) ) . '">';
+		$out  = '<form method="post" class="ftt-tool ftt-box ftt-rfq-form">' . $msg . wp_nonce_field( 'ftt_rfq', '_ftt_rfq', true, false ) . '<input type="hidden" name="labs" value="' . esc_attr( implode( ',', $labs ) ) . '">';
 		$out .= '<fieldset><legend>' . esc_html( sprintf( /* translators: %d: count */ __( 'Providers you are asking (%d)', 'film-transfer-toolkit' ), count( $labs ) ) ) . '</legend><ul class="ftt-rfq-labs">';
 		foreach ( $labs as $l ) { $out .= '<li>' . esc_html( get_the_title( $l ) ) . '</li>'; }
 		$out .= '</ul><p class="ftt-note"><a href="' . esc_url( $pick ) . '">' . esc_html__( 'Change providers', 'film-transfer-toolkit' ) . '</a></p></fieldset>';
@@ -319,7 +319,7 @@ class FTT_RFQ {
 		}
 		$labs = array_values( array_filter( (array) self::m( $id, 'labs' ), array( __CLASS__, 'valid_provider' ) ) );
 		if ( ! isset( $_POST['ftt_rfq_confirm'] ) || ! isset( $_POST['_n'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_n'] ) ), 'ftt_rfq_confirm' . $id ) ) {
-			$h = '<form method="post" class="ftt-box">' . wp_nonce_field( 'ftt_rfq_confirm' . $id, '_n', true, false ) . '<p>' . esc_html( sprintf( /* translators: %d: count */ __( 'Send your quote request to %d provider(s)?', 'film-transfer-toolkit' ), count( $labs ) ) ) . '</p><ul>';
+			$h = '<form method="post" class="ftt-tool ftt-box">' . wp_nonce_field( 'ftt_rfq_confirm' . $id, '_n', true, false ) . '<p>' . esc_html( sprintf( /* translators: %d: count */ __( 'Send your quote request to %d provider(s)?', 'film-transfer-toolkit' ), count( $labs ) ) ) . '</p><ul>';
 			foreach ( $labs as $l ) { $h .= '<li>' . esc_html( get_the_title( $l ) ) . '</li>'; }
 			return $h . '</ul><p><button class="ftt-btn" name="ftt_rfq_confirm" value="1">' . esc_html__( 'Confirm and send', 'film-transfer-toolkit' ) . '</button></p></form>';
 		}
@@ -349,7 +349,7 @@ class FTT_RFQ {
 		}
 		update_post_meta( $id, '_ftt_rfq_ltmap', $map );
 		FTT_Mail::send( self::m( $id, 'cemail' ), __( 'Your quote request was sent', 'film-transfer-toolkit' ), sprintf( "Thanks. Your request went to %d provider(s). We'll email you as quotes arrive.\n\nYour private quotes page (keep this link private):\n%s\n\n%s", count( $map ), self::page_url( 'compare_page', 'rfq-compare', array( 'k' => $key ) ), self::brand() ), 'rfq:customer:' . $id );
-		return '<div class="ftt-box ftt-cta"><strong>' . esc_html__( 'Confirmed.', 'film-transfer-toolkit' ) . '</strong> ' . esc_html( sprintf( /* translators: %d: count */ __( 'Your request was sent to %d provider(s). We emailed you a private link where quotes will appear side by side.', 'film-transfer-toolkit' ), count( $map ) ) ) . '</div>';
+		return '<div class="ftt-tool ftt-box ftt-cta"><strong>' . esc_html__( 'Confirmed.', 'film-transfer-toolkit' ) . '</strong> ' . esc_html( sprintf( /* translators: %d: count */ __( 'Your request was sent to %d provider(s). We emailed you a private link where quotes will appear side by side.', 'film-transfer-toolkit' ), count( $map ) ) ) . '</div>';
 	}
 
 	/* ------------------------------------------------------- provider reply */
@@ -359,12 +359,12 @@ class FTT_RFQ {
 		$t  = self::get( 't' );
 		$id = self::find_by( '_ftt_rfq_lt', $t, self::CPT_REQ );
 		if ( ! $id || 'sent' !== self::m( $id, 'state' ) ) {
-			return '<p class="ftt-msg">' . esc_html__( 'This quote link is invalid or the request has closed.', 'film-transfer-toolkit' ) . '</p>';
+			return '<div class="ftt-tool ftt-box ftt-rfq-reply"><p class="ftt-msg">' . esc_html__( 'This quote link is invalid or the request has closed.', 'film-transfer-toolkit' ) . '</p></div>';
 		}
 		$map = (array) self::m( $id, 'ltmap' );
 		$lid = (int) ( $map[ FTT_Util::token_hash( $t ) ] ?? 0 );
 		if ( ! $lid ) {
-			return '<p class="ftt-msg">' . esc_html__( 'This quote link is invalid or the request has closed.', 'film-transfer-toolkit' ) . '</p>';
+			return '<div class="ftt-tool ftt-box ftt-rfq-reply"><p class="ftt-msg">' . esc_html__( 'This quote link is invalid or the request has closed.', 'film-transfer-toolkit' ) . '</p></div>';
 		}
 		$title = get_the_title( $lid );
 		if ( '' !== self::get( 'optout' ) ) {
@@ -372,10 +372,10 @@ class FTT_RFQ {
 				update_post_meta( $lid, '_ft_rfq_optout', 1 );
 				return '<p class="ftt-msg">' . esc_html( sprintf( /* translators: %s: provider */ __( '%s will no longer receive quote requests. Contact us to undo this.', 'film-transfer-toolkit' ), $title ) ) . '</p>';
 			}
-			return '<form method="post" class="ftt-box">' . wp_nonce_field( 'ftt_rfq_opt' . $id . '_' . $lid, '_n', true, false ) . '<p>' . esc_html( sprintf( /* translators: %s: provider */ __( 'Stop all quote requests to %s?', 'film-transfer-toolkit' ), $title ) ) . '</p><button class="ftt-btn" name="ftt_rfq_optout" value="1">' . esc_html__( 'Opt out', 'film-transfer-toolkit' ) . '</button></form>';
+			return '<form method="post" class="ftt-tool ftt-box">' . wp_nonce_field( 'ftt_rfq_opt' . $id . '_' . $lid, '_n', true, false ) . '<p>' . esc_html( sprintf( /* translators: %s: provider */ __( 'Stop all quote requests to %s?', 'film-transfer-toolkit' ), $title ) ) . '</p><button class="ftt-btn" name="ftt_rfq_optout" value="1">' . esc_html__( 'Opt out', 'film-transfer-toolkit' ) . '</button></form>';
 		}
 		$done = get_posts( array( 'post_type' => self::CPT_QUOTE, 'post_status' => 'private', 'numberposts' => 1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => '_ftt_q_rfq', 'value' => $id ), array( 'key' => '_ftt_q_lab', 'value' => $lid ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$out  = '<div class="ftt-box"><h3>' . esc_html( sprintf( /* translators: %s: provider */ __( 'Quote request for %s', 'film-transfer-toolkit' ), $title ) ) . '</h3><table class="ftt-table">';
+		$out  = '<div class="ftt-tool ftt-box"><h3>' . esc_html( sprintf( /* translators: %s: provider */ __( 'Quote request for %s', 'film-transfer-toolkit' ), $title ) ) . '</h3><table class="ftt-table">';
 		foreach ( self::summary( $id ) as $k => $v ) {
 			if ( '' !== (string) $v ) { $out .= '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . esc_html( $v ) . '</td></tr>'; }
 		}
@@ -416,7 +416,7 @@ class FTT_RFQ {
 		wp_enqueue_style( 'ftt-rfq' );
 		$id = self::find_by( '_ftt_rfq_key', self::get( 'k' ), self::CPT_REQ );
 		if ( ! $id ) {
-			return '<p class="ftt-msg">' . esc_html__( 'This private link is invalid.', 'film-transfer-toolkit' ) . '</p>';
+			return '<div class="ftt-tool ftt-box ftt-rfq-compare"><p class="ftt-msg">' . esc_html__( 'This private link is invalid.', 'film-transfer-toolkit' ) . '</p></div>';
 		}
 		$quotes    = get_posts( array( 'post_type' => self::CPT_QUOTE, 'post_status' => 'private', 'numberposts' => 20, 'meta_key' => '_ftt_q_rfq', 'meta_value' => $id, 'orderby' => 'date', 'order' => 'ASC' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$contacted = array_map( 'intval', (array) self::m( $id, 'contacted' ) );
@@ -436,7 +436,7 @@ class FTT_RFQ {
 			}
 		}
 		$labs = array_map( 'intval', (array) self::m( $id, 'labs' ) );
-		$out  = '<div class="ftt-box"><h3>' . esc_html__( 'Your quotes', 'film-transfer-toolkit' ) . '</h3>' . $msg . '<p class="ftt-note">' . esc_html( sprintf( /* translators: 1: providers, 2: quotes, 3: brand */ __( 'Requested from %1$d provider(s). %2$d quote(s) so far. Quotes are the providers\' own figures; %3$s does not verify or guarantee them.', 'film-transfer-toolkit' ), count( $labs ), count( $quotes ), self::brand() ) ) . '</p>';
+		$out  = '<div class="ftt-tool ftt-box"><h3>' . esc_html__( 'Your quotes', 'film-transfer-toolkit' ) . '</h3>' . $msg . '<p class="ftt-note">' . esc_html( sprintf( /* translators: 1: providers, 2: quotes, 3: brand */ __( 'Requested from %1$d provider(s). %2$d quote(s) so far. Quotes are the providers\' own figures; %3$s does not verify or guarantee them.', 'film-transfer-toolkit' ), count( $labs ), count( $quotes ), self::brand() ) ) . '</p>';
 		if ( ! $quotes ) {
 			return $out . '<p>' . esc_html__( "No quotes yet. We'll email you when they arrive.", 'film-transfer-toolkit' ) . '</p></div>';
 		}
@@ -495,6 +495,7 @@ class FTT_RFQ {
 		<div class="wrap ftt-admin">
 			<h1><?php esc_html_e( 'RFQ requests', 'film-transfer-toolkit' ); ?></h1>
 			<?php settings_errors(); ?>
+			<h2 id="ftt-rfq-requests"><?php esc_html_e( 'Requests', 'film-transfer-toolkit' ); ?></h2>
 			<table class="widefat striped"><thead><tr><th><?php esc_html_e( 'Date', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'State', 'film-transfer-toolkit' ); ?></th><th>ZIP</th><th><?php esc_html_e( 'Customer', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Providers', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Quotes', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Film', 'film-transfer-toolkit' ); ?></th></tr></thead><tbody>
 			<?php
 			$reqs = get_posts( array( 'post_type' => self::CPT_REQ, 'post_status' => 'private', 'numberposts' => 200 ) );
@@ -511,8 +512,6 @@ class FTT_RFQ {
 			<form action="options.php" method="post">
 				<?php settings_fields( 'ftt_rfq' ); ?>
 				<table class="form-table" role="presentation">
-					<tr><th><label for="ftt-rfq-pt"><?php esc_html_e( 'Provider post type', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-pt" name="ftt_rfq[provider_type]" value="<?php echo esc_attr( $o['provider_type'] ); ?>"> <span class="description"><?php esc_html_e( 'ftt_provider = the toolkit\'s own Quote providers list. On filmtransfer.ai use listing.', 'film-transfer-toolkit' ); ?></span></td></tr>
-					<tr><th><label for="ftt-rfq-em"><?php esc_html_e( 'Provider email meta key', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-em" name="ftt_rfq[email_meta]" value="<?php echo esc_attr( $o['email_meta'] ); ?>"></td></tr>
 					<tr><th><label for="ftt-rfq-max"><?php esc_html_e( 'Most providers per request', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-max" type="number" min="1" max="10" class="small-text" name="ftt_rfq[max]" value="<?php echo esc_attr( $o['max'] ); ?>"></td></tr>
 					<tr><th><label for="ftt-rfq-brand"><?php esc_html_e( 'Name used in emails', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-brand" name="ftt_rfq[brand]" value="<?php echo esc_attr( $o['brand'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"></td></tr>
 					<tr><th><?php esc_html_e( 'ZIP code', 'film-transfer-toolkit' ); ?></th><td><label><input type="checkbox" name="ftt_rfq[zip_required]" value="1" <?php checked( $o['zip_required'] ); ?>> <?php esc_html_e( 'Require a 5-digit US ZIP code', 'film-transfer-toolkit' ); ?></label></td></tr>
@@ -521,7 +520,11 @@ class FTT_RFQ {
 						<tr><th><label for="ftt-rfq-<?php echo esc_attr( $k ); ?>"><?php echo esc_html( sprintf( /* translators: %s: shortcode */ __( 'Page with %s', 'film-transfer-toolkit' ), $p[0] ) ); ?></label></th><td><?php wp_dropdown_pages( array( 'name' => 'ftt_rfq[' . esc_attr( $k ) . ']', 'id' => 'ftt-rfq-' . esc_attr( $k ), 'selected' => (int) $o[ $k ], 'show_option_none' => sprintf( '(default: /%s/)', $p[1] ), 'option_none_value' => 0, 'post_status' => array( 'publish', 'private', 'draft' ) ) ); ?></td></tr>
 					<?php endforeach; ?>
 				</table>
-				<?php submit_button(); ?>
+				<details class="ftt-advanced" id="ftt-adv-rfq"><summary><?php esc_html_e( 'Advanced: where providers and their emails come from', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body"><table class="form-table" role="presentation">
+					<tr><th><label for="ftt-rfq-pt"><?php esc_html_e( 'Provider post type', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-pt" name="ftt_rfq[provider_type]" value="<?php echo esc_attr( $o['provider_type'] ); ?>"> <span class="description"><?php esc_html_e( 'ftt_provider = the toolkit\'s own Quote providers list. On filmtransfer.ai use listing.', 'film-transfer-toolkit' ); ?></span></td></tr>
+					<tr><th><label for="ftt-rfq-em"><?php esc_html_e( 'Provider email meta key', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-rfq-em" name="ftt_rfq[email_meta]" value="<?php echo esc_attr( $o['email_meta'] ); ?>"></td></tr>
+				</table></div></details>
+				<?php submit_button( __( 'Save changes', 'film-transfer-toolkit' ) ); ?>
 			</form>
 		</div>
 		<?php

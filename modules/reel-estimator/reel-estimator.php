@@ -39,7 +39,7 @@ function ftt_reel_shortcode( $atts ) {
 	wp_enqueue_script( 'ftt-reels' );
 	ob_start();
 	?>
-	<div class="ftt-box ftt-reels" data-ftt-reels<?php echo '' !== $fps ? ' data-fps="' . esc_attr( $fps ) . '"' : ''; ?>>
+	<div class="ftt-tool ftt-box ftt-reels" data-ftt-reels<?php echo '' !== $fps ? ' data-fps="' . esc_attr( $fps ) . '"' : ''; ?>>
 		<h3 class="ftt-box__title"><?php echo esc_html( $title ); ?></h3>
 		<p class="ftt-box__sub"><?php esc_html_e( 'Pick the reel size, or measure the film itself, to estimate footage and running time.', 'film-transfer-toolkit' ); ?></p>
 		<div class="ftt-grid">

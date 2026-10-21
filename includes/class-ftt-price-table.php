@@ -194,7 +194,7 @@ class FTT_Price_Table {
 		if ( $errors ) {
 			set_transient( 'ftt_price_errors_' . get_current_user_id(), $errors, 300 );
 		}
-		wp_safe_redirect( add_query_arg( array( 'page' => 'ftt-prices', 'ftt_msg' => $code ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect( FTT_Admin_UX::url( 'ftt-settings', 'prices', array( 'ftt_msg' => $code ) ) );
 		exit;
 	}
 
@@ -357,7 +357,7 @@ class FTT_Price_Table {
 					<tbody data-ftt-rows="tiers"><?php foreach ( $t['tiers'] as $i => $x ) { echo $tier_row( $i, $x ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></tbody></table>
 				<template data-ftt-template="tiers"><?php echo $tier_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
 				<p><button type="button" class="button" data-ftt-add="tiers"><?php esc_html_e( 'Add tier', 'film-transfer-toolkit' ); ?></button></p>
-				<details><summary><strong><?php esc_html_e( 'Advanced: formats, services and reel sizes (JSON)', 'film-transfer-toolkit' ); ?></strong></summary>
+				<details class="ftt-advanced" id="ftt-adv-price-json"><summary><?php esc_html_e( 'Advanced: formats, services and reel sizes (JSON)', 'film-transfer-toolkit' ); ?></summary>
 					<?php foreach ( array( 'formats' => 'id, label, fpf (frames per foot), fps (for running time)', 'services' => 'id, label', 'reels' => 'format, size (id), label, feet (nominal full-reel length)' ) as $k => $h ) : ?>
 						<p><label for="ftt-json-<?php echo esc_attr( $k ); ?>"><strong><?php echo esc_html( ucfirst( $k ) ); ?></strong> <span class="description"><?php echo esc_html( $h ); ?></span></label><br>
 						<textarea id="ftt-json-<?php echo esc_attr( $k ); ?>" name="json_<?php echo esc_attr( $k ); ?>" rows="8" class="large-text code"><?php echo esc_textarea( $json( $t[ $k ] ) ); ?></textarea></p>
@@ -366,7 +366,7 @@ class FTT_Price_Table {
 				<?php submit_button( __( 'Save price table', 'film-transfer-toolkit' ) ); ?>
 			</form>
 
-			<h2><?php esc_html_e( 'Export / import', 'film-transfer-toolkit' ); ?></h2>
+			<details class="ftt-advanced" id="ftt-adv-price-export"><summary><?php esc_html_e( 'Advanced: export or import the whole table (JSON)', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body">
 			<p><label for="ftt-export"><?php esc_html_e( 'Current table as JSON (same format the mobile app core reads):', 'film-transfer-toolkit' ); ?></label></p>
 			<textarea id="ftt-export" rows="6" class="large-text code" readonly><?php echo esc_textarea( $json( $t ) ); ?></textarea>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -375,6 +375,7 @@ class FTT_Price_Table {
 				<textarea id="ftt-import" name="json" rows="6" class="large-text code"></textarea>
 				<?php submit_button( __( 'Import JSON', 'film-transfer-toolkit' ), 'secondary' ); ?>
 			</form>
+			</div></details>
 		</div>
 		<?php
 	}

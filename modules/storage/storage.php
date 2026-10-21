@@ -40,7 +40,7 @@ function ftt_storage_shortcode( $atts ) {
 	wp_enqueue_script( 'ftt-storage' );
 	ob_start();
 	?>
-	<div class="ftt-box ftt-store" data-ftt-storage data-headroom="<?php echo esc_attr( $headroom ); ?>" data-format="<?php echo esc_attr( $format ); ?>"<?php echo $preset ? ' data-preset="' . esc_attr( $preset ) . '"' : ''; ?> data-dels="<?php echo esc_attr( wp_json_encode( $o['deliverables'] ) ); ?>">
+	<div class="ftt-tool ftt-box ftt-store" data-ftt-storage data-headroom="<?php echo esc_attr( $headroom ); ?>" data-format="<?php echo esc_attr( $format ); ?>"<?php echo $preset ? ' data-preset="' . esc_attr( $preset ) . '"' : ''; ?> data-dels="<?php echo esc_attr( wp_json_encode( $o['deliverables'] ) ); ?>">
 		<h3 class="ftt-box__title"><?php echo esc_html( $title ); ?></h3>
 		<p class="ftt-box__sub"><?php esc_html_e( 'List your reels, choose one or more file formats, and see the size per reel, the total, and a drive size with room to spare.', 'film-transfer-toolkit' ); ?></p>
 		<h4 class="ftt-store__h"><?php esc_html_e( '1. Your film', 'film-transfer-toolkit' ); ?></h4>

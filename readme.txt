@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,12 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.5.0 =
+* One look for every tool: a shared base stylesheet (ftt-base.css) with --ftt-* tokens that inherit the site theme (Kadence palette, then theme.json presets). Every tool has the same width, padding, border radius, buttons, fields and heading sizes, on desktop and mobile. Only ftt-base.css may contain literal colours or fonts; a test checks this.
+* The film calculator has a new colour scheme, "Site theme", which is now the default. Dark and Light are unchanged. A site that never saved a scheme now shows the site-theme look.
+* The admin is simpler: Dashboard (one card per tool, with how to add it to a page), Tools (switch on/off and the request lists), Settings (one tab per tool, with rarely needed options under Advanced) and Help. Old admin addresses redirect to the new place. No setting names changed.
+* Site check: the calculator check accepts the shortcode or the block.
+
 = 1.4.1 =
 * Fix: with the clip selector switched on while the FW Clip Cart prototype plugin is also active, [ftt_clip_selector] showed as raw text and the Clip selector block was missing. The module now runs next to the prototype: the prototype keeps [fw_clip_cart] and the FluentCart cart hooks, and [ftt_clip_selector] and the block work.
 * A switched-off tool's shortcode or block never shows as raw text: visitors see nothing, editors see a short note saying it is switched off and where to turn it on. All blocks stay registered so they can be placed and set up before a tool is switched on.

@@ -13,7 +13,8 @@ class FTT_Admin {
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
-		add_action( 'admin_menu', array( __CLASS__, 'order_menu' ), 999 );
+		add_action( 'admin_menu', array( 'FTT_Admin_UX', 'trim_menu' ), 999 );
+		FTT_Admin_UX::init();
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'standalone_notice' ) );
 		add_action( 'admin_post_ftt_dismiss_notice', array( __CLASS__, 'dismiss_notice' ) );
@@ -33,19 +34,17 @@ class FTT_Admin {
 		return (bool) preg_match( '/(^|_)page_ftt(-|$)|toplevel_page_ftt$/', (string) $screen->id );
 	}
 
+	/** 1.5.0: Dashboard, Tools, Settings, Help. The setup wizard stays registered (opened from the Dashboard and Tools). Old pages redirect (FTT_Admin_UX::REDIRECTS). */
 	public static function menu() {
 		$cap = 'manage_options';
-		add_menu_page( __( 'FTT', 'film-transfer-toolkit' ), __( 'FTT', 'film-transfer-toolkit' ), $cap, 'ftt', array( __CLASS__, 'render_dashboard' ), 'dashicons-video-alt2', 82 );
-		add_submenu_page( 'ftt', __( 'Dashboard', 'film-transfer-toolkit' ), __( 'Dashboard', 'film-transfer-toolkit' ), $cap, 'ftt', array( __CLASS__, 'render_dashboard' ) );
-		add_submenu_page( 'ftt', __( 'Setup wizard', 'film-transfer-toolkit' ), __( 'Setup wizard', 'film-transfer-toolkit' ), $cap, 'ftt-setup', array( 'FTT_Setup', 'render' ) );
-		add_submenu_page( 'ftt', __( 'Settings', 'film-transfer-toolkit' ), __( 'Settings', 'film-transfer-toolkit' ), $cap, 'ftt-settings', array( 'FTT_Plugin', 'render_modules' ) );
-		add_submenu_page( 'ftt', __( 'Prices', 'film-transfer-toolkit' ), __( 'Prices', 'film-transfer-toolkit' ), $cap, 'ftt-prices', array( 'FTT_Price_Table', 'render_admin' ) );
+		add_menu_page( __( 'FTT', 'film-transfer-toolkit' ), __( 'FTT', 'film-transfer-toolkit' ), $cap, 'ftt', array( 'FTT_Admin_UX', 'render_dashboard' ), 'dashicons-video-alt2', 82 );
+		add_submenu_page( 'ftt', __( 'Dashboard', 'film-transfer-toolkit' ), __( 'Dashboard', 'film-transfer-toolkit' ), $cap, 'ftt', array( 'FTT_Admin_UX', 'render_dashboard' ) );
+		add_submenu_page( 'ftt', __( 'Tools', 'film-transfer-toolkit' ), __( 'Tools', 'film-transfer-toolkit' ), $cap, 'ftt-tools', array( 'FTT_Admin_UX', 'render_tools' ) );
+		add_submenu_page( 'ftt', __( 'Settings', 'film-transfer-toolkit' ), __( 'Settings', 'film-transfer-toolkit' ), $cap, 'ftt-settings', array( 'FTT_Admin_UX', 'render_settings' ) );
 		add_submenu_page( 'ftt', __( 'Help', 'film-transfer-toolkit' ), __( 'Help', 'film-transfer-toolkit' ), $cap, 'ftt-help', array( __CLASS__, 'render_help' ) );
-		if ( 'on' === ( FTT_Plugin::$status['calculator'] ?? '' ) ) {
-			add_submenu_page( 'ftt', __( 'Calculator look', 'film-transfer-toolkit' ), __( 'Calculator look', 'film-transfer-toolkit' ), $cap, 'ftt-calculator', 'ftt_calc_render_settings_page' );
-		}
-		do_action( 'ftt/admin_menu' );
-		add_submenu_page( 'ftt', __( 'Mail log', 'film-transfer-toolkit' ), __( 'Mail log', 'film-transfer-toolkit' ), $cap, 'ftt-mail', array( 'FTT_Plugin', 'render_mail_log' ) );
+		// Hidden page (no parent): opens from the Dashboard and Tools, not listed in the menu.
+		add_submenu_page( '', __( 'Setup wizard', 'film-transfer-toolkit' ), __( 'Setup wizard', 'film-transfer-toolkit' ), $cap, 'ftt-setup', array( 'FTT_Setup', 'render' ) );
+		do_action( 'ftt/admin_menu' ); // Module pages (1.4 slugs) are registered here but redirect to their Settings tab.
 	}
 
 	/** Dashboard, Setup, Settings, Prices, Help first; module screens and post types next; Mail log last. */
@@ -117,72 +116,9 @@ class FTT_Admin {
 
 	/* ------------------------------------------------------------- dashboard */
 
+	/** 1.4 entry point, kept for compatibility: the 1.5.0 dashboard. */
 	public static function render_dashboard() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'film-transfer-toolkit' ) );
-		}
-		$t     = FTT_Price_Table::get();
-		$g     = FTT_Plugin::general();
-		$state = FTT_Setup::state();
-		?>
-		<div class="wrap ftt-admin ftt-dash">
-			<h1><?php esc_html_e( 'FTT', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
-			<?php if ( 'pending' === $state ) : ?>
-				<div class="ftt-hero">
-					<h2><?php esc_html_e( 'Welcome! Let\'s get your tools on your site.', 'film-transfer-toolkit' ); ?></h2>
-					<p><?php esc_html_e( 'The setup wizard takes about two minutes: choose your tools, create their pages, pick a look, and set your prices and email.', 'film-transfer-toolkit' ); ?></p>
-					<p><a class="button button-primary button-hero" href="<?php echo esc_url( FTT_Setup::url() ); ?>"><?php esc_html_e( 'Start setup', 'film-transfer-toolkit' ); ?></a></p>
-				</div>
-			<?php else : ?>
-				<p class="ftt-lead"><?php esc_html_e( 'Calculators, estimates and quote tools for film transfer businesses. Each tool can go on any page as a block or a shortcode.', 'film-transfer-toolkit' ); ?>
-					<a href="<?php echo esc_url( FTT_Setup::url() ); ?>"><?php esc_html_e( 'Run the setup wizard again', 'film-transfer-toolkit' ); ?></a></p>
-			<?php endif; ?>
-
-			<h2><?php esc_html_e( 'Getting started', 'film-transfer-toolkit' ); ?></h2>
-			<ol class="ftt-getting-started">
-				<li><?php esc_html_e( 'Switch on the tools you want under Settings (or in the setup wizard).', 'film-transfer-toolkit' ); ?></li>
-				<li><?php esc_html_e( 'Add a tool to a page: in the block editor click +, search "FTT" and pick the tool; in the classic editor paste its shortcode. Help has step-by-step pictures.', 'film-transfer-toolkit' ); ?></li>
-				<li><?php esc_html_e( 'Replace the EXAMPLE prices with yours under Prices and mark them Final.', 'film-transfer-toolkit' ); ?></li>
-				<li><?php esc_html_e( 'When you are happy with your test requests in the Mail log, switch email to Send under Settings.', 'film-transfer-toolkit' ); ?></li>
-			</ol>
-
-			<h2><?php esc_html_e( 'Your tools', 'film-transfer-toolkit' ); ?></h2>
-			<div class="ftt-cards">
-			<?php
-			foreach ( FTT_Registry::tools() as $k => $tool ) :
-				?>
-				<div class="ftt-card ftt-tool">
-					<h3><span class="dashicons dashicons-<?php echo esc_attr( $tool['icon'] ); ?>" aria-hidden="true"></span> <?php echo esc_html( $tool['title'] ); ?> <?php echo self::status_pill( $k ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?></h3>
-					<p><?php echo esc_html( $tool['summary'] ); ?></p>
-					<?php foreach ( $tool['embeds'] as $e ) : ?>
-						<p class="ftt-tool__sc"><?php if ( count( $tool['embeds'] ) > 1 ) : ?><span class="ftt-tool__sub"><?php echo esc_html( $e['label'] ); ?></span><br><?php endif; ?><?php echo self::copy( '[' . $e['shortcode'] . ']' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in copy(). ?></p>
-						<?php
-						if ( ! empty( $e['page'] ) && 'on' === ( FTT_Plugin::$status[ $k ] ?? '' ) ) :
-							$found = FTT_Registry::find_pages( $e, 3 );
-							?>
-							<p class="ftt-tool__pages">
-							<?php if ( $found ) : ?>
-								<?php esc_html_e( 'On:', 'film-transfer-toolkit' ); ?>
-								<?php foreach ( $found as $i => $p ) : ?><?php echo $i ? ', ' : ''; ?><a href="<?php echo esc_url( get_permalink( $p ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( get_the_title( $p ) ?: wp_make_link_relative( get_permalink( $p ) ) ); ?></a><?php echo 'publish' !== $p->post_status ? ' <span class="ftt-pill">' . esc_html( get_post_status_object( $p->post_status )->label ?? $p->post_status ) . '</span>' : ''; ?><?php endforeach; ?>
-							<?php else : ?>
-								<em><?php esc_html_e( 'Not on any page yet.', 'film-transfer-toolkit' ); ?></em>
-							<?php endif; ?>
-							</p>
-						<?php endif; ?>
-					<?php endforeach; ?>
-					<p class="ftt-tool__links"><a class="button" href="<?php echo esc_url( self::help_url( $k ) ); ?>"><?php esc_html_e( 'How to add it to a page', 'film-transfer-toolkit' ); ?></a></p>
-				</div>
-			<?php endforeach; ?>
-			</div>
-
-			<h2><?php esc_html_e( 'At a glance', 'film-transfer-toolkit' ); ?></h2>
-			<table class="widefat striped ftt-glance"><tbody>
-				<tr><th><?php esc_html_e( 'Prices', 'film-transfer-toolkit' ); ?></th><td><?php echo esc_html( $t['label'] . ' (' . strtoupper( $t['status'] ) . ')' ); ?> <a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-prices' ) ); ?>"><?php esc_html_e( 'Edit prices', 'film-transfer-toolkit' ); ?></a></td></tr>
-				<tr><th><?php esc_html_e( 'Email', 'film-transfer-toolkit' ); ?></th><td><?php echo esc_html( 'send' === FTT_Mail::mode() ? __( 'Send', 'film-transfer-toolkit' ) : __( 'Log only (nothing is sent)', 'film-transfer-toolkit' ) ); ?>; <?php echo esc_html( $g['notify_email'] ? sprintf( /* translators: %s: email */ __( 'notify %s', 'film-transfer-toolkit' ), $g['notify_email'] ) : __( 'no notify address', 'film-transfer-toolkit' ) ); ?> <a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'film-transfer-toolkit' ); ?></a></td></tr>
-				<tr><th><?php esc_html_e( 'Version', 'film-transfer-toolkit' ); ?></th><td><?php echo esc_html( FTT_VERSION ); ?></td></tr>
-			</tbody></table>
-		</div>
-		<?php
+		FTT_Admin_UX::render_dashboard();
 	}
 
 	/* ------------------------------------------------------------------ help */
@@ -197,7 +133,7 @@ class FTT_Admin {
 		$tool  = isset( $tools[ $tool ] ) ? $tool : '';
 		?>
 		<div class="wrap ftt-admin ftt-help">
-			<h1><?php esc_html_e( 'FTT help', 'film-transfer-toolkit' ); ?></h1>
+			<?php FTT_Admin_UX::header( __( 'Help', 'film-transfer-toolkit' ), __( 'How to put each tool on a page, with pictures, and every option.', 'film-transfer-toolkit' ), 'ftt-help' ); ?>
 			<nav class="nav-tab-wrapper ftt-help__tabs" aria-label="<?php esc_attr_e( 'Help topics', 'film-transfer-toolkit' ); ?>">
 				<a class="nav-tab<?php echo '' === $tool && '' === $all ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( self::help_url() ); ?>"<?php echo '' === $tool && '' === $all ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Start here', 'film-transfer-toolkit' ); ?></a>
 				<?php foreach ( $tools as $k => $t ) : ?>
@@ -245,7 +181,7 @@ class FTT_Admin {
 
 	private static function help_general_faq() {
 		$faq = array(
-			__( 'The page shows the shortcode as text, like [ftt_estimate].', 'film-transfer-toolkit' ) => __( 'The tool is switched off. Turn it on under FTT > Settings. Also check the shortcode is spelled exactly as shown, with straight square brackets.', 'film-transfer-toolkit' ),
+			__( 'The page shows the shortcode as text, like [ftt_estimate].', 'film-transfer-toolkit' ) => __( 'The tool is switched off. Turn it on under FTT > Tools. Also check the shortcode is spelled exactly as shown, with straight square brackets.', 'film-transfer-toolkit' ),
 			__( 'The block says "Your site doesn\'t include support for this block".', 'film-transfer-toolkit' ) => __( 'The tool behind that block is switched off. Turn it on under Settings and reload the editor.', 'film-transfer-toolkit' ),
 			__( 'The tool shows but nothing happens when I type.', 'film-transfer-toolkit' ) => __( 'A speed or caching plugin may be delaying or combining JavaScript. Clear its cache, and if that does not help, exclude files containing "film-transfer-toolkit" from JavaScript optimisation.', 'film-transfer-toolkit' ),
 			__( 'I changed a setting but the page looks the same.', 'film-transfer-toolkit' ) => __( 'Clear your caching plugin or host cache (for example SiteGround Speed Optimizer > Purge cache), then reload the page.', 'film-transfer-toolkit' ),
@@ -430,9 +366,10 @@ class FTT_Admin {
 			)
 		);
 		$here = array(
-			'toplevel_page_ftt' => __( 'The dashboard lists every tool, whether it is on, which pages show it, and its shortcode with a Copy button.', 'film-transfer-toolkit' ),
+			'toplevel_page_ftt' => __( 'One card per tool: whether it is on, what it does, how to add it to a page (block or shortcode), and links to its Settings and Help.', 'film-transfer-toolkit' ),
+			'ftt-tools'         => __( 'Tick a tool to switch it on and press Save changes. The middle column links to what each tool has collected, such as quote and clip requests.', 'film-transfer-toolkit' ),
 			'ftt-setup'         => __( 'The setup wizard saves each step only when you press Save and continue. "Skip this step" changes nothing. Pages that already show a tool are reused, never copied.', 'film-transfer-toolkit' ),
-			'ftt-settings'      => __( 'Tick a tool to switch it on. Mail mode "Log only" writes emails to the Mail log instead of sending them; the notify address may be left empty.', 'film-transfer-toolkit' ),
+			'ftt-settings'      => __( 'One tab per tool. Rarely needed options are folded under Advanced. Email: "Not yet (test mode)" keeps messages in the Mail log instead of sending them.', 'film-transfer-toolkit' ),
 			'ftt-prices'        => __( 'These prices feed the price table and the estimate builder. A banner shows on the site until the table status is Final.', 'film-transfer-toolkit' ),
 			'ftt-help'          => __( 'Pick a tool from the tabs for step-by-step instructions, every option, copyable examples and troubleshooting.', 'film-transfer-toolkit' ),
 			'ftt-mail'          => __( 'Every email the toolkit sends or would send is listed here with its result.', 'film-transfer-toolkit' ),
@@ -468,7 +405,7 @@ class FTT_Admin {
 			/* translators: %s: version */
 			echo esc_html( sprintf( __( 'The standalone Film Calculator plugin (version %s) is active. The toolkit includes the same calculator, so you do not need both. While the standalone plugin is active it keeps drawing every [film_calculator] on your site, exactly as before. The toolkit\'s own calculator is [ftt_calculator] and the "Film calculator" block.', 'film-transfer-toolkit' ), FILMCALC_VERSION ) );
 			?></p>
-			<p><?php esc_html_e( 'If you deactivate the standalone plugin, your existing [film_calculator] pages switch to the toolkit automatically and use the settings under FTT > Calculator look. Nothing has been deactivated; this is your choice.', 'film-transfer-toolkit' ); ?></p>
+			<p><?php esc_html_e( 'If you deactivate the standalone plugin, your existing [film_calculator] pages switch to the toolkit automatically and use the settings under FTT > Settings > Film calculator. Nothing has been deactivated; this is your choice.', 'film-transfer-toolkit' ); ?></p>
 			<?php if ( ! $toolkit ) : ?>
 				<p><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=ftt_dismiss_notice' ), 'ftt_dismiss_notice' ) ); ?>"><?php esc_html_e( 'Hide this message on the Plugins screen', 'film-transfer-toolkit' ); ?></a></p>
 			<?php endif; ?>

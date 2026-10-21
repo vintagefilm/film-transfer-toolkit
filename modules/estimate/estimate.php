@@ -70,7 +70,7 @@ class FTT_Estimate {
 		$u = 'ftt-est-' . $n;
 		ob_start();
 		?>
-		<div class="ftt-box ftt-est" data-ftt-estimate>
+		<div class="ftt-tool ftt-box ftt-est" data-ftt-estimate>
 			<h3 class="ftt-box__title"><?php echo esc_html( $title ); ?></h3>
 			<?php echo FTT_Price_Table::banner( $t ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in banner(). ?>
 			<p class="ftt-box__sub"><?php esc_html_e( 'Add a line for each group of reels. If you know the footage, type it in; otherwise pick the reel size.', 'film-transfer-toolkit' ); ?></p>

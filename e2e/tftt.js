@@ -181,8 +181,8 @@ wp('plugin activate film-calculator');wp(`post delete ${al} --force`);
 
 // ---------- admin
 await p.goto(B+'/wp-login.php');await p.fill('#user_login','admin');await p.fill('#user_pass','admin');await p.click('#wp-submit');await p.waitForLoadState();console.log('after login:',p.url(), await p.locator('#login_error').count()? (await p.textContent('#login_error')).trim():'');
-await p.goto(B+'/wp-admin/admin.php?page=ftt-settings');console.log('settings page:',p.url(),(await p.title()));
-ok('Modules page lists 7 modules (incl. storage), all active',await p.locator('.ftt-modules tbody tr').count()===7&&await p.locator('.ftt-pill--on').count()===7);
+await p.goto(B+'/wp-admin/admin.php?page=ftt-tools');console.log('settings page:',p.url(),(await p.title()));
+ok('Tools page lists 7 tools (incl. storage), all on',await p.locator('tr[id^="ftt-tool-"]').count()===7&&await p.locator('tr[id^="ftt-tool-"] .ftt-pill--on').count()===7,await p.locator('tr[id^="ftt-tool-"]').count());
 await p.screenshot({path:SH+'11-admin-modules.png',fullPage:true});
 await p.goto(B+'/wp-admin/admin.php?page=ftt-prices');
 await p.click('button[value=draft]');await p.waitForLoadState();

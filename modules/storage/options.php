@@ -232,7 +232,7 @@ function ftt_storage_render_settings() {
 		<form action="options.php" method="post">
 			<?php settings_fields( 'ftt_storage' ); ?>
 			<?php ftt_storage_render_fields( $o, 'ftt_storage' ); ?>
-			<?php submit_button(); ?>
+			<?php submit_button( __( 'Save changes', 'film-transfer-toolkit' ) ); ?>
 		</form>
 		<h2><?php esc_html_e( 'Currently', 'film-transfer-toolkit' ); ?></h2>
 		<ul class="ul-disc"><?php foreach ( $o['deliverables'] as $d ) : ?><li><?php echo esc_html( ftt_storage_deliverable_label( $d ) ); ?></li><?php endforeach; ?></ul>

@@ -1,8 +1,6 @@
-/* Clip selector (ported from fw-clip-cart): LAYOUT ONLY. Fonts, sizes, colours, backgrounds, inputs and buttons all come from the theme (Kadence).
-   The only visual override is the 3px button radius requested by Joanne. */
-.fwcc{margin:1em 0}
-.fwcc .button,.fwcc button.button{border-radius:3px}
-.fwcc-marks{display:grid;grid-template-columns:max-content minmax(8em,max-content) max-content max-content;gap:.5em .75em;align-items:center;margin-bottom:.5em}
+/* Clip selector (FTT 1.5.0): container, type, inputs and buttons (3px radius, Joanne) come from ftt-base.css (.ftt-tool). Tokens only. */
+.fwcc .button,.fwcc button.button{border-radius:var(--ftt-radius-sm)}
+.fwcc-marks{display:grid;grid-template-columns:max-content minmax(8em,max-content) max-content max-content;gap:.5em var(--ftt-gap);align-items:center;margin-bottom:.5em}
 .fwcc-marks .fwcc-set{width:100%}
 .fwcc-tc,.fwcc-list td.mono,.fwcc-debug{font-variant-numeric:tabular-nums}
 .fwcc-trim-label{cursor:help}
@@ -20,9 +18,9 @@
 @media (max-width:600px){.fwcc-marks{grid-template-columns:max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2}}
 /* 1.3.0: request mode and preview notice */
 .fwcc-hp{position:absolute!important;left:-10000px!important;width:1px;height:1px;overflow:hidden}
-.fwcc-request{margin:.5em 0;padding:.75em;border:1px solid rgba(128,128,128,.35);border-radius:3px}
+.fwcc-request{margin:.5em 0;padding:.75em;border:1px solid var(--ftt-border);border-radius:var(--ftt-radius-sm)}
 .fwcc-request label{display:flex;flex-direction:column;gap:.25em;flex:1;min-width:12em}
 .fwcc-rq-notewrap label{width:100%}
 .fwcc-rq-note{width:100%}
-.fwcc-demo{padding:.5em .75em;border-left:4px solid #d63638;background:rgba(214,54,56,.08);margin:0 0 .75em}
-.fwcc-msg.bad{color:#b32d2e}
+.fwcc-demo{padding:.5em .75em;border-left:4px solid var(--ftt-bad);background:var(--ftt-bad-bg);margin:0 0 .75em}
+.fwcc-msg.bad{color:var(--ftt-bad)}

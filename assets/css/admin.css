@@ -87,3 +87,41 @@
 .ftt-atts th[scope="row"] code { white-space: nowrap; }
 .ftt-atts td:nth-child(2) { font-weight: 600; }
 .ftt-examples .ftt-ex-all code, .ftt-examples .ftt-ex-block code { word-break: break-all; }
+
+/* 1.5.0 admin structure: one header, tool cards, tabs, Advanced boxes. WordPress admin colours (#2271b1 etc.) are the
+   admin's own design system; front-end tools never use this file. */
+.ftt-admin .ftt-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:6px 0 4px}
+.ftt-admin .ftt-header__title{margin:0;padding:0;font-size:23px;font-weight:400;line-height:1.3}
+.ftt-admin .ftt-header__brand{font-weight:600}
+.ftt-admin .ftt-header__sep{color:#8c8f94;margin:0 2px}
+.ftt-admin .ftt-header__ver{font-size:12px;color:#646970;margin-left:6px}
+.ftt-admin .ftt-header__nav{display:flex;flex-wrap:wrap;gap:6px}
+.ftt-admin .ftt-intro{margin:4px 0 12px;font-size:14px;color:#3c434a;max-width:760px}
+.ftt-admin .ftt-section{margin:28px 0 8px;font-size:16px}
+.ftt-admin .ftt-facts{margin:0;padding:0;list-style:none}.ftt-admin .ftt-facts li{margin:0 0 6px}
+.ftt-admin .ftt-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0}
+.ftt-admin .ftt-toolcard{display:flex;flex-direction:column;margin:0;padding:16px 18px;background:#fff;border:1px solid #c3c4c7;border-radius:4px}
+.ftt-admin .ftt-toolcard.is-off{background:#f6f7f7}
+.ftt-admin .ftt-toolcard__title{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:15px;line-height:1.4}
+.ftt-admin .ftt-toolcard__title .ftt-pill{margin-left:auto}
+.ftt-admin .ftt-toolcard__line{margin:0 0 10px;color:#3c434a}
+.ftt-admin .ftt-toolcard__add{margin:0 0 10px;padding:10px 12px;background:#f6f7f7;border-radius:4px}
+.ftt-admin .ftt-toolcard.is-off .ftt-toolcard__add{background:#fff}
+.ftt-admin .ftt-toolcard__add h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#50575e}
+.ftt-admin .ftt-toolcard__add dl{margin:0}.ftt-admin .ftt-toolcard__add dt{margin:8px 0 2px;font-weight:600}
+.ftt-admin .ftt-toolcard__add dd{margin:0 0 4px;font-size:13px}
+.ftt-admin .ftt-toolcard__how{display:inline-block;min-width:72px;color:#50575e}
+.ftt-admin .ftt-toolcard__links{margin:auto 0 0;padding-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+.ftt-admin .ftt-col-on{width:40px;text-align:center}
+.ftt-admin .ftt-tabs{margin-bottom:0}
+.ftt-admin .nav-tab.is-off{color:#8c8f94}
+.ftt-admin .nav-tab .ftt-pill{font-size:10px;vertical-align:middle}
+.ftt-admin .ftt-tab-panel{padding:4px 0 0}
+.ftt-admin .ftt-tab-panel>h2:first-child,.ftt-admin .ftt-tab-panel h2{font-size:18px}
+.ftt-admin details.ftt-advanced{margin:20px 0;border:1px solid #c3c4c7;border-radius:4px;background:#fff;max-width:960px}
+.ftt-admin details.ftt-advanced>summary{padding:10px 14px;cursor:pointer;font-weight:600}
+.ftt-admin details.ftt-advanced[open]>summary{border-bottom:1px solid #dcdcde}
+.ftt-admin details.ftt-advanced>:not(summary){padding:0 14px}
+.ftt-admin .ftt-advanced__body{padding:4px 14px 12px}
+@media (max-width:782px){.ftt-admin .ftt-header{flex-direction:column;align-items:flex-start}.ftt-admin .ftt-cards{grid-template-columns:1fr}}
+.ftt-admin .ftt-toolcard__pages{margin:0 0 10px;font-size:13px}

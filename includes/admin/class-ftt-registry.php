@@ -42,7 +42,7 @@ class FTT_Registry {
 						'atts'      => array(
 							array( 'name' => 'format', 'label' => __( 'Film format', 'film-transfer-toolkit' ), 'default_note' => __( 'The default film format (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:default_format', 'type' => 'select', 'default' => '', 'options' => $fmt8, 'help' => __( 'Film format selected when the page opens. Visitors can still change it.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'fps', 'label' => __( 'Starting frame rate (fps)', 'film-transfer-toolkit' ), 'default_note' => __( 'The default frame rate (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:default_fps', 'type' => 'text', 'default' => '', 'example' => '18', 'help' => __( 'Frame rate selected when the page opens, for example 16, 18, 24 or 25.', 'film-transfer-toolkit' ) ),
-							array( 'name' => 'theme', 'label' => __( 'Colour scheme', 'film-transfer-toolkit' ), 'default_note' => __( 'The colour scheme (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:theme', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'dark' => __( 'Dark', 'film-transfer-toolkit' ), 'light' => __( 'Light', 'film-transfer-toolkit' ) ), 'help' => __( 'Dark or light colour scheme.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'theme', 'label' => __( 'Colour scheme', 'film-transfer-toolkit' ), 'default_note' => __( 'The colour scheme (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:theme', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'site' => __( 'Site theme', 'film-transfer-toolkit' ), 'dark' => __( 'Dark', 'film-transfer-toolkit' ), 'light' => __( 'Light', 'film-transfer-toolkit' ) ), 'help' => __( 'Site theme (matches every FTT tool), or a dark or light panel.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'accent', 'label' => __( 'Accent colour', 'film-transfer-toolkit' ), 'default_note' => __( 'The accent colour (Calculator look settings), or the built-in colour', 'film-transfer-toolkit' ), 'setting' => 'calc:accent', 'type' => 'color', 'default' => '', 'example' => '#c0392b', 'help' => __( 'Accent colour as a hex code, for example #c0392b. Leave empty for the built-in colour.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'heading_font', 'label' => __( 'Heading font', 'film-transfer-toolkit' ), 'default_note' => __( 'The heading font (Calculator look settings)', 'film-transfer-toolkit' ), 'setting' => 'calc:heading_font', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the settings default', 'film-transfer-toolkit' ), 'preset' => __( 'Built-in display font', 'film-transfer-toolkit' ), 'yeseva' => 'Yeseva One', 'theme' => __( 'Your theme font', 'film-transfer-toolkit' ), 'plain' => __( 'Plain system font', 'film-transfer-toolkit' ) ), 'help' => __( 'Font used for the calculator heading.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'meters', 'label' => __( 'Show Length (meters)', 'film-transfer-toolkit' ), 'default_note' => __( 'The Fields setting (Calculator look)', 'film-transfer-toolkit' ), 'setting' => 'calc:show_meters', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'Show the Length (meters) field.', 'film-transfer-toolkit' ) ),
@@ -56,7 +56,7 @@ class FTT_Registry {
 							array( 'name' => 'title', 'label' => __( 'Heading', 'film-transfer-toolkit' ), 'default_note' => __( '"Film Calculator"', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'How long is my film?', 'help' => __( 'Heading shown above the calculator.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
-							'[ftt_calculator]'                                 => __( 'Uses the defaults from FTT > Calculator look.', 'film-transfer-toolkit' ),
+							'[ftt_calculator]'                                 => __( 'Uses the defaults from FTT > Settings > Film calculator.', 'film-transfer-toolkit' ),
 							'[ftt_calculator format="s8" fps="18"]'            => __( 'Opens on Super 8 at 18 frames per second.', 'film-transfer-toolkit' ),
 							'[ftt_calculator theme="light" accent="#c0392b" table="yes"]' => __( 'Light scheme, red accent, with the reel table.', 'film-transfer-toolkit' ),
 							'[ftt_calculator meters="no" frames="no" seconds="no"]' => __( 'Feet, running time and film speed only.', 'film-transfer-toolkit' ),
@@ -64,7 +64,7 @@ class FTT_Registry {
 					),
 				),
 				'faq'     => array(
-					__( 'The page shows [film_calculator] as plain text.', 'film-transfer-toolkit' ) => __( 'Make sure the Film calculator module is switched on under FTT > Settings. If the standalone Film Calculator plugin is active it handles [film_calculator] itself; [ftt_calculator] always uses the toolkit.', 'film-transfer-toolkit' ),
+					__( 'The page shows [film_calculator] as plain text.', 'film-transfer-toolkit' ) => __( 'Make sure the Film calculator module is switched on under FTT > Tools. If the standalone Film Calculator plugin is active it handles [film_calculator] itself; [ftt_calculator] always uses the toolkit.', 'film-transfer-toolkit' ),
 					__( 'Which shortcode should I use?', 'film-transfer-toolkit' ) => __( 'Use [ftt_calculator] or the "Film calculator" block. [film_calculator] is kept so pages built with the older standalone plugin keep working.', 'film-transfer-toolkit' ),
 					__( 'The colours clash with my theme.', 'film-transfer-toolkit' ) => __( 'Try theme="light" and set an accent colour that matches your site, or change the defaults once under Calculator look.', 'film-transfer-toolkit' ),
 					__( 'Can I hide the meters, frames, frame rate or seconds fields?', 'film-transfer-toolkit' ) => __( 'Yes. Untick them under Calculator look > Fields for the whole site, or use meters="no", frames="no", fps_picker="no", speed="no" or seconds="no" (block: Fields panel) on one page.', 'film-transfer-toolkit' ),
@@ -101,7 +101,7 @@ class FTT_Registry {
 				'title'   => __( 'Price table', 'film-transfer-toolkit' ),
 				'icon'    => 'money-alt',
 				'image'   => 'prices.webp',
-				'summary' => __( 'Shows your prices from FTT > Prices as a tidy table. Change a price once and every page that shows the table (and the estimate builder) updates.', 'film-transfer-toolkit' ),
+				'summary' => __( 'Shows your prices from FTT > Settings > Prices as a tidy table. Change a price once and every page that shows the table (and the estimate builder) updates.', 'film-transfer-toolkit' ),
 				'embeds'  => array(
 					array(
 						'shortcode' => 'ftt_price_table',
@@ -121,7 +121,7 @@ class FTT_Registry {
 				),
 				'faq'     => array(
 					__( 'There is a yellow "EXAMPLE" banner above the table.', 'film-transfer-toolkit' ) => __( 'That shows until you enter your own prices and mark the table Final on the Prices page. It stops visitors mistaking sample prices for real ones.', 'film-transfer-toolkit' ),
-					__( 'Where do I find a service ID?', 'film-transfer-toolkit' ) => __( 'On FTT > Prices, in the ID column of the Services table.', 'film-transfer-toolkit' ),
+					__( 'Where do I find a service ID?', 'film-transfer-toolkit' ) => __( 'On FTT > Settings > Prices, in the ID column of the Services table.', 'film-transfer-toolkit' ),
 				),
 			),
 			'estimate'   => array(

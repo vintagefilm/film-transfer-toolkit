@@ -111,7 +111,7 @@ class FTT_Clip_Shortcode
         $card = FTT_Clip_Rate_Card::get();
         $T = self::tips();
         $ta = function ($k, $arg = null) use ($T) { $v = $arg === null ? $T[$k] : sprintf($T[$k], $arg); return 'title="' . esc_attr($v) . '" aria-label="' . esc_attr($v) . '"'; };
-        wp_enqueue_style('ftt-clip', FTT_CLIP_URL . 'assets/clip-selector.css', [], FTT_VERSION);
+        wp_enqueue_style('ftt-clip', FTT_CLIP_URL . 'assets/clip-selector.css', ['ftt-base'], FTT_VERSION);
         wp_enqueue_script('ftt-clip-players', FTT_CLIP_URL . 'assets/clip-players.js', [], FTT_VERSION, true);
         wp_enqueue_script('ftt-clip', FTT_CLIP_URL . 'assets/clip-selector.js', ['ftt-core', 'ftt-clip-players'], FTT_VERSION, true);
         wp_localize_script('ftt-clip', 'FTT_CLIP', [
@@ -121,7 +121,7 @@ class FTT_Clip_Shortcode
             'card'  => $card,
         ]);
         ob_start(); ?>
-<div class="fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>">
+<div class="ftt-tool fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>">
 <?php if (self::$demo) : ?>  <p class="fwcc-demo"><strong><?php esc_html_e('Preview only:', 'film-transfer-toolkit'); ?></strong> <?php esc_html_e('the Clip selector module is switched off on this site, so visitors do not see this and nothing can be sent.', 'film-transfer-toolkit'); ?></p>
 <?php endif; ?>
   <div class="fwcc-marks">

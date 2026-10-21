@@ -1,43 +1,37 @@
-/* Film Calculator 1.1.1. Theme with CSS custom properties on .filmcalc:
-   --fc-bg, --fc-text, --fc-accent, --fc-field-bg, --fc-heading-font (plus --fc-muted, --fc-border, --fc-accent-2, --fc-heading-color, --fc-on-accent). */
-@font-face{font-family:"Yeseva One";font-style:normal;font-weight:400;font-display:swap;src:url("../../assets/fonts/YesevaOne-Regular.woff2") format("woff2")}
-
-.filmcalc{--fc-bg:#1d1d1f;--fc-text:#f5f5f7;--fc-muted:rgba(245,245,247,.8);--fc-accent:#ffb700;--fc-accent-2:var(--fc-accent);--fc-field-bg:#2c2c2e;--fc-border:#444;--fc-heading-color:var(--fc-accent);--fc-on-accent:#1d1d1f;--fc-heading-font:"Yeseva One",Georgia,"Times New Roman",serif;--fc-shadow:0 6px 24px rgba(0,0,0,.18);
-  box-sizing:border-box;max-width:760px;margin:1.5em auto;padding:1.5em;border-radius:12px;background:var(--fc-bg);color:var(--fc-text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:var(--fc-shadow)}
-.filmcalc--light{--fc-bg:#faf5ed;--fc-text:#161600;--fc-muted:rgba(22,22,0,.75);--fc-accent:#a1b7e9;--fc-accent-2:#d3d379;--fc-field-bg:#fff3c7;--fc-border:rgba(22,22,0,.28);--fc-heading-color:#161600;--fc-on-accent:#161600;--fc-shadow:0 4px 18px rgba(22,22,0,.10)}
-.filmcalc *{box-sizing:border-box}
-.filmcalc__head{display:flex;justify-content:space-between;align-items:flex-start;gap:1em;margin:0 0 1.2em}
-.filmcalc .filmcalc__title{margin:0 0 .2em;color:var(--fc-heading-color);font-size:1.5em;line-height:1.2}
-.filmcalc--hf-plain .filmcalc__title{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:700;letter-spacing:0;text-transform:none}
+/* Film Calculator (FTT 1.5.0). Container, type, inputs and buttons come from ftt-base.css (.ftt-tool); colour schemes
+   (site, dark, light) are token sets there. The 1.x --fc-* properties still work: each defaults to its --ftt-* token,
+   so an inline --fc-accent (the accent option) or a theme override of --fc-* still applies. Tokens only here. */
+.filmcalc{--fc-bg:var(--ftt-bg);--fc-text:var(--ftt-text);--fc-muted:var(--ftt-muted);--fc-accent:var(--ftt-accent);--fc-accent-2:var(--ftt-accent-2,var(--fc-accent));--fc-field-bg:var(--ftt-field-bg);--fc-field-text:var(--ftt-field-text);--fc-border:var(--ftt-border);--fc-heading-color:var(--ftt-heading-color,inherit);--fc-on-accent:var(--ftt-on-accent);--fc-heading-font:var(--ftt-font-display);
+  background:var(--fc-bg);color:var(--fc-text);border-color:var(--fc-border)}
+.filmcalc__head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--ftt-gap);margin:0 0 var(--ftt-gap)}
+.filmcalc .filmcalc__title{color:var(--fc-heading-color)}
+.filmcalc--hf-plain .filmcalc__title{font-family:var(--ftt-font-plain);font-weight:700;letter-spacing:0;text-transform:none}
 .filmcalc--hf-yeseva .filmcalc__title{font-family:var(--fc-heading-font);font-weight:400;letter-spacing:0;text-transform:none}
-.filmcalc .filmcalc__sub{margin:0 !important;color:var(--fc-muted);font-size:.95em}
-.filmcalc .filmcalc__mode{margin:-.4em 0 1em !important;font-size:.85em;font-weight:600;color:var(--fc-muted)}
-.filmcalc .filmcalc__switch{flex:none;display:inline-flex;align-items:center;gap:.4em;padding:.55em .9em;font:inherit;font-size:.9em;font-weight:600;line-height:1.2;color:var(--fc-on-accent);background:var(--fc-accent);border:1px solid var(--fc-accent);border-radius:8px;cursor:pointer;box-shadow:none;text-transform:none;letter-spacing:0}
-.filmcalc .filmcalc__switch:hover,.filmcalc .filmcalc__switch:focus-visible{color:var(--fc-on-accent);background:var(--fc-accent);filter:brightness(1.08);outline:2px solid var(--fc-text);outline-offset:2px}
-.filmcalc__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1em}
+.filmcalc .filmcalc__sub{margin:0 !important;color:var(--fc-muted);font-size:var(--ftt-size-small)}
+.filmcalc .filmcalc__mode{margin:-.4em 0 1em !important;font-size:var(--ftt-size-small);font-weight:600;color:var(--fc-muted)}
+.filmcalc .filmcalc__switch{flex:none;color:var(--fc-on-accent);background:var(--fc-accent);border-color:var(--fc-accent)}
+.filmcalc__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--ftt-gap)}
 .filmcalc__f-format{order:1}.filmcalc__f-speed{order:2}.filmcalc__custom{order:3}.filmcalc__f-feet{order:4}.filmcalc__f-meters{order:5}.filmcalc__f-time{order:6}.filmcalc__f-frames{order:7}
 .filmcalc[data-mode="time"] .filmcalc__f-time{order:4}
 .filmcalc[data-mode="time"] .filmcalc__f-feet{order:5}
 .filmcalc[data-mode="time"] .filmcalc__f-meters{order:6}
-.filmcalc__field{display:flex;flex-direction:column;gap:.35em;font-size:.85em;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--fc-text)}
+.filmcalc__field{display:flex;flex-direction:column;gap:.35em;font-size:var(--ftt-size-label);font-weight:600;color:var(--fc-text)}
 .filmcalc__field[hidden]{display:none}
-.filmcalc input,.filmcalc select{width:100%;margin:0;padding:.7em .8em;font-size:16px;line-height:1.3;border:1px solid var(--fc-border);border-radius:8px;background-color:var(--fc-field-bg);color:var(--fc-text);text-transform:none;letter-spacing:0;box-shadow:none}
+.filmcalc input,.filmcalc select{width:100%;margin:0;border-color:var(--fc-border);background-color:var(--fc-field-bg);color:var(--fc-field-text);text-transform:none;letter-spacing:0}
 .filmcalc[data-mode="len"] .filmcalc__f-feet input,.filmcalc[data-mode="time"] .filmcalc__f-time input{border-color:var(--fc-accent)}
-.filmcalc input:focus,.filmcalc select:focus,.filmcalc input:hover,.filmcalc select:hover{outline:2px solid var(--fc-accent);outline-offset:0;border-color:var(--fc-accent);background-color:var(--fc-field-bg);color:var(--fc-text);box-shadow:none}
-.filmcalc--light input:focus,.filmcalc--light select:focus{border-color:var(--fc-text);outline:3px solid var(--fc-accent)}
-.filmcalc select{-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:2.4em;background-image:linear-gradient(45deg,transparent 50%,var(--fc-text) 50%),linear-gradient(135deg,var(--fc-text) 50%,transparent 50%);background-position:calc(100% - 1.2em) 55%,calc(100% - .85em) 55%;background-size:.35em .35em,.35em .35em;background-repeat:no-repeat}
-.filmcalc select option{background:var(--fc-field-bg);color:var(--fc-text)}
-.filmcalc .filmcalc__summary{margin:1.5em 0 0 !important;padding:.9em 1em;border-left:4px solid var(--fc-accent-2);background:var(--fc-field-bg);color:var(--fc-text);border-radius:6px;font-variant-numeric:tabular-nums}
-.filmcalc .filmcalc__stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75em;margin:1em 0 0;padding:0}
-.filmcalc .filmcalc__stats>div{padding:.7em 1em;border:1px solid var(--fc-border);border-radius:8px}
-.filmcalc .filmcalc__stats dt{margin:0;font-size:.8em;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--fc-muted)}
+.filmcalc input:focus,.filmcalc select:focus,.filmcalc input:hover,.filmcalc select:hover{outline:2px solid var(--fc-accent);outline-offset:0;border-color:var(--fc-accent);background-color:var(--fc-field-bg);color:var(--fc-field-text);box-shadow:none}
+.filmcalc select option{background:var(--fc-field-bg);color:var(--fc-field-text)}
+.filmcalc .filmcalc__summary{margin:1.5em 0 0 !important;padding:.9em 1em;border-left:4px solid var(--fc-accent-2);background:var(--ftt-soft);color:var(--fc-text);border-radius:var(--ftt-radius-sm);font-variant-numeric:tabular-nums}
+.filmcalc .filmcalc__stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--ftt-gap);margin:var(--ftt-gap) 0 0;padding:0}
+.filmcalc .filmcalc__stats>div{padding:.7em 1em;border:1px solid var(--fc-border);border-radius:var(--ftt-radius-sm)}
+.filmcalc .filmcalc__stats dt{margin:0;font-size:var(--ftt-size-small);font-weight:600;color:var(--fc-muted)}
 .filmcalc .filmcalc__stats dd{margin:.2em 0 0;font-size:1.15em;font-weight:700;font-variant-numeric:tabular-nums}
 .filmcalc__tablewrap{margin-top:1.2em;overflow-x:auto}
-.filmcalc .filmcalc__table{width:100%;margin:0;border-collapse:collapse;font-size:.9em;color:var(--fc-text);background:transparent}
+.filmcalc .filmcalc__table{width:100%;margin:0;border-collapse:collapse;font-size:var(--ftt-size-small);color:var(--fc-text);background:transparent}
 .filmcalc .filmcalc__table caption{text-align:left;font-weight:700;padding:0 0 .5em;color:var(--fc-text)}
 .filmcalc .filmcalc__table th,.filmcalc .filmcalc__table td{padding:.5em .6em;border:0;border-bottom:1px solid var(--fc-border);text-align:right;background:transparent;color:var(--fc-text);font-variant-numeric:tabular-nums}
 .filmcalc .filmcalc__table th:first-child,.filmcalc .filmcalc__table thead th:first-child{text-align:left}
-.filmcalc .filmcalc__table thead th{font-size:.85em;color:var(--fc-muted);font-weight:600}
+.filmcalc .filmcalc__table thead th{font-size:var(--ftt-size-small);color:var(--fc-muted);font-weight:600}
 .filmcalc .filmcalc__table tbody th{font-weight:500}
-.filmcalc .filmcalc__table tr.is-current th,.filmcalc .filmcalc__table tr.is-current td{font-weight:700;background:var(--fc-field-bg)}
-@media (max-width:480px){.filmcalc{padding:1em;border-radius:0}.filmcalc__head{flex-direction:column}}
+.filmcalc .filmcalc__table tr.is-current th,.filmcalc .filmcalc__table tr.is-current td{font-weight:700;background:var(--ftt-soft)}
+@media (max-width:600px){.filmcalc__head{flex-direction:column}}

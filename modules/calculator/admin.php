@@ -26,15 +26,16 @@ function ftt_calc_register_settings() {
 	add_settings_field( 'default_fps', __( 'Default frame rate (fps)', 'film-transfer-toolkit' ), 'ftt_calc_field_fps', 'ftt-calculator', 'ftt_calc_defaults', array( 'label_for' => 'ftt_calc_default_fps' ) );
 
 	add_settings_section( 'ftt_calc_look', __( 'Appearance', 'film-transfer-toolkit' ), '__return_false', 'ftt-calculator' );
-	add_settings_field( 'theme', __( 'Color theme', 'film-transfer-toolkit' ), 'ftt_calc_field_theme', 'ftt-calculator', 'ftt_calc_look' );
-	add_settings_field( 'accent', __( 'Accent color', 'film-transfer-toolkit' ), 'ftt_calc_field_accent', 'ftt-calculator', 'ftt_calc_look', array( 'label_for' => 'ftt_calc_accent' ) );
-	add_settings_field( 'heading_font', __( 'Heading font', 'film-transfer-toolkit' ), 'ftt_calc_field_heading_font', 'ftt-calculator', 'ftt_calc_look', array( 'label_for' => 'ftt_calc_heading_font' ) );
+	add_settings_field( 'theme', __( 'Colour scheme', 'film-transfer-toolkit' ), 'ftt_calc_field_theme', 'ftt-calculator', 'ftt_calc_look' );
 
 	add_settings_section( 'ftt_calc_fields', __( 'Fields', 'film-transfer-toolkit' ), 'ftt_calc_fields_intro', 'ftt-calculator' );
 	foreach ( ftt_calc_field_toggle_labels() as $key => $l ) {
 		add_settings_field( $key, $l[0], 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_fields', array( 'key' => $key, 'text' => $l[1] ) );
 	}
 
+	add_settings_section( 'ftt_calc_more', __( 'More appearance options', 'film-transfer-toolkit' ), '__return_false', 'ftt-calculator' );
+	add_settings_field( 'accent', __( 'Accent colour', 'film-transfer-toolkit' ), 'ftt_calc_field_accent', 'ftt-calculator', 'ftt_calc_more', array( 'label_for' => 'ftt_calc_accent' ) );
+	add_settings_field( 'heading_font', __( 'Heading font', 'film-transfer-toolkit' ), 'ftt_calc_field_heading_font', 'ftt-calculator', 'ftt_calc_more', array( 'label_for' => 'ftt_calc_heading_font' ) );
 	add_settings_section( 'ftt_calc_extras', __( 'Extras', 'film-transfer-toolkit' ), '__return_false', 'ftt-calculator' );
 	add_settings_field( 'show_switch', __( 'Switch button', 'film-transfer-toolkit' ), 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_extras', array( 'key' => 'show_switch', 'text' => __( 'Show the Length → Time / Time → Length switch', 'film-transfer-toolkit' ) ) );
 	add_settings_field( 'show_table', __( 'Reference table', 'film-transfer-toolkit' ), 'ftt_calc_field_checkbox', 'ftt-calculator', 'ftt_calc_extras', array( 'key' => 'show_table', 'text' => __( 'Show the format reference table', 'film-transfer-toolkit' ) ) );
@@ -78,6 +79,7 @@ function ftt_calc_field_fps() {
 function ftt_calc_field_theme() {
 	$o       = ftt_calc_get_options();
 	$choices = array(
+		'site'  => __( 'Site theme (same colours and fonts as every FTT tool; recommended)', 'film-transfer-toolkit' ),
 		'dark'  => __( 'Dark (amber accent)', 'film-transfer-toolkit' ),
 		'light' => __( 'Light (FilmTransfer.ai palette, Yeseva One headings)', 'film-transfer-toolkit' ),
 	);
@@ -133,7 +135,7 @@ function ftt_calc_render_settings_page() {
 			<?php
 			settings_fields( 'ftt_calc' );
 			do_settings_sections( 'ftt-calculator' );
-			submit_button();
+			submit_button( __( 'Save changes', 'film-transfer-toolkit' ) );
 			?>
 		</form>
 		<hr>
@@ -149,7 +151,7 @@ function ftt_calc_render_help_page( $wrap = true ) {
 	$attrs = array(
 		array( 'format', '8, s8, 16, 35-4, 35-3, 35-2', __( 'Starting film format.', 'film-transfer-toolkit' ) ),
 		array( 'fps', '16, 18, 24, 25, 29.97, 30 or any number up to 1000', __( 'Starting frame rate. Non-standard values preselect Custom.', 'film-transfer-toolkit' ) ),
-		array( 'theme', 'dark, light', __( 'Color preset. Light uses the FilmTransfer.ai palette.', 'film-transfer-toolkit' ) ),
+		array( 'theme', 'site, dark, light', __( 'Color preset. Light uses the FilmTransfer.ai palette.', 'film-transfer-toolkit' ) ),
 		array( 'accent', '#rgb or #rrggbb', __( 'Accent color. Invalid values are ignored.', 'film-transfer-toolkit' ) ),
 		array( 'heading_font', 'preset, theme, plain, yeseva', __( 'Font for the calculator title.', 'film-transfer-toolkit' ) ),
 		array( 'extras', 'yes, no', __( 'Show film speed (ft/min) and total seconds.', 'film-transfer-toolkit' ) ),

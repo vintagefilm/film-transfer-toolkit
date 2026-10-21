@@ -27,7 +27,7 @@ ok('admin menu item reads "FTT"',mname==='FTT',mname);
 ok('menu slug unchanged (admin.php?page=ftt)',(await p.getAttribute('#toplevel_page_ftt > a','href')).includes('page=ftt'));
 const subs=await p.$$eval('#toplevel_page_ftt .wp-submenu li a',xs=>xs.map(x=>x.textContent.trim()));
 ok('submenu has Help and Settings',subs.some(s=>/Help/.test(s))&&subs.some(s=>/Settings/.test(s)),subs.join('|'));
-ok('dashboard heading is FTT',/^FTT\s*v1\.4\.\d+/.test((await p.textContent('.wrap h1')).trim()),await p.textContent('.wrap h1'));
+ok('dashboard heading is FTT',/^FTT\s*›\s*Dashboard\s*v1\.5\.\d+/.test((await p.textContent('.wrap h1')).trim()),await p.textContent('.wrap h1'));
 ok('no old name on the dashboard',!(await p.content()).includes('Film Transfer Toolkit'));
 await p.locator('#adminmenuwrap').screenshot({path:SH+'renamed-admin-menu.png'});
 await p.screenshot({path:SH+'renamed-dashboard.png'});

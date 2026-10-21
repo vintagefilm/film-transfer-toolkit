@@ -169,7 +169,7 @@ class FTT_Setup {
 		$on = FTT_Plugin::enabled();
 		?>
 		<h2><?php esc_html_e( 'Which tools do you want?', 'film-transfer-toolkit' ); ?></h2>
-		<p><?php esc_html_e( 'Tick the tools you want to use on your site. You can change this at any time under FTT > Settings.', 'film-transfer-toolkit' ); ?></p>
+		<p><?php esc_html_e( 'Tick the tools you want to use on your site. You can change this at any time under FTT > Tools.', 'film-transfer-toolkit' ); ?></p>
 		<div class="ftt-choices">
 		<?php foreach ( FTT_Registry::tools() as $k => $t ) : ?>
 			<label class="ftt-choice">
@@ -258,6 +258,7 @@ class FTT_Setup {
 		<p><?php esc_html_e( 'Choose how the film calculator looks and what it shows first. Every page can override these with block settings or shortcode attributes.', 'film-transfer-toolkit' ); ?></p>
 		<table class="form-table" role="presentation">
 			<tr><th><?php esc_html_e( 'Colour scheme', 'film-transfer-toolkit' ); ?></th><td>
+				<label class="ftt-radio"><input type="radio" name="theme" value="site" <?php checked( 'site', $o['theme'] ); ?>> <?php esc_html_e( 'Site theme (same colours and fonts as your site and every FTT tool; recommended)', 'film-transfer-toolkit' ); ?></label>
 				<label class="ftt-radio"><input type="radio" name="theme" value="dark" <?php checked( 'dark', $o['theme'] ); ?>> <?php esc_html_e( 'Dark (light text on a dark panel)', 'film-transfer-toolkit' ); ?></label>
 				<label class="ftt-radio"><input type="radio" name="theme" value="light" <?php checked( 'light', $o['theme'] ); ?>> <?php esc_html_e( 'Light (dark text on a light panel)', 'film-transfer-toolkit' ); ?></label>
 			</td></tr>
@@ -299,7 +300,7 @@ class FTT_Setup {
 				<p><label for="ftt-price-json"><?php esc_html_e( 'or paste the JSON here', 'film-transfer-toolkit' ); ?></label><br><textarea id="ftt-price-json" name="price_json" rows="5" class="large-text code"></textarea></p>
 			</div>
 		</fieldset>
-		<p class="description"><?php esc_html_e( 'To type prices in one by one, finish setup and open FTT > Prices.', 'film-transfer-toolkit' ); ?></p>
+		<p class="description"><?php esc_html_e( 'To type prices in one by one, finish setup and open FTT > Settings > Prices.', 'film-transfer-toolkit' ); ?></p>
 		<?php
 	}
 
@@ -324,7 +325,7 @@ class FTT_Setup {
 			<tr><th><label for="ftt-notify"><?php esc_html_e( 'Notify address (optional)', 'film-transfer-toolkit' ); ?></label></th><td><input type="email" id="ftt-notify" name="notify_email" class="regular-text" value="<?php echo esc_attr( $g['notify_email'] ); ?>" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"></td></tr>
 			<tr><th><?php esc_html_e( 'Mail mode', 'film-transfer-toolkit' ); ?></th><td>
 				<p><strong><?php echo esc_html( 'send' === $g['mail_mode'] ? __( 'Send (emails go out with wp_mail)', 'film-transfer-toolkit' ) : __( 'Log only (nothing is sent)', 'film-transfer-toolkit' ) ); ?></strong></p>
-				<p class="description"><?php esc_html_e( 'Setup never changes this. In log-only mode every email the toolkit would send is written to FTT > Mail log instead, so you can test safely. When you are ready, switch Mail mode to Send under Settings.', 'film-transfer-toolkit' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Setup never changes this. In log-only mode every email the toolkit would send is written to the Mail log (FTT > Settings > Email) instead, so you can test safely. When you are ready, switch Mail mode to Send under Settings.', 'film-transfer-toolkit' ); ?></p>
 			</td></tr>
 		</table>
 		<?php
@@ -348,9 +349,9 @@ class FTT_Setup {
 		<?php endif; ?>
 		<h3><?php esc_html_e( 'Next steps', 'film-transfer-toolkit' ); ?></h3>
 		<ul class="ftt-list">
-			<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-prices' ) ); ?>"><?php esc_html_e( 'Enter your own prices and mark them Final', 'film-transfer-toolkit' ); ?></a></li>
+			<li><a href="<?php echo esc_url( FTT_Admin_UX::settings_url( 'prices' ) ); ?>"><?php esc_html_e( 'Enter your own prices and mark them Final', 'film-transfer-toolkit' ); ?></a></li>
 			<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-help' ) ); ?>"><?php esc_html_e( 'Learn how to add a tool to any page (block editor and classic editor)', 'film-transfer-toolkit' ); ?></a></li>
-			<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-settings' ) ); ?>"><?php esc_html_e( 'Settings: switch tools on or off, and turn on email when you are ready', 'film-transfer-toolkit' ); ?></a></li>
+			<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-tools' ) ); ?>"><?php esc_html_e( 'Tools: switch tools on or off', 'film-transfer-toolkit' ); ?></a> · <a href="<?php echo esc_url( FTT_Admin_UX::settings_url( 'email' ) ); ?>"><?php esc_html_e( 'Settings > Email: start sending emails when you are ready', 'film-transfer-toolkit' ); ?></a></li>
 			<li><a href="<?php echo esc_url( admin_url( 'nav-menus.php' ) ); ?>"><?php esc_html_e( 'Add the new pages to your menu (optional)', 'film-transfer-toolkit' ); ?></a></li>
 		</ul>
 		<p><a class="button button-primary button-hero" href="<?php echo esc_url( admin_url( 'admin.php?page=ftt' ) ); ?>"><?php esc_html_e( 'Go to the dashboard', 'film-transfer-toolkit' ); ?></a></p>

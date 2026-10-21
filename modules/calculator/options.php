@@ -29,7 +29,7 @@ function ftt_calc_default_options() {
 	return array(
 		'default_format' => '16',
 		'default_fps'    => '24',
-		'theme'          => 'dark',
+		'theme'          => 'site', // 1.5.0: match the site theme like every FTT tool (was 'dark').
 		'accent'         => '',
 		'heading_font'   => 'preset',
 		'show_extras'    => 1, // Legacy (1.2.0 and older): "film speed and total seconds". Kept equal to show_speed || show_seconds.
@@ -109,7 +109,7 @@ function ftt_calc_sanitize_options( $input ) {
 	$out   = array(
 		'default_format' => ftt_calc_sanitize_format( isset( $input['default_format'] ) ? $input['default_format'] : '', $d['default_format'] ),
 		'default_fps'    => ftt_calc_sanitize_fps( isset( $input['default_fps'] ) ? $input['default_fps'] : '', $d['default_fps'] ),
-		'theme'          => ftt_calc_sanitize_choice( isset( $input['theme'] ) ? $input['theme'] : '', array( 'dark', 'light' ), $d['theme'] ),
+		'theme'          => ftt_calc_sanitize_choice( isset( $input['theme'] ) ? $input['theme'] : '', array( 'site', 'dark', 'light' ), $d['theme'] ),
 		'accent'         => ftt_calc_sanitize_hex( isset( $input['accent'] ) ? $input['accent'] : '' ),
 		'heading_font'   => ftt_calc_sanitize_choice( isset( $input['heading_font'] ) ? $input['heading_font'] : '', array( 'preset', 'theme', 'plain', 'yeseva' ), $d['heading_font'] ),
 	);

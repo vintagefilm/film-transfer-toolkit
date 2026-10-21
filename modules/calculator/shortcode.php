@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'init', 'ftt_calc_register_assets', 11 );
 function ftt_calc_register_assets() {
 	$base = plugins_url( 'modules/calculator/', FTT_FILE );
-	wp_register_style( 'ftt-calculator', $base . 'calculator.css', array(), FTT_VERSION );
+	wp_register_style( 'ftt-calculator', $base . 'calculator.css', array( 'ftt-base' ), FTT_VERSION );
 	wp_register_script( 'ftt-calculator', $base . 'calculator.js', array( 'ftt-core' ), FTT_VERSION, true );
 }
 
@@ -61,7 +61,7 @@ function ftt_calc_shortcode( $atts ) {
 	$format       = ftt_calc_sanitize_format( $atts['format'], $o['default_format'] );
 	$atts['format'] = $format; // Sanitized value for the filmcalc_format_badge filter below (as in FilmTransfer.ai's film-calculator.php).
 	$fps          = ftt_calc_sanitize_fps( $atts['fps'], $o['default_fps'] );
-	$theme        = ftt_calc_sanitize_choice( $atts['theme'], array( 'dark', 'light' ), $o['theme'] );
+	$theme        = ftt_calc_sanitize_choice( $atts['theme'], array( 'site', 'dark', 'light' ), $o['theme'] );
 	$accent       = ftt_calc_sanitize_hex( $atts['accent'] );
 	$heading_font = ftt_calc_sanitize_choice( $atts['heading_font'], array( 'preset', 'theme', 'plain', 'yeseva' ), $o['heading_font'] );
 	// Field toggles: a field's own attribute wins, then the old extras="" (both readouts), then Settings.
@@ -87,7 +87,7 @@ function ftt_calc_shortcode( $atts ) {
 	$formats  = ftt_calc_formats();
 	$speeds   = ftt_calc_speeds();
 	$is_std   = in_array( $fps, $speeds, true );
-	$classes  = array( 'filmcalc', 'filmcalc--' . $theme, 'filmcalc--hf-' . $heading_font );
+	$classes  = array( 'ftt-tool', 'filmcalc', 'filmcalc--' . $theme, 'filmcalc--hf-' . $heading_font );
 	if ( 'plain' === $heading_font ) {
 		$classes[] = 'filmcalc--plain-heading'; // 1.0.x class name, kept for compatibility.
 	}

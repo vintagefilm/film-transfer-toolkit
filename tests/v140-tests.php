@@ -43,12 +43,13 @@ foreach ( (array) $menu as $m ) { if ( 'ftt' === $m[2] ) { $top = $m; } }
 $ok( 'admin menu: top item is "FTT" with slug ftt', $top && 'FTT' === $top[0] && 'FTT' === $top[3], wp_json_encode( $top ) );
 $subs = wp_list_pluck( $GLOBALS['submenu']['ftt'] ?? array(), 2 );
 foreach ( array( 'ftt', 'ftt-settings', 'ftt-help', 'ftt-prices' ) as $slug ) {
-	$ok( "admin submenu slug $slug unchanged", in_array( $slug, $subs, true ), implode( ',', $subs ) );
+	// 1.5.0: an old slug may instead redirect to its Settings tab (FTT_Admin_UX::REDIRECTS).
+	$ok( "admin submenu slug $slug unchanged", in_array( $slug, $subs, true ) || '' !== FTT_Admin_UX::redirect_target( $slug ), implode( ',', $subs ) );
 }
 ob_start(); FTT_Admin::render_dashboard(); $dash = ob_get_clean();
 ob_start(); $_GET['tool'] = ''; FTT_Admin::render_help(); $help = ob_get_clean();
-$ok( 'dashboard heading says FTT', false !== strpos( $dash, '<h1>FTT <small>' ), substr( strip_tags( $dash ), 0, 80 ) );
-$ok( 'help heading says FTT help', false !== strpos( $help, 'FTT help' ) );
+$ok( 'dashboard heading says FTT', (bool) preg_match( '/<h1[^>]*>\s*<span class="ftt-header__brand">FTT<\/span>/', $dash ), substr( strip_tags( $dash ), 0, 80 ) ); // 1.5.0 header
+$ok( 'help heading says FTT help', (bool) preg_match( '/ftt-header__brand">FTT<\/span>.*Help/s', $help ) );
 $ok( 'no "Film Transfer Toolkit" in dashboard/help output', false === stripos( $dash . $help, 'Film Transfer Toolkit' ) );
 // No file the plugin ships (code, readme, docs, help images) still shows the old name - except the changelog line that records the rename.
 $old = array();
@@ -72,6 +73,10 @@ $now = ftt_surface( $dir );
 $ok( '1.3.0 snapshot loaded', is_array( $was ) && count( $was ) >= 15 );
 foreach ( (array) $was as $kind => $list ) {
 	$miss = array_diff( $list, $now[ $kind ] ?? array() );
+	// 1.5.0 admin redesign, on purpose: old page slugs redirect; the old dashboard card classes and the old
+	// "Calculator look" page callback are gone from the admin (the function itself still exists).
+	$allowed150 = array( 'page_slug' => array_keys( FTT_Admin_UX::REDIRECTS ), 'css_class' => array( 'ftt-tool__links', 'ftt-tool__sc' ), 'ftt_string' => array( 'ftt_calc_render_settings_page' ) );
+	$miss = array_diff( $miss, $allowed150[ $kind ] ?? array() );
 	$ok( "every 1.3.0 $kind still present (" . count( $list ) . ')', ! $miss, implode( ', ', $miss ) );
 }
 foreach ( array( 'ftt_calculator', 'film_calculator', 'ftt_reel_estimator', 'ftt_price_table', 'ftt_estimate', 'ftt_storage_calculator', 'ftt_clip_selector', 'ftt_rfq_providers', 'ftt_rfq_form', 'ftt_rfq_reply', 'ftt_rfq_compare' ) as $tag ) {

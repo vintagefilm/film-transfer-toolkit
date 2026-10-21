@@ -102,7 +102,7 @@ ok('save without nonce rejected',r1.status()===403||(await r1.text()).includes('
 await p.goto(B+'/wp-admin/admin.php?page=ftt');await shot('dashboard-after-setup');
 ok('dashboard shows pages for tools',(await p.textContent('.ftt-cards')).includes('Film Storage Calculator'));
 const sub=await p.$$eval('#toplevel_page_ftt .wp-submenu li a',as=>as.map(a=>a.textContent.trim()));
-ok('menu order starts Dashboard, Setup wizard, Settings, Prices, Help',sub.slice(0,5).join('|')==='Dashboard|Setup wizard|Settings|Prices|Help'&&sub[sub.length-1]==='Mail log',sub.join('|'));
+ok('menu is Dashboard, Tools, Settings, Help (1.5.0)',sub.join('|')==='Dashboard|Tools|Settings|Help',sub.join('|'));
 // help tab
 await p.click('#contextual-help-link');await p.waitForTimeout(400);await shot('wp-help-tab');
 ok('WP help tab has toolkit tabs',await p.locator('#tab-link-ftt-overview').count()===1&&await p.locator('#tab-link-ftt-shortcodes').count()===1&&await p.locator('#tab-link-ftt-this-screen').count()===1);
@@ -134,7 +134,7 @@ await p.waitForTimeout(1500);
 for(const sel of ['button[aria-label="Close"]','.components-modal__header button']){if(await p.locator(sel).count()){try{await p.locator(sel).first().click({timeout:1500});}catch(e){}}}
 const cats=await p.evaluate(()=>wp.blocks.getCategories().map(c=>c.slug));ok('inserter category film-transfer-toolkit',cats[0]==='film-transfer-toolkit',cats.join(','));
 const bl=await p.evaluate(()=>wp.blocks.getBlockTypes().filter(t=>t.category==='film-transfer-toolkit').map(t=>t.name).sort());
-ok('9 toolkit blocks in category (4 RFQ; clip selector off so hidden)',bl.length===9&&!bl.includes('ftt/clip-selector'),bl.join(','));
+ok('10 toolkit blocks in category (4 RFQ; clip selector registered even when off, since 1.4.1)',bl.length===10&&bl.includes('ftt/clip-selector'),bl.join(','));
 const canvas=p.frameLocator('iframe[name="editor-canvas"]');
 await p.click('button.editor-document-tools__inserter-toggle, button[aria-label="Block Inserter"], button[aria-label="Toggle block inserter"]');
 await p.waitForTimeout(800);await p.keyboard.type('FTT');await p.waitForTimeout(1200);await shot('block-inserter-search');

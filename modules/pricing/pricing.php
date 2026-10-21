@@ -25,7 +25,7 @@ function ftt_price_table_shortcode( $atts ) {
 	$yes = function ( $v ) { return ! in_array( strtolower( (string) $v ), array( 'no', '0', 'false', 'off', 'hide' ), true ); };
 	wp_enqueue_style( 'ftt-front' );
 	ob_start();
-	echo '<div class="ftt-box ftt-prices">';
+	echo '<div class="ftt-tool ftt-box ftt-prices">';
 	echo FTT_Price_Table::banner( $t ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in banner().
 	foreach ( $svcs as $s ) {
 		$rows = '';

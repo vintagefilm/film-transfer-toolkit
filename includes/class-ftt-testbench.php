@@ -194,7 +194,7 @@ class FTT_Testbench {
 		foreach ( FTT_Registry::embeds() as $tag => $e ) {
 			$on = 'on' === ( FTT_Plugin::$status[ $e['module'] ] ?? '' );
 			if ( 'clips' === $e['module'] ) {
-				$n = substr_count( $html, 'class="fwcc"' );
+				$n = preg_match_all( '/class="(?:[^"]*\\s)?fwcc(?:\\s[^"]*)?"/', $html );
 				$ok( 'clip selector rendered' . ( $on ? '' : ' (preview only, module off)' ), $n >= 1 && ( $on || false !== strpos( $html, 'data-demo="1"' ) ), $n . ' selector(s)' );
 				continue;
 			}
@@ -208,7 +208,15 @@ class FTT_Testbench {
 		if ( 'on' === ( FTT_Plugin::$status['calculator'] ?? '' ) ) {
 			$ok( 'calculator with toggles hides meters and frames', false !== strpos( $html, 'data-hide="meters frames"' ) );
 		}
-		$ok( defined( 'FILMCALC_VERSION' ) ? 'standalone [film_calculator] rendered once' : '[film_calculator] rendered by the toolkit (standalone plugin inactive)', defined( 'FILMCALC_VERSION' ) ? 1 === substr_count( $html, 'data-filmcalc ' ) : substr_count( $html, 'data-ftt-calc' ) >= 3, substr_count( $html, 'data-filmcalc ' ) . ' / ' . substr_count( $html, 'data-ftt-calc' ) );
+		if ( defined( 'FILMCALC_VERSION' ) ) {
+			$ok( 'standalone [film_calculator] rendered once', 1 === substr_count( $html, 'data-filmcalc ' ), substr_count( $html, 'data-filmcalc ' ) . ' / ' . substr_count( $html, 'data-ftt-calc' ) );
+		} elseif ( 'on' === ( FTT_Plugin::$status['calculator'] ?? '' ) ) {
+			// 1.5.0: the bench may use the [film_calculator]/[ftt_calculator] shortcode or the calculator block (editors may change the bench).
+			$src   = (string) get_post_field( 'post_content', $id );
+			$uses  = array_filter( array( 'shortcode' => (bool) preg_match( '/\[(?:film_calculator|ftt_calculator)[\s\]]/', $src ), 'block' => false !== strpos( $src, '<!-- wp:ftt/calculator' ) ) );
+			$n     = substr_count( $html, 'data-ftt-calc' );
+			$ok( 'calculator rendered by the toolkit (shortcode or block; standalone plugin inactive)', $uses && $n >= 1 && ! preg_match( '/\[film_calculator[\s\]]/', $html ), implode( '+', array_keys( $uses ) ) . ': ' . $n . ' rendered' );
+		}
 		if ( defined( 'FILMCALC_VERSION' ) ) {
 			$ok( 'standalone version', true, FILMCALC_VERSION );
 		}

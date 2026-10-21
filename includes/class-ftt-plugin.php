@@ -134,9 +134,10 @@ class FTT_Plugin {
 		if ( ! ( $id ? current_user_can( 'edit_post', $id ) : current_user_can( 'edit_posts' ) ) ) {
 			return '';
 		}
+		wp_enqueue_style( 'ftt-base' );
 		$tools = FTT_Registry::tools();
 		$name  = $tools[ $e['module'] ]['label'] ?? $e['label'];
-		return '<div class="ftt-off-note" data-ftt-off="' . esc_attr( $tag ) . '" role="note" style="border:1px dashed currentColor;padding:.75em 1em;margin:1em 0;border-radius:4px;opacity:.8;font-size:.9em"><strong>' . esc_html__( 'FTT:', 'film-transfer-toolkit' ) . '</strong> '
+		return '<div class="ftt-off-note" data-ftt-off="' . esc_attr( $tag ) . '" role="note"><strong>' . esc_html__( 'FTT:', 'film-transfer-toolkit' ) . '</strong> '
 			/* translators: %s: tool name */
 			. esc_html( sprintf( __( '%s is switched off, so this spot is empty for visitors. Turn it on under FTT > Settings > Modules. Only editors see this note.', 'film-transfer-toolkit' ), $name ) )
 			. '</div>';
@@ -161,12 +162,13 @@ class FTT_Plugin {
 
 	public static function register_assets() {
 		wp_register_script( 'ftt-core', FTT_URL . 'core/ftt-core.js', array(), FTT_VERSION, true );
-		wp_register_style( 'ftt-front', FTT_URL . 'assets/css/ftt.css', array(), FTT_VERSION );
+		wp_register_style( 'ftt-base', FTT_URL . 'assets/css/ftt-base.css', array(), FTT_VERSION );
+		wp_register_style( 'ftt-front', FTT_URL . 'assets/css/ftt.css', array( 'ftt-base' ), FTT_VERSION );
 	}
 
 	public static function settings() {
 		register_setting( 'ftt_modules', 'ftt_modules', array( 'type' => 'array', 'sanitize_callback' => array( __CLASS__, 'sanitize_modules' ), 'show_in_rest' => false ) );
-		register_setting( 'ftt_modules', 'ftt_general', array( 'type' => 'array', 'sanitize_callback' => array( __CLASS__, 'sanitize_general' ), 'show_in_rest' => false ) );
+		register_setting( 'ftt_general', 'ftt_general', array( 'type' => 'array', 'sanitize_callback' => array( __CLASS__, 'sanitize_general' ), 'show_in_rest' => false ) );
 	}
 
 	public static function sanitize_modules( $in ) {
@@ -185,53 +187,9 @@ class FTT_Plugin {
 		);
 	}
 
+	/** 1.4 Settings page, kept for compatibility: switching tools on/off now lives under FTT > Tools. */
 	public static function render_modules() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'film-transfer-toolkit' ) );
-		}
-		$on = self::enabled();
-		$g  = self::general();
-		?>
-		<div class="wrap ftt-admin">
-			<h1><?php esc_html_e( 'FTT settings', 'film-transfer-toolkit' ); ?> <small>v<?php echo esc_html( FTT_VERSION ); ?></small></h1>
-			<?php settings_errors(); ?>
-			<form action="options.php" method="post">
-				<?php settings_fields( 'ftt_modules' ); ?>
-				<h2><?php esc_html_e( 'Modules', 'film-transfer-toolkit' ); ?></h2>
-				<table class="widefat striped ftt-modules">
-					<thead><tr><th><?php esc_html_e( 'On', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Module', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Status', 'film-transfer-toolkit' ); ?></th></tr></thead>
-					<tbody>
-					<?php foreach ( self::modules() as $k => $m ) : $s = self::$status[ $k ] ?? 'off'; ?>
-						<tr>
-							<td><input type="checkbox" id="ftt-mod-<?php echo esc_attr( $k ); ?>" name="ftt_modules[<?php echo esc_attr( $k ); ?>]" value="1" <?php checked( ! empty( $on[ $k ] ) ); ?>></td>
-							<td><label for="ftt-mod-<?php echo esc_attr( $k ); ?>"><strong><?php echo esc_html( $m['label'] ); ?></strong></label><br><span class="description"><?php echo esc_html( $m['desc'] ); ?></span></td>
-							<td><?php echo 'on' === $s ? '<span class="ftt-pill ftt-pill--on">' . esc_html__( 'Active', 'film-transfer-toolkit' ) . '</span>' . ( 'clips' === $k && self::$fwcc_shared ? ' ' . esc_html__( 'The FW Clip Cart prototype plugin is also active: it keeps [fw_clip_cart] and the cart hooks; [ftt_clip_selector] and the block work too.', 'film-transfer-toolkit' ) : '' ) : ( 'off' === $s ? '<span class="ftt-pill">' . esc_html__( 'Off', 'film-transfer-toolkit' ) . '</span>' : '<span class="ftt-pill ftt-pill--wait">' . esc_html__( 'Waiting', 'film-transfer-toolkit' ) . '</span> ' . esc_html( 'wait_fwcc' === $s ? __( 'The FW Clip Cart prototype plugin is active and keeps handling [fw_clip_cart]. Deactivate it to switch to this module.', 'film-transfer-toolkit' ) : $s ) ); ?></td>
-						</tr>
-					<?php endforeach; ?>
-					</tbody>
-				</table>
-				<h2><?php esc_html_e( 'Email', 'film-transfer-toolkit' ); ?></h2>
-				<table class="form-table" role="presentation">
-					<tr><th><?php esc_html_e( 'Mail mode', 'film-transfer-toolkit' ); ?></th><td>
-						<label><input type="radio" name="ftt_general[mail_mode]" value="log" <?php checked( 'log', $g['mail_mode'] ); ?>> <?php esc_html_e( 'Log only: nothing is sent; messages appear under Mail log (default, use on staging)', 'film-transfer-toolkit' ); ?></label><br>
-						<label><input type="radio" name="ftt_general[mail_mode]" value="send" <?php checked( 'send', $g['mail_mode'] ); ?>> <?php esc_html_e( 'Send with wp_mail()', 'film-transfer-toolkit' ); ?></label>
-						<?php if ( defined( 'FTT_MAIL_LOG_ONLY' ) && FTT_MAIL_LOG_ONLY ) : ?><p class="description"><strong><?php esc_html_e( 'FTT_MAIL_LOG_ONLY is set in wp-config.php, so mail is logged only whatever this says.', 'film-transfer-toolkit' ); ?></strong></p><?php endif; ?>
-					</td></tr>
-					<tr><th><label for="ftt-notify"><?php esc_html_e( 'Notify address for estimate requests', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-notify" type="email" class="regular-text" name="ftt_general[notify_email]" value="<?php echo esc_attr( $g['notify_email'] ); ?>">
-						<p class="description"><?php esc_html_e( 'Leave blank to store requests without any notification email.', 'film-transfer-toolkit' ); ?></p></td></tr>
-				</table>
-				<?php submit_button(); ?>
-			</form>
-			<h2><?php esc_html_e( 'More settings', 'film-transfer-toolkit' ); ?></h2>
-			<ul class="ftt-list">
-				<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-prices' ) ); ?>"><?php esc_html_e( 'Prices', 'film-transfer-toolkit' ); ?></a></li>
-				<?php if ( 'on' === ( self::$status['calculator'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-calculator' ) ); ?>"><?php esc_html_e( 'Calculator look (colours, fonts, defaults)', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
-				<?php if ( 'on' === ( self::$status['clips'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-clips' ) ); ?>"><?php esc_html_e( 'Clip selector rate card', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
-				<?php if ( 'on' === ( self::$status['rfq'] ?? '' ) ) : ?><li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-rfq' ) ); ?>"><?php esc_html_e( 'Quote comparison (RFQ) settings', 'film-transfer-toolkit' ); ?></a></li><?php endif; ?>
-				<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-setup' ) ); ?>"><?php esc_html_e( 'Run the setup wizard', 'film-transfer-toolkit' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'admin.php?page=ftt-help' ) ); ?>"><?php esc_html_e( 'Help: shortcodes, blocks and options', 'film-transfer-toolkit' ); ?></a></li>
-			</ul>
-		</div>
-		<?php
+		FTT_Admin_UX::render_tools();
 	}
 
 	public static function render_mail_log() {
@@ -262,7 +220,7 @@ class FTT_Plugin {
 		}
 		check_admin_referer( 'ftt_clear_mail_log' );
 		FTT_Mail::clear();
-		wp_safe_redirect( admin_url( 'admin.php?page=ftt-mail' ) );
+		wp_safe_redirect( FTT_Admin_UX::settings_url( 'email' ) . '#ftt-mail-log' );
 		exit;
 	}
 }
