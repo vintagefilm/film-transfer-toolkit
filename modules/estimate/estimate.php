@@ -125,7 +125,13 @@ class FTT_Estimate {
 			$x['addons'] = array_map( function ( $a ) { return FTT_Util::text( $a, 32 ); }, array_slice( (array) ( $l['addons'] ?? array() ), 0, FTT_Pricing::LIMITS['addons'] ) );
 			$lines[]     = $x;
 		}
-		$order = array_map( function ( $a ) { return FTT_Util::text( $a, 32 ); }, array_slice( (array) ( $raw['order_addons'] ?? array() ), 0, FTT_Pricing::LIMITS['addons'] ) );
+		$order = array_map( function ( $a ) {
+			if ( is_array( $a ) ) { // { id, qty } for a per-custom-unit add-on
+				$q = $a['qty'] ?? 1;
+				return array( 'id' => FTT_Util::text( $a['id'] ?? '', 32 ), 'qty' => is_int( $q ) || ( is_string( $q ) && preg_match( '/^[0-9]{1,4}$/', $q ) ) ? (int) $q : ( is_numeric( $q ) ? 0 + $q : -1 ) );
+			}
+			return FTT_Util::text( $a, 32 );
+		}, array_slice( (array) ( $raw['order_addons'] ?? array() ), 0, FTT_Pricing::LIMITS['addons'] ) );
 		return array( 'lines' => $lines, 'order_addons' => $order );
 	}
 
@@ -203,7 +209,7 @@ class FTT_Estimate {
 		$t    = $q['totals'];
 		$out .= sprintf( "\nSubtotal %s", FTT_Pricing::format_money( $t['lines_cents'], $cur ) );
 		if ( $t['discount_cents'] ) { $out .= sprintf( "\nVolume discount %d%% -%s", $t['discount_pct'], FTT_Pricing::format_money( $t['discount_cents'], $cur ) ); }
-		foreach ( $t['order_addons'] as $a ) { $out .= sprintf( "\n%s %s", $a['label'], FTT_Pricing::format_money( $a['cents'], $cur ) ); }
+		foreach ( $t['order_addons'] as $a ) { $out .= sprintf( "\n%s %s", FTT_Pricing::order_addon_text( $a, $cur ), FTT_Pricing::format_money( $a['cents'], $cur ) ); }
 		if ( $t['setup_cents'] ) { $out .= sprintf( "\nSetup %s", FTT_Pricing::format_money( $t['setup_cents'], $cur ) ); }
 		if ( $t['minimum_adjust_cents'] ) { $out .= sprintf( "\nOrder minimum adjustment %s", FTT_Pricing::format_money( $t['minimum_adjust_cents'], $cur ) ); }
 		$out .= sprintf( "\nESTIMATE TOTAL %s (%s, prices as of %s)\n\nNotes:\n%s\n", FTT_Pricing::format_money( $t['total_cents'], $cur ), $pr['label'] ?? '', $pr['as_of'] ?? '', $c['notes'] );

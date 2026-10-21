@@ -39,6 +39,16 @@
   {
    "id": "4k",
    "label": "4K scan"
+  },
+  {
+   "id": "4k_out",
+   "label": "4K output",
+   "description": "Delivered as a 4K (3840x2160) video file."
+  },
+  {
+   "id": "1080_out",
+   "label": "1080p output",
+   "description": "Delivered as an HD 1080p (1920x1080) video file."
   }
  ],
  "reels": [
@@ -255,6 +265,54 @@
    "unit": "reel",
    "size": "7",
    "price": 128000
+  },
+  {
+   "format": "8",
+   "service": "1080_out",
+   "unit": "foot",
+   "price": 320
+  },
+  {
+   "format": "s8",
+   "service": "1080_out",
+   "unit": "foot",
+   "price": 320
+  },
+  {
+   "format": "16",
+   "service": "1080_out",
+   "unit": "foot",
+   "price": 350
+  },
+  {
+   "format": "35",
+   "service": "1080_out",
+   "unit": "foot",
+   "price": 400
+  },
+  {
+   "format": "8",
+   "service": "4k_out",
+   "unit": "foot",
+   "price": 450
+  },
+  {
+   "format": "s8",
+   "service": "4k_out",
+   "unit": "foot",
+   "price": 450
+  },
+  {
+   "format": "16",
+   "service": "4k_out",
+   "unit": "foot",
+   "price": 500
+  },
+  {
+   "format": "35",
+   "service": "4k_out",
+   "unit": "foot",
+   "price": 600
   }
  ],
  "addons": [

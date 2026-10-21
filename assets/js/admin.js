@@ -5,6 +5,13 @@
   document.addEventListener('click', function (ev) {
     var t = ev.target;
     if (t.closest && t.closest('[data-ftt-remove]')) { ev.preventDefault(); var tr = t.closest('tr'); if (tr) { tr.parentNode.removeChild(tr); } return; }
+    var mv = t.closest && t.closest('[data-ftt-up],[data-ftt-down]');
+    if (mv) {
+      ev.preventDefault(); var row = mv.closest('tr'); if (!row) { return; }
+      if (mv.hasAttribute('data-ftt-up')) { if (row.previousElementSibling) { row.parentNode.insertBefore(row, row.previousElementSibling); } }
+      else if (row.nextElementSibling) { row.parentNode.insertBefore(row.nextElementSibling, row); }
+      mv.focus(); return;
+    }
     var add = t.closest && t.closest('[data-ftt-add]');
     if (add) {
       ev.preventDefault();
@@ -20,4 +27,9 @@
     var c = t.closest && t.closest('[data-ftt-confirm]');
     if (c && !window.confirm(c.getAttribute('data-ftt-confirm'))) { ev.preventDefault(); }
   });
+  /* Add-on unit name: only for "per custom unit". */
+  function unitBox(sel) { var tr = sel.closest('tr'), u = tr && tr.querySelector('.ftt-addon-unit'); if (u) { u.hidden = sel.value !== 'custom'; u.required = sel.value === 'custom'; } }
+  document.addEventListener('change', function (ev) { if (ev.target.matches && ev.target.matches('select[name^="addons["][name$="[unit]"]')) { unitBox(ev.target); } });
+  document.addEventListener('click', function () { setTimeout(function () { Array.prototype.forEach.call(document.querySelectorAll('select[name^="addons["][name$="[unit]"]'), unitBox); }, 0); });
+  Array.prototype.forEach.call(document.querySelectorAll('select[name^="addons["][name$="[unit]"]'), unitBox);
 })();

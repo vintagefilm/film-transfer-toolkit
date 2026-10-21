@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,13 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.5.2 =
+* Add-ons: new "per custom unit" pricing type. The owner names the unit (USB drive, DVD copy, hour...); customers enter a quantity (1-999) and the estimate reads "3 × USB drive @ $15.00". Server re-pricing matches the browser.
+* Add-ons and services: optional description, shown as helper text in the estimate builder and the price table (plain text, escaped).
+* Services are now editable rows on the Prices page: add, rename (label only; ids stay), reorder and remove (removing a service removes its rates).
+* New built-in services "4K output" and "1080p output" in the EXAMPLE and DRAFT presets. Upgrades from 1.5.1 get them appended once, with no rates, so no existing price changes.
+* JSON import/export, setup wizard Prices step and help updated.
+
 = 1.5.1 =
 * Clip selector: new rate card setting "rounding" (up | down | nearest) for turning a clip's length into whole billed seconds. Default "up" (unchanged behaviour). The on-page estimate and the cart/request price use the same rule. New filter ftt/clip/billable_seconds ($secs, $duration, $card).
 

@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FTT_Pricing {
-	const LIMITS = array( 'lines' => 50, 'reels' => 999, 'feet' => 100000, 'addons' => 20 );
+	const LIMITS = array( 'lines' => 50, 'reels' => 999, 'feet' => 100000, 'addons' => 20, 'qty' => 999 );
 
 	public static function to_cents( $mills ) {
 		return (int) floor( ( $mills + 5 ) / 10 );
@@ -116,7 +116,7 @@ class FTT_Pricing {
 				$seen[ $id ] = 1;
 				$ad = self::find( $table['addons'] ?? array(), function ( $x ) use ( $id ) { return ( $x['id'] ?? null ) === $id; } );
 				if ( ! $ad ) { $bad = self::err( $i, 'bad_addon', 'Unknown add-on.' ); break; }
-				if ( 'order' === ( $ad['unit'] ?? '' ) ) { $bad = self::err( $i, 'order_addon_on_line', 'That add-on applies to the whole order.' ); break; }
+				if ( in_array( $ad['unit'] ?? '', array( 'order', 'custom' ), true ) ) { $bad = self::err( $i, 'order_addon_on_line', 'That add-on applies to the whole order.' ); break; }
 				$fl = isset( $ad['formats'] ) && is_array( $ad['formats'] ) ? $ad['formats'] : array();
 				if ( $fl && ! in_array( $fmt['id'], $fl, true ) ) { $bad = self::err( $i, 'addon_not_available', 'That add-on is not available for this format.' ); break; }
 				$c      = self::to_cents( self::int( $ad['price'] ?? 0 ) * ( 'reel' === ( $ad['unit'] ?? '' ) ? $reels : $bill ) );
@@ -150,11 +150,22 @@ class FTT_Pricing {
 		$oids  = isset( $request['order_addons'] ) && is_array( $request['order_addons'] ) ? array_slice( array_values( $request['order_addons'] ), 0, self::LIMITS['addons'] ) : array();
 		$oseen = array();
 		foreach ( $oids as $raw ) {
-			$oid = self::str( $raw );
+			// An order add-on is an id, or { id, qty } for a per-custom-unit add-on (qty defaults to 1). Mirrors ftt-core.js.
+			$is_obj = is_array( $raw ) && ( ! $raw || array_keys( $raw ) !== range( 0, count( $raw ) - 1 ) );
+			$oid    = $is_obj ? self::str( $raw['id'] ?? '' ) : self::str( $raw );
 			if ( isset( $oseen[ $oid ] ) ) { continue; }
 			$oseen[ $oid ] = 1;
-			$oa = self::find( $table['addons'] ?? array(), function ( $x ) use ( $oid ) { return ( $x['id'] ?? null ) === $oid && ( $x['unit'] ?? '' ) === 'order'; } );
+			$oa = self::find( $table['addons'] ?? array(), function ( $x ) use ( $oid ) { return ( $x['id'] ?? null ) === $oid && in_array( $x['unit'] ?? '', array( 'order', 'custom' ), true ); } );
 			if ( ! $oa ) { $errors[] = self::err( -1, 'bad_order_addon', 'Unknown order add-on.' ); continue; }
+			if ( 'custom' === $oa['unit'] ) {
+				$qv = $is_obj && isset( $raw['qty'] ) ? $raw['qty'] : 1;
+				if ( is_int( $qv ) ) { $qn = $qv; } elseif ( is_float( $qv ) && is_finite( $qv ) && floor( $qv ) === $qv && $qv >= 1 && $qv <= self::LIMITS['qty'] ) { $qn = (int) $qv; } elseif ( is_string( $qv ) && preg_match( '/^[0-9]{1,4}$/', $qv ) ) { $qn = (int) $qv; } else { $qn = 0; }
+				if ( $qn < 1 || $qn > self::LIMITS['qty'] ) { $errors[] = self::err( -1, 'bad_quantity', 'Quantity must be a whole number from 1 to 999.' ); continue; }
+				$qc      = self::to_cents( self::int( $oa['price'] ?? 0 ) * $qn );
+				$oadds[] = array( 'id' => $oa['id'], 'label' => $oa['label'] ?? '', 'cents' => $qc, 'qty' => $qn, 'unit_label' => $oa['unit_label'] ?? '', 'unit_mills' => self::int( $oa['price'] ?? 0 ) );
+				$oc     += $qc;
+				continue;
+			}
 			$c       = self::to_cents( self::int( $oa['price'] ?? 0 ) );
 			$oadds[] = array( 'id' => $oa['id'], 'label' => $oa['label'] ?? '', 'cents' => $c );
 			$oc     += $c;
@@ -179,6 +190,14 @@ class FTT_Pricing {
 		$c    = (int) $cents;
 		$sym  = $syms[ $currency ] ?? ( $currency . ' ' );
 		return ( $c < 0 ? '-' : '' ) . $sym . number_format( intdiv( abs( $c ), 100 ) ) . '.' . sprintf( '%02d', abs( $c ) % 100 );
+	}
+
+	/** "USB drive: 3 × USB drive @ $15.00" for a per-custom-unit order add-on, else the label. Mirrors estimate.js orderAddonText(). Plain text: escape on output. */
+	public static function order_addon_text( $a, $currency = 'USD' ) {
+		if ( empty( $a['qty'] ) ) {
+			return (string) ( $a['label'] ?? '' );
+		}
+		return sprintf( "%s: %d \u{00D7} %s @ %s", $a['label'] ?? '', (int) $a['qty'], $a['unit_label'] ?? '', self::format_mills( (int) ( $a['unit_mills'] ?? 0 ), $currency ) );
 	}
 
 	public static function format_mills( $mills, $currency = 'USD' ) {

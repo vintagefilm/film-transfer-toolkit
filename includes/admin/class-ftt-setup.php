@@ -300,6 +300,7 @@ class FTT_Setup {
 				<p><label for="ftt-price-json"><?php esc_html_e( 'or paste the JSON here', 'film-transfer-toolkit' ); ?></label><br><textarea id="ftt-price-json" name="price_json" rows="5" class="large-text code"></textarea></p>
 			</div>
 		</fieldset>
+		<p><?php echo esc_html( sprintf( /* translators: %s: list of service names */ __( 'Services customers choose from: %s. You can add, rename, reorder or remove them, give each a description, and add "per custom unit" add-ons (for example per USB drive) on the Prices page.', 'film-transfer-toolkit' ), implode( ', ', wp_list_pluck( $t['services'], 'label' ) ) ) ); ?></p>
 		<p class="description"><?php esc_html_e( 'To type prices in one by one, finish setup and open FTT > Settings > Prices.', 'film-transfer-toolkit' ); ?></p>
 		<?php
 	}

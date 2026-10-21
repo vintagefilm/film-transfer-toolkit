@@ -14,14 +14,17 @@
   function clear(n) { while (n.firstChild) { n.removeChild(n.firstChild); } }
   function by(list, k, v) { return (list || []).filter(function (x) { return x[k] === v; }); }
   function servicesFor(fmt) { return (T.services || []).filter(function (s) { return (T.rates || []).some(function (r) { return r.format === fmt && r.service === s.id; }); }); }
-  function addonsFor(fmt) { return (T.addons || []).filter(function (a) { return a.unit !== 'order' && (!a.formats || !a.formats.length || a.formats.indexOf(fmt) !== -1); }); }
+  function addonsFor(fmt) { return (T.addons || []).filter(function (a) { return a.unit !== 'order' && a.unit !== 'custom' && (!a.formats || !a.formats.length || a.formats.indexOf(fmt) !== -1); }); }
+  function desc(text) { return el('span', { 'class': 'ftt-desc' }, text); } // textContent only: owner text is never parsed as HTML
+  /* "USB drive: 3 × USB drive @ $15.00" for per-custom-unit order add-ons; plain label otherwise. Mirrors FTT_Pricing::order_addon_text(). */
+  function orderAddonText(a) { return a.qty ? a.label + ': ' + a.qty + ' \u00d7 ' + (a.unit_label || '') + ' @ ' + P.formatMills(a.unit_mills, cur) : a.label; }
   function unitTxt(a) { return a.unit === 'foot' ? '/ft' : a.unit === 'reel' ? '/reel' : ''; }
   var uid = 0;
 
   function init(root) {
     var q = function (k) { return root.querySelector('[data-e="' + k + '"]'); };
     var linesBox = q('lines'), orderBox = q('order'), summary = q('summary'), form = q('form'), msg = q('msg');
-    var state = { lines: [], order: [] };
+    var state = { lines: [], order: [], qty: {} };
     function newLine(fmt) {
       fmt = fmt || ((T.formats || [])[0] || {}).id;
       var s = servicesFor(fmt)[0], r = by(T.reels, 'format', fmt);
@@ -33,7 +36,7 @@
         if (l.size) { o.size = l.size; }
         if (l.feet !== '' && l.feet != null) { o.feet = Number(l.feet); }
         return o;
-      }), order_addons: state.order.slice() };
+      }), order_addons: state.order.map(function (id) { return state.qty[id] !== undefined ? { id: id, qty: state.qty[id] } : id; }) };
     }
     function select(opts, val, label, onchange) {
       var id = 'ftt-e' + (++uid), wrap = el('label', { 'class': 'ftt-field', 'for': id }), s = el('select', { id: id });
@@ -69,7 +72,9 @@
           if (servicesFor(v).some(function (s) { return s.id === l.service; })) { n.service = l.service; }
           state.lines[idx] = n; drawLines(); update();
         }));
-        g.appendChild(select(servicesFor(l.format).map(function (s) { return [s.id, s.label]; }), l.service, 'Service', function (v) { l.service = v; update(); }));
+        g.appendChild(select(servicesFor(l.format).map(function (s) { return [s.id, s.label]; }), l.service, 'Service', function (v) { l.service = v; drawLines(); update(); }));
+        var sv = by(T.services, 'id', l.service)[0];
+        if (sv && sv.description) { g.lastChild.appendChild(desc(sv.description)); }
         g.appendChild(select(by(T.reels, 'format', l.format).map(function (r) { return [r.size, r.label + ' (' + r.feet + ' ft)']; }).concat([['', 'Not sure / I know the footage']]), l.size, 'Reel size', function (v) { l.size = v; update(); }));
         g.appendChild(input('number', l.reels, 'Number of reels', { min: 1, max: 999, step: 1, inputmode: 'numeric' }, function (v) { l.reels = v; update(); }));
         g.appendChild(input('number', l.feet, 'Total feet (if known)', { min: 0, step: 'any', inputmode: 'decimal', placeholder: 'optional' }, function (v) { l.feet = v; update(); }));
@@ -82,6 +87,7 @@
             cb.checked = l.addons.indexOf(a.id) !== -1;
             cb.addEventListener('change', function () { var i = l.addons.indexOf(a.id); if (cb.checked && i === -1) { l.addons.push(a.id); } if (!cb.checked && i !== -1) { l.addons.splice(i, 1); } update(); });
             lab.appendChild(cb); lab.appendChild(document.createTextNode(' ' + a.label + ' (' + P.formatMills(a.price, cur) + unitTxt(a) + ')'));
+            if (a.description) { lab.appendChild(desc(a.description)); }
             fs.appendChild(lab);
           });
           row.appendChild(fs);
@@ -93,14 +99,29 @@
     }
     function drawOrder() {
       clear(orderBox);
-      var oa = (T.addons || []).filter(function (a) { return a.unit === 'order'; });
+      var oa = (T.addons || []).filter(function (a) { return a.unit === 'order' || a.unit === 'custom'; });
       q('order-wrap').hidden = !oa.length;
       oa.forEach(function (a) {
+        if (a.unit === 'custom') {
+          /* Quantity input labelled with the owner's unit name; 0 / empty = not wanted. */
+          var w = input('number', state.qty[a.id] || '', a.label + ' \u2013 ' + P.formatMills(a.price, cur) + ' per ' + a.unit_label + '. How many?', { min: 0, max: 999, step: 1, inputmode: 'numeric', placeholder: '0', 'data-ftt-qty': a.id }, function (v) {
+            var i = state.order.indexOf(a.id), n = v === '' ? 0 : Number(v);
+            if (v === '' || n === 0) { delete state.qty[a.id]; if (i !== -1) { state.order.splice(i, 1); } }
+            else { state.qty[a.id] = /^[0-9]+$/.test(String(v)) ? n : String(v); if (i === -1) { state.order.push(a.id); } }
+            update();
+          });
+          w.classList.add('ftt-qty');
+          if (a.description) { w.appendChild(desc(a.description)); }
+          orderBox.appendChild(w);
+          return;
+        }
         var lab = el('label', { 'class': 'ftt-check' }), cb = el('input', { type: 'checkbox', value: a.id });
         cb.addEventListener('change', function () { var i = state.order.indexOf(a.id); if (cb.checked && i === -1) { state.order.push(a.id); } if (!cb.checked && i !== -1) { state.order.splice(i, 1); } update(); });
         lab.appendChild(cb); lab.appendChild(document.createTextNode(' ' + a.label + ' (' + P.formatMills(a.price, cur) + ')'));
+        if (a.description) { lab.appendChild(desc(a.description)); }
         orderBox.appendChild(lab);
       });
+      orderBox.appendChild(el('p', { 'class': 'ftt-line__err', 'data-line-err': -1, role: 'alert' }));
     }
     function showErrors(errors) {
       Array.prototype.forEach.call(root.querySelectorAll('[data-line-err]'), function (n) { n.textContent = ''; });
@@ -123,7 +144,7 @@
       function row(label, val, cls) { var tr = el('tr', cls ? { 'class': cls } : null); tr.appendChild(el('th', { scope: 'row' }, label)); tr.appendChild(el('td', null, val)); body.appendChild(tr); }
       row('Reels and add-ons (' + Math.round(t.billable_feet).toLocaleString() + ' ft billed, about ' + Core.formatTime(t.seconds) + ')', money(t.lines_cents));
       if (t.discount_cents) { row('Volume discount ' + t.discount_pct + '%', '\u2212' + money(t.discount_cents)); }
-      t.order_addons.forEach(function (a) { row(a.label, money(a.cents)); });
+      t.order_addons.forEach(function (a) { row(orderAddonText(a), money(a.cents)); });
       if (t.setup_cents) { row('Setup fee', money(t.setup_cents)); }
       if (t.minimum_adjust_cents) { row('Order minimum (' + money(t.minimum_cents) + ') adjustment', money(t.minimum_adjust_cents)); }
       row('Estimated total', money(t.total_cents), 'ftt-est__grand');

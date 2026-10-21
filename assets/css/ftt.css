@@ -52,3 +52,6 @@ fieldset.ftt-field,fieldset.ftt-est__order{border:0;padding:0;margin:0 0 .8em}
 .ftt-store__bin{display:block;font-size:var(--ftt-size-small);color:var(--ftt-muted)}
 .ftt-store__sum dd{white-space:nowrap}
 @media (max-width:600px){.ftt-store__table td:nth-child(n+3),.ftt-store__table tfoot td,.ftt-store__sum dd{white-space:normal}}
+.ftt-box .ftt-desc{display:block;margin:2px 0 0 1.6em;color:var(--ftt-muted);font-size:var(--ftt-size-small);font-weight:normal}
+.ftt-box .ftt-field>.ftt-desc{margin-left:0}
+.ftt-box .ftt-qty input{max-width:7em}

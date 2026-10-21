@@ -127,7 +127,7 @@
   }
 
   /* ----------------------------------------------------------------- pricing */
-  var LIMITS = { lines: 50, reels: 999, feet: 100000, addons: 20 };
+  var LIMITS = { lines: 50, reels: 999, feet: 100000, addons: 20, qty: 999 };
   function toCents(mills) { return Math.floor((mills + 5) / 10); }
   function int(v) { var n = Number(v); return isFinite(n) ? Math.round(n) : 0; }
   function findBy(list, pred) { list = list || []; for (var i = 0; i < list.length; i++) { if (pred(list[i])) { return list[i]; } } return null; }
@@ -185,7 +185,7 @@
         var id = String(ids[a]); if (seen[id]) { continue; } seen[id] = 1;
         var ad = findBy(table.addons, function (x) { return x.id === id; });
         if (!ad) { bad = err(i, 'bad_addon', 'Unknown add-on.'); break; }
-        if (ad.unit === 'order') { bad = err(i, 'order_addon_on_line', 'That add-on applies to the whole order.'); break; }
+        if (ad.unit === 'order' || ad.unit === 'custom') { bad = err(i, 'order_addon_on_line', 'That add-on applies to the whole order.'); break; }
         if (!applies(ad, fmt.id)) { bad = err(i, 'addon_not_available', 'That add-on is not available for this format.'); break; }
         var c = toCents(int(ad.price) * (ad.unit === 'reel' ? reels : bill));
         adds.push({ id: ad.id, label: ad.label, cents: c }); addCents += c;
@@ -205,9 +205,19 @@
 
     var orderAdds = [], orderCents = 0, oids = Array.isArray(request.order_addons) ? request.order_addons.slice(0, LIMITS.addons) : [], oseen = {};
     for (var o = 0; o < oids.length; o++) {
-      var oid = String(oids[o]); if (oseen[oid]) { continue; } oseen[oid] = 1;
-      var oa = findBy(table.addons, function (x) { return x.id === oid && x.unit === 'order'; });
+      // An order add-on is an id, or { id, qty } for a per-custom-unit add-on (qty defaults to 1).
+      var raw = oids[o], isObj = raw !== null && typeof raw === 'object' && !Array.isArray(raw);
+      var oid = isObj ? (raw.id === undefined || raw.id === null ? '' : String(raw.id)) : String(raw); if (oseen[oid]) { continue; } oseen[oid] = 1;
+      var oa = findBy(table.addons, function (x) { return x.id === oid && (x.unit === 'order' || x.unit === 'custom'); });
       if (!oa) { errors.push(err(-1, 'bad_order_addon', 'Unknown order add-on.')); continue; }
+      if (oa.unit === 'custom') {
+        var qv = isObj && raw.qty !== undefined && raw.qty !== null ? raw.qty : 1;
+        var qn = typeof qv === 'number' && isFinite(qv) && Math.floor(qv) === qv ? qv : (typeof qv === 'string' && /^[0-9]{1,4}$/.test(qv) ? Number(qv) : NaN);
+        if (!(qn >= 1 && qn <= LIMITS.qty)) { errors.push(err(-1, 'bad_quantity', 'Quantity must be a whole number from 1 to 999.')); continue; }
+        var qc = toCents(int(oa.price) * qn);
+        orderAdds.push({ id: oa.id, label: oa.label, cents: qc, qty: qn, unit_label: oa.unit_label || '', unit_mills: int(oa.price) }); orderCents += qc;
+        continue;
+      }
       var oc = toCents(int(oa.price)); orderAdds.push({ id: oa.id, label: oa.label, cents: oc }); orderCents += oc;
     }
     var setup = lines.length ? toCents(int(fees.setup)) : 0;

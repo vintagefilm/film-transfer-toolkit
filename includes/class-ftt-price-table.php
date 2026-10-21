@@ -17,6 +17,7 @@ class FTT_Price_Table {
 	);
 
 	public static function init() {
+		add_action( 'init', array( __CLASS__, 'maybe_migrate' ), 5 );
 		add_action( 'admin_post_ftt_save_prices', array( __CLASS__, 'handle_save' ) );
 		add_action( 'admin_post_ftt_load_preset', array( __CLASS__, 'handle_preset' ) );
 		add_action( 'admin_post_ftt_import_prices', array( __CLASS__, 'handle_import' ) );
@@ -38,6 +39,36 @@ class FTT_Price_Table {
 			return $t;
 		}
 		return self::preset( 'example' );
+	}
+
+	/** Built-in service choices added in 1.5.2 (appended once on upgrade, without rates: no existing price changes). */
+	const NEW_SERVICES_152 = array(
+		array( 'id' => '4k_out', 'label' => '4K output', 'description' => 'Delivered as a 4K (3840x2160) video file.' ),
+		array( 'id' => '1080_out', 'label' => '1080p output', 'description' => 'Delivered as an HD 1080p (1920x1080) video file.' ),
+	);
+	const MIGRATIONS = 'ftt_price_migrations';
+
+	/** One-time: append the 1.5.2 service choices to a stored table. An owner who later removes them keeps them removed. */
+	public static function maybe_migrate() {
+		$done = get_option( self::MIGRATIONS, array() );
+		$done = is_array( $done ) ? $done : array();
+		if ( ! empty( $done['services_152'] ) ) {
+			return false;
+		}
+		$t       = get_option( self::OPTION, null );
+		$changed = false;
+		if ( is_array( $t ) && ! empty( $t['formats'] ) ) {
+			$ids = array_column( (array) ( $t['services'] ?? array() ), 'id' );
+			foreach ( self::NEW_SERVICES_152 as $s ) {
+				if ( count( $t['services'] ) < 20 && ! in_array( $s['id'], $ids, true ) ) { $t['services'][] = $s; $changed = true; }
+			}
+			if ( $changed ) {
+				update_option( self::OPTION, $t, false );
+			}
+		}
+		$done['services_152'] = FTT_VERSION;
+		update_option( self::MIGRATIONS, $done, false );
+		return $changed;
 	}
 
 	public static function save( $table ) {
@@ -126,7 +157,10 @@ class FTT_Price_Table {
 		foreach ( array_slice( (array) ( $in['services'] ?? array() ), 0, 20 ) as $s ) {
 			$id = self::id( $s['id'] ?? '' );
 			if ( ! $id ) { $err[] = 'A service row needs an id.'; continue; }
-			$t['services'][] = array( 'id' => $id, 'label' => FTT_Util::text( $s['label'] ?? $id, 80 ) );
+			$row = array( 'id' => $id, 'label' => FTT_Util::text( $s['label'] ?? $id, 80 ) );
+			$dsc = FTT_Util::text( $s['description'] ?? '', 300 );
+			if ( '' !== $dsc ) { $row['description'] = $dsc; } // only stored when set, so older tables stay byte-identical
+			$t['services'][] = $row;
 		}
 		$sids = array_column( $t['services'], 'id' );
 		if ( ! $sids ) { $err[] = 'At least one service is required.'; }
@@ -158,12 +192,18 @@ class FTT_Price_Table {
 		$aseen = array();
 		foreach ( array_slice( (array) ( $in['addons'] ?? array() ), 0, 50 ) as $a ) {
 			$id    = self::id( $a['id'] ?? '' );
-			$unit  = in_array( $a['unit'] ?? '', array( 'foot', 'reel', 'order' ), true ) ? $a['unit'] : '';
+			$unit  = in_array( $a['unit'] ?? '', array( 'foot', 'reel', 'order', 'custom' ), true ) ? $a['unit'] : '';
 			$price = self::inum( $a['price'] ?? null, 0, 100000000 );
 			if ( ! $id || ! $unit || null === $price || isset( $aseen[ $id ] ) ) { $err[] = 'An add-on row is incomplete or its id is repeated.'; continue; }
+			$ul = 'custom' === $unit ? FTT_Util::text( $a['unit_label'] ?? '', 40 ) : '';
+			if ( 'custom' === $unit && '' === $ul ) { $err[] = "Add-on \"$id\" is priced per custom unit: type the unit name (for example USB drive)."; continue; }
 			$aseen[ $id ] = 1;
 			$fl           = array_values( array_intersect( array_map( array( __CLASS__, 'id' ), (array) ( $a['formats'] ?? array() ) ), $fids ) );
-			$t['addons'][] = array( 'id' => $id, 'label' => FTT_Util::text( $a['label'] ?? $id, 80 ), 'unit' => $unit, 'price' => $price, 'formats' => $fl );
+			$row          = array( 'id' => $id, 'label' => FTT_Util::text( $a['label'] ?? $id, 80 ), 'unit' => $unit, 'price' => $price, 'formats' => $fl );
+			if ( 'custom' === $unit ) { $row['unit_label'] = $ul; }
+			$dsc = FTT_Util::text( $a['description'] ?? '', 300 );
+			if ( '' !== $dsc ) { $row['description'] = $dsc; } // only stored when set
+			$t['addons'][] = $row;
 		}
 		$fees      = (array) ( $in['fees'] ?? array() );
 		$t['fees'] = array(
@@ -205,6 +245,15 @@ class FTT_Price_Table {
 		$adv = array();
 		$err = array();
 		foreach ( array( 'formats', 'services', 'reels' ) as $k ) {
+			if ( 'services' === $k && isset( $p['services'] ) && is_array( $p['services'] ) ) { // 1.5.2: services are editable rows
+				$adv['services'] = array();
+				foreach ( $p['services'] as $s ) {
+					if ( ! is_array( $s ) || '' === trim( (string) ( $s['id'] ?? '' ) ) ) { continue; }
+					$adv['services'][] = array( 'id' => $s['id'], 'label' => '' !== trim( (string) ( $s['label'] ?? '' ) ) ? $s['label'] : $s['id'], 'description' => $s['description'] ?? '' );
+				}
+				continue;
+			}
+			if ( ! isset( $p[ 'json_' . $k ] ) ) { $adv[ $k ] = $cur[ $k ]; continue; }
 			$raw = isset( $p[ 'json_' . $k ] ) ? (string) $p[ 'json_' . $k ] : '';
 			$dec = json_decode( $raw, true );
 			if ( ! is_array( $dec ) ) { $err[] = "The $k JSON is not valid; it was not changed."; $dec = $cur[ $k ]; }
@@ -223,8 +272,17 @@ class FTT_Price_Table {
 		$addons = array();
 		foreach ( (array) ( $p['addons'] ?? array() ) as $a ) {
 			if ( ! is_array( $a ) || '' === trim( (string) ( $a['id'] ?? '' ) ) ) { continue; }
-			$addons[] = array( 'id' => $a['id'], 'label' => $a['label'] ?? '', 'unit' => $a['unit'] ?? '', 'price' => $money( $a['price'] ?? '', 'Add-on ' . sanitize_key( $a['id'] ) ), 'formats' => array_filter( array_map( 'trim', explode( ',', (string) ( $a['formats'] ?? '' ) ) ) ) );
+			$addons[] = array( 'id' => $a['id'], 'label' => $a['label'] ?? '', 'unit' => $a['unit'] ?? '', 'unit_label' => $a['unit_label'] ?? '', 'description' => $a['description'] ?? '', 'price' => $money( $a['price'] ?? '', 'Add-on ' . sanitize_key( $a['id'] ) ), 'formats' => array_filter( array_map( 'trim', explode( ',', (string) ( $a['formats'] ?? '' ) ) ) ) );
 		}
+		// A removed service takes its rates with it (otherwise the save would be refused).
+		$svc_ids = array_map( function ( $s ) { return strtolower( trim( (string) ( $s['id'] ?? '' ) ) ); }, (array) $adv['services'] );
+		$dropped = array();
+		$rates   = array_values( array_filter( $rates, function ( $r ) use ( $svc_ids, &$dropped ) {
+			$sv = strtolower( trim( (string) ( $r['service'] ?? '' ) ) );
+			if ( in_array( $sv, $svc_ids, true ) ) { return true; }
+			$dropped[ $sv ] = 1;
+			return false;
+		} ) );
 		$tiers = array();
 		foreach ( (array) ( $p['tiers'] ?? array() ) as $x ) {
 			if ( is_array( $x ) && '' !== trim( (string) ( $x['min_feet'] ?? '' ) ) ) { $tiers[] = array( 'min_feet' => $x['min_feet'], 'pct' => $x['pct'] ?? '' ); }
@@ -238,6 +296,9 @@ class FTT_Price_Table {
 			self::back( 'error', $err );
 		}
 		$err = self::save( $table );
+		if ( ! $err && $dropped ) {
+			set_transient( 'ftt_price_info_' . get_current_user_id(), array( sprintf( 'Rates for the removed service(s) %s were removed too.', implode( ', ', array_keys( $dropped ) ) ) ), 300 );
+		}
 		self::back( $err ? 'error' : 'saved', $err );
 	}
 
@@ -287,6 +348,8 @@ class FTT_Price_Table {
 		$msg  = isset( $_GET['ftt_msg'] ) ? sanitize_key( wp_unslash( $_GET['ftt_msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- display only.
 		$errs = get_transient( 'ftt_price_errors_' . get_current_user_id() );
 		delete_transient( 'ftt_price_errors_' . get_current_user_id() );
+		$infos = get_transient( 'ftt_price_info_' . get_current_user_id() );
+		delete_transient( 'ftt_price_info_' . get_current_user_id() );
 		$notes = array( 'saved' => __( 'Price table saved.', 'film-transfer-toolkit' ), 'imported' => __( 'Price table imported.', 'film-transfer-toolkit' ), 'preset_example' => __( 'EXAMPLE prices loaded.', 'film-transfer-toolkit' ), 'preset_draft' => __( 'DRAFT FOR REVIEW prices loaded.', 'film-transfer-toolkit' ) );
 		$fmt_opts = array_column( $t['formats'], 'label', 'id' );
 		$svc_opts = array_column( $t['services'], 'label', 'id' );
@@ -300,9 +363,19 @@ class FTT_Price_Table {
 				. $sel( "rates[$i][unit]", array( 'foot' => 'per foot', 'reel' => 'per reel' ), $r['unit'] ?? 'foot' ) . '</td><td><input type="text" class="small-text" name="' . esc_attr( "rates[$i][size]" ) . '" value="' . esc_attr( $r['size'] ?? '' ) . '" placeholder="7"></td>'
 				. '<td>$<input type="text" class="small-text" inputmode="decimal" name="' . esc_attr( "rates[$i][price]" ) . '" value="' . esc_attr( isset( $r['price'] ) ? self::mills_to_dollars( $r['price'] ) : '' ) . '"></td><td><button type="button" class="button-link-delete" data-ftt-remove>' . esc_html__( 'Remove', 'film-transfer-toolkit' ) . '</button></td></tr>';
 		};
+		$service_row = function ( $i, $s ) {
+			$known = isset( $s['id'] ) && '' !== $s['id'];
+			return '<tr data-ftt-service="' . esc_attr( $s['id'] ?? '' ) . '"><td><input type="text" class="small-text" name="' . esc_attr( "services[$i][id]" ) . '" value="' . esc_attr( $s['id'] ?? '' ) . '"' . ( $known ? ' readonly title="' . esc_attr__( 'The id stays the same so rates and saved requests keep working; change the label to rename.', 'film-transfer-toolkit' ) . '"' : ' placeholder="e.g. 2k"' ) . '></td>'
+				. '<td><input type="text" class="regular-text" aria-label="' . esc_attr__( 'Name customers see', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "services[$i][label]" ) . '" value="' . esc_attr( $s['label'] ?? '' ) . '"></td>'
+				. '<td><input type="text" class="large-text" aria-label="' . esc_attr__( 'Description (optional)', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "services[$i][description]" ) . '" value="' . esc_attr( $s['description'] ?? '' ) . '" placeholder="' . esc_attr__( 'optional helper text for customers', 'film-transfer-toolkit' ) . '"></td>'
+				. '<td class="ftt-move"><button type="button" class="button button-small" data-ftt-up aria-label="' . esc_attr__( 'Move up', 'film-transfer-toolkit' ) . '">&uarr;</button> <button type="button" class="button button-small" data-ftt-down aria-label="' . esc_attr__( 'Move down', 'film-transfer-toolkit' ) . '">&darr;</button></td>'
+				. '<td><button type="button" class="button-link-delete" data-ftt-remove>' . esc_html__( 'Remove', 'film-transfer-toolkit' ) . '</button></td></tr>';
+		};
 		$addon_row = function ( $i, $a ) use ( $sel ) {
-			return '<tr><td><input type="text" class="small-text" name="' . esc_attr( "addons[$i][id]" ) . '" value="' . esc_attr( $a['id'] ?? '' ) . '"></td><td><input type="text" class="regular-text" name="' . esc_attr( "addons[$i][label]" ) . '" value="' . esc_attr( $a['label'] ?? '' ) . '"></td><td>'
-				. $sel( "addons[$i][unit]", array( 'foot' => 'per foot', 'reel' => 'per reel', 'order' => 'per order' ), $a['unit'] ?? 'foot' ) . '</td><td>$<input type="text" class="small-text" inputmode="decimal" name="' . esc_attr( "addons[$i][price]" ) . '" value="' . esc_attr( isset( $a['price'] ) ? self::mills_to_dollars( $a['price'] ) : '' ) . '"></td>'
+			return '<tr><td><input type="text" class="small-text" name="' . esc_attr( "addons[$i][id]" ) . '" value="' . esc_attr( $a['id'] ?? '' ) . '"></td><td><input type="text" class="regular-text" name="' . esc_attr( "addons[$i][label]" ) . '" value="' . esc_attr( $a['label'] ?? '' ) . '">'
+				. '<br><input type="text" class="regular-text ftt-addon-desc" aria-label="' . esc_attr__( 'Description (optional)', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "addons[$i][description]" ) . '" value="' . esc_attr( $a['description'] ?? '' ) . '" placeholder="' . esc_attr__( 'Description (optional, shown to customers)', 'film-transfer-toolkit' ) . '"></td><td>'
+				. $sel( "addons[$i][unit]", array( 'foot' => 'per foot', 'reel' => 'per reel', 'order' => 'per order', 'custom' => 'per custom unit' ), $a['unit'] ?? 'foot' )
+				. '<br><input type="text" class="small-text ftt-addon-unit" aria-label="' . esc_attr__( 'Unit name (per custom unit only)', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "addons[$i][unit_label]" ) . '" value="' . esc_attr( $a['unit_label'] ?? '' ) . '" placeholder="' . esc_attr__( 'unit, e.g. USB drive', 'film-transfer-toolkit' ) . '" style="width:11em"></td><td>$<input type="text" class="small-text" inputmode="decimal" name="' . esc_attr( "addons[$i][price]" ) . '" value="' . esc_attr( isset( $a['price'] ) ? self::mills_to_dollars( $a['price'] ) : '' ) . '"></td>'
 				. '<td><input type="text" name="' . esc_attr( "addons[$i][formats]" ) . '" value="' . esc_attr( implode( ',', $a['formats'] ?? array() ) ) . '" placeholder="all"></td><td><button type="button" class="button-link-delete" data-ftt-remove>' . esc_html__( 'Remove', 'film-transfer-toolkit' ) . '</button></td></tr>';
 		};
 		$tier_row = function ( $i, $x ) {
@@ -314,6 +387,7 @@ class FTT_Price_Table {
 		<div class="wrap ftt-admin">
 			<h1><?php esc_html_e( 'Price table', 'film-transfer-toolkit' ); ?></h1>
 			<?php if ( isset( $notes[ $msg ] ) ) : ?><div class="notice notice-success is-dismissible"><p><?php echo esc_html( $notes[ $msg ] ); ?></p></div><?php endif; ?>
+			<?php if ( is_array( $infos ) && $infos ) : ?><div class="notice notice-info"><?php foreach ( $infos as $e ) { echo '<p>' . esc_html( $e ) . '</p>'; } ?></div><?php endif; ?>
 			<?php if ( is_array( $errs ) && $errs ) : ?><div class="notice notice-error"><p><?php esc_html_e( 'Nothing was saved:', 'film-transfer-toolkit' ); ?></p><ul><?php foreach ( $errs as $e ) { echo '<li>' . esc_html( $e ) . '</li>'; } ?></ul></div><?php endif; ?>
 			<?php echo self::banner( $t ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in banner(). ?>
 			<p><?php esc_html_e( 'Used by the [ftt_price_table] shortcode and the estimate builder. The server always re-prices estimates with this table; the browser figure is only a preview.', 'film-transfer-toolkit' ); ?></p>
@@ -340,6 +414,18 @@ class FTT_Price_Table {
 					<tr><th><label for="ftt-min"><?php esc_html_e( 'Order minimum', 'film-transfer-toolkit' ); ?></label></th><td>$<input id="ftt-min" class="small-text" name="fee_min_order" value="<?php echo esc_attr( self::mills_to_dollars( $t['fees']['min_order'] ) ); ?>"></td></tr>
 					<tr><th><label for="ftt-minft"><?php esc_html_e( 'Minimum billed feet per reel', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-minft" type="number" min="0" class="small-text" name="fee_min_feet" value="<?php echo esc_attr( $t['fees']['min_feet_per_reel'] ); ?>"> ft</td></tr>
 				</table>
+				<h2 id="ftt-services"><?php esc_html_e( 'Services (what customers choose)', 'film-transfer-toolkit' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'The service list in the estimate builder, in this order. Rename by changing the name (the id stays, so rates and saved requests keep working). A service is offered for a format once it has a rate below. Removing a service also removes its rates.', 'film-transfer-toolkit' ); ?></p>
+				<table class="widefat striped ftt-rows"><thead><tr><th>ID</th><th><?php esc_html_e( 'Name', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Description (optional)', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Order', 'film-transfer-toolkit' ); ?></th><th></th></tr></thead>
+					<tbody data-ftt-rows="services"><?php foreach ( $t['services'] as $i => $s ) { echo $service_row( $i, $s ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></tbody></table>
+				<template data-ftt-template="services"><?php echo $service_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
+				<p><button type="button" class="button" data-ftt-add="services"><?php esc_html_e( 'Add service', 'film-transfer-toolkit' ); ?></button></p>
+				<?php
+				$unrated = array_filter( $t['services'], function ( $s ) use ( $t ) { return ! array_filter( $t['rates'], function ( $r ) use ( $s ) { return $r['service'] === $s['id']; } ); } );
+				if ( $unrated ) :
+					?>
+					<div class="notice notice-info inline"><p><?php echo esc_html( sprintf( /* translators: %s: service names */ __( 'Not offered yet (no rates): %s. Add a per-foot rate below for each format you offer them for.', 'film-transfer-toolkit' ), implode( ', ', wp_list_pluck( $unrated, 'label' ) ) ) ); ?></p></div>
+				<?php endif; ?>
 				<h2><?php esc_html_e( 'Rates', 'film-transfer-toolkit' ); ?></h2>
 				<p class="description"><?php esc_html_e( 'Per-foot rates are required for every format and service you offer. Per-reel rates are optional: they apply when a customer picks a full reel of that size. Partial reels (footage typed in) use the per-foot rate.', 'film-transfer-toolkit' ); ?></p>
 				<table class="widefat striped ftt-rows"><thead><tr><th><?php esc_html_e( 'Format', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Service', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Unit', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Reel size', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Price', 'film-transfer-toolkit' ); ?></th><th></th></tr></thead>
@@ -347,7 +433,7 @@ class FTT_Price_Table {
 				<template data-ftt-template="rates"><?php echo $rate_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
 				<p><button type="button" class="button" data-ftt-add="rates"><?php esc_html_e( 'Add rate', 'film-transfer-toolkit' ); ?></button></p>
 				<h2><?php esc_html_e( 'Add-ons', 'film-transfer-toolkit' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'Formats: comma-separated format ids (for example s8,16); leave blank for all formats. Per-order add-ons are chosen once for the whole estimate.', 'film-transfer-toolkit' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Formats: comma-separated format ids (for example s8,16); leave blank for all formats. Per-order add-ons are chosen once for the whole estimate. "Per custom unit": type the unit name (for example USB drive, DVD copy, hour); customers enter how many, and the estimate reads "3 × USB drive @ $15.00". The description is optional helper text shown to customers.', 'film-transfer-toolkit' ); ?></p>
 				<table class="widefat striped ftt-rows"><thead><tr><th>ID</th><th><?php esc_html_e( 'Label', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Unit', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Price', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Formats', 'film-transfer-toolkit' ); ?></th><th></th></tr></thead>
 					<tbody data-ftt-rows="addons"><?php foreach ( $t['addons'] as $i => $a ) { echo $addon_row( $i, $a ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></tbody></table>
 				<template data-ftt-template="addons"><?php echo $addon_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
@@ -357,8 +443,8 @@ class FTT_Price_Table {
 					<tbody data-ftt-rows="tiers"><?php foreach ( $t['tiers'] as $i => $x ) { echo $tier_row( $i, $x ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></tbody></table>
 				<template data-ftt-template="tiers"><?php echo $tier_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
 				<p><button type="button" class="button" data-ftt-add="tiers"><?php esc_html_e( 'Add tier', 'film-transfer-toolkit' ); ?></button></p>
-				<details class="ftt-advanced" id="ftt-adv-price-json"><summary><?php esc_html_e( 'Advanced: formats, services and reel sizes (JSON)', 'film-transfer-toolkit' ); ?></summary>
-					<?php foreach ( array( 'formats' => 'id, label, fpf (frames per foot), fps (for running time)', 'services' => 'id, label', 'reels' => 'format, size (id), label, feet (nominal full-reel length)' ) as $k => $h ) : ?>
+				<details class="ftt-advanced" id="ftt-adv-price-json"><summary><?php esc_html_e( 'Advanced: formats and reel sizes (JSON)', 'film-transfer-toolkit' ); ?></summary>
+					<?php foreach ( array( 'formats' => 'id, label, fpf (frames per foot), fps (for running time)', 'reels' => 'format, size (id), label, feet (nominal full-reel length)' ) as $k => $h ) : ?>
 						<p><label for="ftt-json-<?php echo esc_attr( $k ); ?>"><strong><?php echo esc_html( ucfirst( $k ) ); ?></strong> <span class="description"><?php echo esc_html( $h ); ?></span></label><br>
 						<textarea id="ftt-json-<?php echo esc_attr( $k ); ?>" name="json_<?php echo esc_attr( $k ); ?>" rows="8" class="large-text code"><?php echo esc_textarea( $json( $t[ $k ] ) ); ?></textarea></p>
 					<?php endforeach; ?>

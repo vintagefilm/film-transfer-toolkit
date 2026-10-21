@@ -46,7 +46,7 @@ function ftt_price_table_shortcode( $atts ) {
 			$rows .= '<tr><th scope="row">' . esc_html( $f['label'] ) . '</th><td>' . ( null === $foot ? '&ndash;' : esc_html( FTT_Pricing::format_mills( $foot, $cur ) ) ) . '</td><td>' . ( $reel_txt ? esc_html( implode( '; ', $reel_txt ) ) : '&ndash;' ) . '</td></tr>';
 		}
 		if ( '' === $rows ) { continue; }
-		echo '<table class="ftt-table"><caption>' . esc_html( $s['label'] ) . '</caption><thead><tr><th scope="col">' . esc_html__( 'Format', 'film-transfer-toolkit' ) . '</th><th scope="col">' . esc_html__( 'Per foot', 'film-transfer-toolkit' ) . '</th><th scope="col">' . esc_html__( 'Per full reel', 'film-transfer-toolkit' ) . '</th></tr></thead><tbody>' . $rows . '</tbody></table>'; // phpcs:ignore WordPress.Security.EscapeOutput -- rows escaped above.
+		echo '<table class="ftt-table"><caption>' . esc_html( $s['label'] ) . ( ! empty( $s['description'] ) ? '<span class="ftt-desc">' . esc_html( $s['description'] ) . '</span>' : '' ) . '</caption><thead><tr><th scope="col">' . esc_html__( 'Format', 'film-transfer-toolkit' ) . '</th><th scope="col">' . esc_html__( 'Per foot', 'film-transfer-toolkit' ) . '</th><th scope="col">' . esc_html__( 'Per full reel', 'film-transfer-toolkit' ) . '</th></tr></thead><tbody>' . $rows . '</tbody></table>'; // phpcs:ignore WordPress.Security.EscapeOutput -- rows escaped above.
 	}
 	if ( $yes( $atts['addons'] ) && $t['addons'] ) {
 		$units = array( 'foot' => __( 'per foot', 'film-transfer-toolkit' ), 'reel' => __( 'per reel', 'film-transfer-toolkit' ), 'order' => __( 'per order', 'film-transfer-toolkit' ) );
@@ -54,7 +54,7 @@ function ftt_price_table_shortcode( $atts ) {
 		echo '<table class="ftt-table"><caption>' . esc_html__( 'Add-ons', 'film-transfer-toolkit' ) . '</caption><tbody>';
 		foreach ( $t['addons'] as $a ) {
 			$only = $a['formats'] ? ' (' . implode( ', ', array_map( function ( $id ) use ( $names ) { return $names[ $id ] ?? $id; }, $a['formats'] ) ) . ')' : '';
-			echo '<tr><th scope="row">' . esc_html( $a['label'] . $only ) . '</th><td>' . esc_html( FTT_Pricing::format_mills( $a['price'], $cur ) . ' ' . $units[ $a['unit'] ] ) . '</td></tr>';
+			echo '<tr><th scope="row">' . esc_html( $a['label'] . $only ) . ( ! empty( $a['description'] ) ? '<span class="ftt-desc">' . esc_html( $a['description'] ) . '</span>' : '' ) . '</th><td>' . esc_html( FTT_Pricing::format_mills( $a['price'], $cur ) . ' ' . ( 'custom' === $a['unit'] ? sprintf( /* translators: %s: owner-defined unit name */ __( 'per %s', 'film-transfer-toolkit' ), $a['unit_label'] ?? '' ) : ( $units[ $a['unit'] ] ?? '' ) ) ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 	}

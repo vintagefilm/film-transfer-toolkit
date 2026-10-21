@@ -122,6 +122,9 @@ class FTT_Registry {
 				'faq'     => array(
 					__( 'There is a yellow "EXAMPLE" banner above the table.', 'film-transfer-toolkit' ) => __( 'That shows until you enter your own prices and mark the table Final on the Prices page. It stops visitors mistaking sample prices for real ones.', 'film-transfer-toolkit' ),
 					__( 'Where do I find a service ID?', 'film-transfer-toolkit' ) => __( 'On FTT > Settings > Prices, in the ID column of the Services table.', 'film-transfer-toolkit' ),
+					__( 'How do I add, rename, reorder or remove a service?', 'film-transfer-toolkit' ) => __( 'On FTT > Settings > Prices, in the Services table. Change the Name to rename (the ID never changes, so rates and old quote requests keep working), use the arrows to reorder, Remove to delete (its rates go too), and Add service for a new one. Each service can have an optional description that customers see. A service is offered for a format once it has a rate in the Rates table. New sites start with HD 1080p scan, 4K scan, 4K output and 1080p output; sites upgraded from 1.5.1 get 4K output and 1080p output added at the end with no rates, so no price changes until you add them.', 'film-transfer-toolkit' ),
+					__( 'What is a "per custom unit" add-on?', 'film-transfer-toolkit' ) => __( 'An add-on priced per something you name, for example USB drive, DVD copy or hour. Pick "per custom unit" and type the unit name. Customers enter how many in the estimate builder and the estimate reads "3 × USB drive @ $15.00". Quantities are whole numbers from 1 to 999; it applies to the whole order.', 'film-transfer-toolkit' ),
+					__( 'Can customers see a description of an add-on?', 'film-transfer-toolkit' ) => __( 'Yes. Every add-on and service has an optional Description on the Prices page. It shows as small helper text in the estimate builder and the price table. It is plain text (no HTML).', 'film-transfer-toolkit' ),
 				),
 			),
 			'estimate'   => array(
