@@ -24,3 +24,7 @@
 .fwcc-rq-note{width:100%}
 .fwcc-demo{padding:.5em .75em;border-left:4px solid var(--ftt-bad);background:var(--ftt-bad-bg);margin:0 0 .75em}
 .fwcc-msg.bad{color:var(--ftt-bad)}
+/* 1.5.3: heading (type, font and colour from .ftt-tool__title in ftt-base.css) and Jump to In/Out */
+.fwcc-heading{margin-bottom:.5em}
+.fwcc-jumpbar{margin-top:0}
+.fwcc .fwcc-jump[aria-disabled="true"]{opacity:.6}

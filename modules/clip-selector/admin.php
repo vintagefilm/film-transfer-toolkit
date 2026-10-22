@@ -39,6 +39,8 @@ function ftt_clip_render_settings() {
 		<form action="options.php" method="post">
 			<?php settings_fields( 'ftt_clip' ); ?>
 			<table class="form-table" role="presentation">
+				<tr><th><label for="ftt-clip-heading"><?php esc_html_e( 'Heading', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-clip-heading" class="regular-text" maxlength="120" name="<?php echo esc_attr( $n ); ?>[heading]" value="<?php echo esc_attr( $o['heading'] ); ?>">
+					<p class="description"><?php esc_html_e( 'Shown above every clip selector in your site\'s heading font. Default "Select Stock Footage". Leave blank to hide it. One selector can override it (heading option on the shortcode or block).', 'film-transfer-toolkit' ); ?></p></td></tr>
 				<tr><th><label for="ftt-clip-label"><?php esc_html_e( 'Rate card label', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-clip-label" class="large-text" name="ftt_clip_rate_card[label]" value="<?php echo esc_attr( $c['label'] ); ?>"></td></tr>
 				<?php foreach ( $fields as $k => $l ) : ?>
 					<tr><th><label for="ftt-clip-<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $l ); ?></label></th><td><input id="ftt-clip-<?php echo esc_attr( $k ); ?>" type="number" min="0" class="small-text" name="ftt_clip_rate_card[<?php echo esc_attr( $k ); ?>]" value="<?php echo esc_attr( $c[ $k ] ); ?>"></td></tr>

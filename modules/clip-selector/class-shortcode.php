@@ -28,6 +28,8 @@ class FTT_Clip_Shortcode
         return apply_filters('ftt/clip/tooltips', [
             'set_in'    => 'Mark the start of your clip at the current video time (shortcut: I)',
             'set_out'   => 'Mark the end of your clip at the current video time; the video pauses there (shortcut: O)',
+            'jump_in'   => 'Move the video to your In point and pause there (shortcut: Shift+I)',
+            'jump_out'  => 'Move the video to your Out point and pause there (shortcut: Shift+O)',
             'trim'      => [
                 '-1s' => 'Trim: move the %s point back 1 second (shortcut: Ctrl+Left arrow)',
                 '-1f' => 'Trim: move the %s point back 1 frame (shortcut: Left arrow)',
@@ -55,6 +57,7 @@ class FTT_Clip_Shortcode
             . '<li>Click <b>Set In</b>.</li>'
             . '<li>Keep playing to where you want the clip to end.</li>'
             . '<li>Click <b>Set Out</b>. The video pauses there so you can see the last frame.</li>'
+            . '<li>Use <b>Jump to In</b> or <b>Jump to Out</b> to go back to either point at any time.</li>'
             . '<li>Use the <b>Trim</b> buttons to fine-tune the In or Out point by one frame (f) or one second (s).</li>'
             . '<li>Click <b>Preview range</b> to watch just your selection.</li>'
             . '<li>Check the clip name, or type your own.</li>'
@@ -67,6 +70,7 @@ class FTT_Clip_Shortcode
             . '<li><kbd>K</kbd> pause</li>'
             . '<li><kbd>J</kbd> step backwards (about 0.1 s at a time; YouTube cannot play in reverse)</li>'
             . '<li><kbd>I</kbd> Set In &nbsp; <kbd>O</kbd> Set Out (pauses on the Out frame)</li>'
+            . '<li><kbd>Shift</kbd>+<kbd>I</kbd> Jump to In &nbsp; <kbd>Shift</kbd>+<kbd>O</kbd> Jump to Out</li>'
             . '<li><kbd>&larr;</kbd> / <kbd>&rarr;</kbd> one frame back / forward (moves the In or Out point you just set, otherwise the video)</li>'
             . '<li><kbd>Ctrl</kbd>+<kbd>&larr;</kbd> / <kbd>Ctrl</kbd>+<kbd>&rarr;</kbd> one second back / forward</li>'
             . '</ul>'
@@ -89,7 +93,8 @@ class FTT_Clip_Shortcode
 
     public static function render($atts)
     {
-        $a = shortcode_atts(['product_id' => 0, 'clip_id' => '', 'fps' => '', 'player' => 'auto', 'player_selector' => '', 'title' => ''], $atts, 'ftt_clip_selector');
+        $a = shortcode_atts(['product_id' => 0, 'clip_id' => '', 'fps' => '', 'player' => 'auto', 'player_selector' => '', 'title' => '', 'heading' => ''], $atts, 'ftt_clip_selector');
+        $heading = FTT_Clip_Settings::heading_for($a); // 1.5.3
         $set = FTT_Clip_Settings::get();
         $pid = absint($a['product_id']) ?: (int) $set['default_product_id'];
         $mode = FTT_Clip_Settings::is_clip_product($pid) ? 'cart' : 'request';
@@ -124,6 +129,12 @@ class FTT_Clip_Shortcode
 <div class="ftt-tool fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>">
 <?php if (self::$demo) : ?>  <p class="fwcc-demo"><strong><?php esc_html_e('Preview only:', 'film-transfer-toolkit'); ?></strong> <?php esc_html_e('the Clip selector module is switched off on this site, so visitors do not see this and nothing can be sent.', 'film-transfer-toolkit'); ?></p>
 <?php endif; ?>
+<?php if ($heading !== '') : ?>  <h3 class="ftt-tool__title fwcc-heading"><?php echo esc_html($heading); ?></h3>
+<?php endif; ?>
+  <div class="fwcc-row fwcc-jumpbar" role="group" aria-label="<?php esc_attr_e('Jump to a mark', 'film-transfer-toolkit'); ?>">
+    <button type="button" class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I" <?php echo $ta('jump_in'); ?>><?php esc_html_e('Jump to In', 'film-transfer-toolkit'); ?></button>
+    <button type="button" class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O" <?php echo $ta('jump_out'); ?>><?php esc_html_e('Jump to Out', 'film-transfer-toolkit'); ?></button>
+  </div>
   <div class="fwcc-marks">
     <button type="button" class="button fwcc-set" data-which="in" <?php echo $ta('set_in'); ?>>Set In</button>
     <span class="fwcc-tc" data-tc="in"></span>

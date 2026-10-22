@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,10 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+= 1.5.3 =
+* Clip selector: "Jump to In" and "Jump to Out" buttons at the top of the clip editor seek the video to the current In or Out point (pausing there). They are real buttons, so Tab + Enter/Space work; shortcuts Shift+I and Shift+O.
+* Clip selector: a heading above the selector, default "Select Stock Footage". Edit it under FTT > Settings > Clip selector, or per selector with heading="..." (shortcode) or the block sidebar. A blank site setting hides it everywhere; heading="none" hides it on one selector. It uses the shared ftt-base.css title style and the site's heading font.
+
 = 1.5.2 =
 * Add-ons: new "per custom unit" pricing type. The owner names the unit (USB drive, DVD copy, hour...); customers enter a quantity (1-999) and the estimate reads "3 × USB drive @ $15.00". Server re-pricing matches the browser.
 * Add-ons and services: optional description, shown as helper text in the estimate builder and the price table (plain text, escaped).

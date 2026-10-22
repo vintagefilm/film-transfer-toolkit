@@ -46,6 +46,7 @@
     function draw() {
       el.querySelector('[data-tc=in]').textContent = st.in === null ? blank : tc(st.in);
       el.querySelector('[data-tc=out]').textContent = st.out === null ? blank : tc(st.out);
+      el.querySelectorAll('.fwcc-jump').forEach(function (j) { j.setAttribute('aria-disabled', st[j.getAttribute('data-which')] === null ? 'true' : 'false'); });
       $('.fwcc-dur').textContent = dur().toFixed(3) + 's';
       $('.fwcc-est').textContent = dur() ? money(estimate(dur())) : '$0.00';
       $('.fwcc-nextlabel').textContent = clipId + '-' + pad(st.seq);
@@ -79,6 +80,13 @@
         st[which] = t; st.last = which;
         if (which === 'out') { var po = player(); if (po) { po.pause && po.pause(); seekTo(po, t); } } // hold the Out frame on screen
         msg(''); draw(); return;
+      }
+      if (b.classList.contains('fwcc-jump')) { // 1.5.3: seek to the current In/Out point and hold there
+        var jw = b.getAttribute('data-which'), jp = player();
+        if (st[jw] === null) return msg(jw === 'in' ? 'Set In first.' : 'Set Out first.', true);
+        if (!jp) return msg('No player found on this page.', true);
+        jp.pause && jp.pause(); seekTo(jp, st[jw]); st.last = jw;
+        msg((jw === 'in' ? 'At In ' : 'At Out ') + tc(st[jw]) + '.'); return;
       }
       if (b.parentNode && b.parentNode.classList && b.parentNode.classList.contains('fwcc-nudge')) {
         var w = b.parentNode.getAttribute('data-which'), d = b.getAttribute('data-d');
@@ -205,6 +213,8 @@
         // YouTube cannot play backwards: emulate by stepping back 0.1 s every 100 ms.
         if (!p) return; p.pause && p.pause(); stopRev(); st.last = null;
         revTimer = setInterval(function () { var c = Number(p.currentTime) || 0; if (c <= 0) return stopRev(); p.currentTime = Math.max(0, c - 0.1); }, 100);
+      } else if (!ev.ctrlKey && ev.shiftKey && (k === 'i' || k === 'I')) { stopRev(); clickBtn('.fwcc-jump[data-which=in]');
+      } else if (!ev.ctrlKey && ev.shiftKey && (k === 'o' || k === 'O')) { stopRev(); clickBtn('.fwcc-jump[data-which=out]');
       } else if (!ev.ctrlKey && (k === 'i' || k === 'I')) { stopRev(); clickBtn('.fwcc-set[data-which=in]');
       } else if (!ev.ctrlKey && (k === 'o' || k === 'O')) { stopRev(); clickBtn('.fwcc-set[data-which=out]');
       } else if (k === 'ArrowLeft' || k === 'ArrowRight') {

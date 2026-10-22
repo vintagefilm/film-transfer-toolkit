@@ -16,6 +16,7 @@ class FTT_Clip_Settings {
 			'default_product_id' => 0,          // FluentCart product used when a selector has no product_id.
 			'default_fps'        => '29.97df',  // Timecode rate when neither the shortcode nor a product sets one.
 			'auto_attach'        => 'off',      // off | page | post | all: add a selector under the content's first video player.
+			'heading'            => __( 'Select Stock Footage', 'film-transfer-toolkit' ), // 1.5.3: title above the selector; '' hides it.
 		);
 	}
 
@@ -27,7 +28,27 @@ class FTT_Clip_Settings {
 			'default_product_id' => isset( $in['default_product_id'] ) ? absint( $in['default_product_id'] ) : 0,
 			'default_fps'        => $fps ? $fps : $d['default_fps'],
 			'auto_attach'        => isset( $in['auto_attach'] ) && in_array( $in['auto_attach'], array( 'off', 'page', 'post', 'all' ), true ) ? $in['auto_attach'] : 'off',
+			// 1.5.3: missing key = default heading (older saved settings); a saved blank hides it.
+			'heading'            => array_key_exists( 'heading', $in ) ? self::clean_heading( $in['heading'] ) : $d['heading'],
 		);
+	}
+
+	/** Plain text, one line, at most 120 characters. */
+	public static function clean_heading( $v ) {
+		$v = is_scalar( $v ) ? trim( preg_replace( '/\s+/', ' ', sanitize_text_field( (string) $v ) ) ) : '';
+		return function_exists( 'mb_substr' ) ? mb_substr( $v, 0, 120 ) : substr( $v, 0, 120 );
+	}
+
+	/**
+	 * The heading one selector shows. An empty or missing heading attribute uses the site setting (so a block left at
+	 * its default renders like the bare shortcode); heading="none" hides it; anything else is shown (plain text).
+	 */
+	public static function heading_for( $atts ) {
+		$h = is_array( $atts ) && isset( $atts['heading'] ) ? self::clean_heading( $atts['heading'] ) : '';
+		if ( '' === $h ) {
+			return self::get()['heading'];
+		}
+		return 'none' === strtolower( $h ) ? '' : $h;
 	}
 
 	public static function get() {
