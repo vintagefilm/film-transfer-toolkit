@@ -8,10 +8,33 @@
   function money(c) { return '$' + (c / 100).toFixed(2); }
   function estimate(dur) {
     // Same rule as FTT_Clip_Rate_Card::billable_seconds(): millisecond first, then the card's rounding mode.
-    var k = C.card; var ms = Math.round(dur * 1000) / 1000;
+    var k = C.card || {}; var ms = Math.round(dur * 1000) / 1000;
     var w = k.rounding === 'down' ? Math.floor(ms) : (k.rounding === 'nearest' ? Math.round(ms) : Math.ceil(ms));
-    var b = Math.max(k.min_seconds, w);
-    return Math.max(k.min_charge_cents, b * k.per_second_cents);
+    var b = Math.max(+k.min_seconds || 0, w);
+    return Math.max(+k.min_charge_cents || 0, b * (+k.per_second_cents || 0));
+  }
+  // 1.5.9: header mini-cart refresh. FluentCart renders the header cart on the server, so after our REST add (or on a page
+  // served from a page cache) it can still show $0.00. Update the amount and badges from the live /minicart numbers and
+  // tell FluentCart the cart changed.
+  function applyMini(m) {
+    if (!m || typeof m !== 'object') return;
+    document.querySelectorAll('[data-fluent-cart-cart-total-price]').forEach(function (n) { if (m.subtotal) { n.textContent = m.subtotal; n.setAttribute('aria-label', m.subtotal); } });
+    document.querySelectorAll('[data-cart-badge-count]').forEach(function (n) {
+      var v = n.getAttribute('data-cart-count-mode') === 'total_quantity' ? m.qty : m.count; n.textContent = v > 0 ? String(v) : '';
+    });
+    document.querySelectorAll('.fct-cart-badge-count, [data-fluent-cart-cart-total-item]').forEach(function (n) { n.textContent = String(m.count || 0); });
+    if (window.fluentcart_drawer_vars) { window.fluentcart_drawer_vars.cart_item_count = m.count; window.fluentcart_drawer_vars.cart_total_quantity = m.qty; }
+  }
+  function refreshMini(m) {
+    if (m) applyMini(m);
+    try { window.dispatchEvent(new Event('fluentCartNotifyCartDrawerItemChanged')); } catch (e) {}
+    try { if (window.fluentCartCart && typeof window.fluentCartCart.getCart === 'function') window.fluentCartCart.getCart().then(function () { if (m) applyMini(m); }, function () {}); } catch (e) {}
+  }
+  function syncMiniOnLoad() {
+    if (!C.rest || !document.querySelector('[data-fluent-cart-cart-total-price], [data-cart-badge-count]')) return;
+    if (!/(^|;\s*)fct_cart_hash=[^;]+/.test(document.cookie)) return;
+    fetch(C.rest + '/minicart', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { if (m && m.count) applyMini(m); }, function () {});
   }
   var TC = window.FTTCore.timecode;
   function findPlayer(el) {
@@ -94,17 +117,25 @@
     function now() { var p = player(); return p ? TC.secondsToFrames(Number(p.currentTime) || 0, fps) : null; }
     function dur() { return (st.in !== null && st.out !== null && st.out > st.in) ? secOf(st.out - st.in) : 0; }
     var blank = R.drop ? '--:--:--;--' : '--:--:--:--';
+    // 1.5.9: price each listed clip on the server (/quote) so the list shows exactly what the cart will charge.
+    function quoteRow(row) {
+      if (!C.rest || !C.nonce || el.getAttribute('data-mode') === 'request' || DEMO) return;
+      fetch(C.rest + '/quote', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
+        body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: row.seq, name: row.name, in: secOf(row.in), out: secOf(row.out), fps: fps }) })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j && j.clip && j.clip.price_cents != null && st.list.indexOf(row) > -1) { row.price = +j.clip.price_cents; draw(); } }, function () {});
+    }
     function draw() {
       el.querySelector('[data-tc=in]').textContent = st.in === null ? blank : tc(st.in);
       el.querySelector('[data-tc=out]').textContent = st.out === null ? blank : tc(st.out);
       el.querySelectorAll('.fwcc-jump').forEach(function (j) { j.setAttribute('aria-disabled', st[j.getAttribute('data-which')] === null ? 'true' : 'false'); });
       $('.fwcc-dur').textContent = dur().toFixed(3) + 's';
-      $('.fwcc-est').textContent = dur() ? money(estimate(dur())) : '$0.00';
+      $('.fwcc-est').textContent = dur() ? money(estimate(dur())) : (I18.from || 'from %s').replace('%s', money(estimate(0)));
       $('.fwcc-nextlabel').textContent = clipId + '-' + pad(st.seq);
       var nm = $('.fwcc-name'); nm.placeholder = defName(st.seq); if (!nm.dataset.touched) nm.value = defName(st.seq);
       var tb = $('.fwcc-list tbody'); while (tb.firstChild) tb.removeChild(tb.firstChild); var tot = 0;
       st.list.forEach(function (c, i) {
-        var e = estimate(secOf(c.out - c.in)); tot += e;
+        var e = c.price != null ? c.price : estimate(secOf(c.out - c.in)); tot += e;
         var tr = document.createElement('tr');
         tr.appendChild(mk('td', 'mono', clipId + '-' + pad(c.seq)));
         var tdn = mk('td'), inp = document.createElement('input');
@@ -121,7 +152,7 @@
         });
         tr.appendChild(act); tb.appendChild(tr);
       });
-      $('.fwcc-total').textContent = money(tot);
+      $('.fwcc-total').textContent = (!st.list.length && st.added) ? (I18.in_cart || '%s added to cart').replace('%s', money(st.added)) : money(tot);
     }
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('button'); if (!b) return;
@@ -160,7 +191,8 @@
         if (!dur()) return msg('Set In and Out first (Out after In).', true);
         if (dur() > C.card.max_seconds) return msg('Clip too long (max ' + C.card.max_seconds + 's).', true);
         var nmv = ($('.fwcc-name').value || '').trim() || defName(st.seq);
-        st.list.push({ in: st.in, out: st.out, seq: st.seq, name: nmv }); st.seq++; st.in = st.out = null; st.last = null;
+        var row = { in: st.in, out: st.out, seq: st.seq, name: nmv }; st.list.push(row); st.seq++;
+        quoteRow(row); st.in = st.out = null; st.last = null;
         delete $('.fwcc-name').dataset.touched; msg('Added to clip list.'); draw(); return;
       }
       if (b.classList.contains('fwcc-clear')) { st.in = st.out = null; st.last = null; msg(''); draw(); return; }
@@ -212,7 +244,7 @@
         // 1.5.5: "Require sign-in to add to cart": save the selection server-side and offer sign-in / registration.
         if (el.getAttribute('data-require-login') === '1' && !C.loggedIn) return toLogin(b);
         b.disabled = true; msg('Adding...');
-        var queue = st.list.slice(), done = 0, fail = [], needLogin = false, auth = null;
+        var queue = st.list.slice(), done = 0, fail = [], needLogin = false, auth = null, mini = null;
         var prompt = el.getAttribute('data-require-login') === 'prompt' && !C.loggedIn; // 1.5.8: add, then offer sign-in
         (function next() {
           var c = queue.shift();
@@ -226,6 +258,7 @@
             }
             else if (!fail.length) { st.list = []; draw(); msg(done + ' clip(s) added to cart.'); }
             else msg(done + ' added; ' + fail.length + ' rejected: ' + fail.join('; '), true);
+            if (done) refreshMini(mini); draw();
             document.dispatchEvent(new CustomEvent('fwcc:added'));
             return;
           }
@@ -234,7 +267,7 @@
             headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
             body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)), login_optout: el.getAttribute('data-login-optout') || '', return: location.href })
           }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (r) { if (r.ok) { done++; if (r.j && r.j.auth && r.j.auth.login_url) auth = r.j.auth; } else { if (r.j && r.j.code === 'fwcc_login_required') { needLogin = true; queue = []; } else fail.push(r.j.message || 'error'); } next(); })
+            .then(function (r) { if (r.ok) { done++; if (r.j && r.j.clip && r.j.clip.price_cents != null) st.added = (st.added || 0) + (+r.j.clip.price_cents); if (r.j && r.j.mini_cart) mini = r.j.mini_cart; if (r.j && r.j.auth && r.j.auth.login_url) auth = r.j.auth; } else { if (r.j && r.j.code === 'fwcc_login_required') { needLogin = true; queue = []; } else fail.push(r.j.message || 'error'); } next(); })
             .catch(function (e) { fail.push(String(e)); next(); });
         })();
       }
@@ -298,5 +331,5 @@
     }
     draw();
   }
-  document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('.fwcc').forEach(init); });
+  document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('.fwcc').forEach(init); syncMiniOnLoad(); });
 })();

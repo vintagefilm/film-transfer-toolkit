@@ -46,7 +46,9 @@ FTT updates itself from the latest GitHub release of vintagefilm/film-transfer-t
 == Changelog ==
 
 = 1.5.9 =
-* Built-in GitHub release updater (includes/class-ftt-updater.php): update offers, View details, authenticated download with sha256 check, pause switch, optional per-site read token, FTT > Settings > Updates and `wp ftt-updater`. Nothing else changes.
+* Built-in GitHub release updater (includes/class-ftt-updater.php): update offers, View details, authenticated download with sha256 check, pause switch, optional per-site read token, FTT > Settings > Updates and `wp ftt-updater`. Settings, pages and prices are unchanged.
+* Fix: after clips are added to the cart (REST add, including login_mode add_then_prompt for signed-out visitors), the FluentCart header mini-cart now updates at once (amount and count from the new /wp-json/ftt/v1/clip/minicart, plus FluentCart's cart-changed event). A page served from a page cache that shows an empty header cart is corrected on load when the visitor holds a cart (fct_cart_hash cookie), and such visitors get no-cache headers.
+* Fix: the clip selector estimate and list total match the server price. Each listed clip is priced by /quote; with nothing marked the estimate shows the minimum ("from $29.00") instead of $0.00, and after the add the total shows what was added ("$29.00 added to cart") instead of $0.00.
 
 = 1.5.8 =
 * Clip selector: new setting "When a signed-out visitor adds clips" (ftt_clip_settings login_mode). block (default) = sign in first, as in 1.5.5. add_then_prompt = the clips go into the FluentCart guest cart at once (server-priced) and Sign in / Create account / View cart are offered. At sign-in or registration (wp-login, FluentAuth, anything that sets the login cookie) the guest cart is recorded as the customer's; items are not merged, so nothing is duplicated. A resume token that is claimed now skips clips already in the cart.

@@ -56,4 +56,17 @@ $ok( 'front end has no token', false === strpos( do_shortcode( '[ftt_price_table
 FTT_Updater::set_token( '' ); unlink( $st( 'private' ) ); delete_site_transient( FTT_Updater::CACHE );
 $ok( 'public: no token needed', isset( $t()->response[ $B ] ) && 'none' === FTT_Updater::token_source() );
 delete_site_transient( FTT_Updater::CACHE ); @unlink( $st( 'latest.json' ) );
+
+// ---- 1.5.9 bug fixes: header mini-cart after a REST add; server-priced estimate ----
+if ( class_exists( 'FTT_Clip_Rest' ) ) {
+	$m = FTT_Clip_Rest::mini_cart_summary();
+	$ok( 'minicart summary has count/qty/subtotal', is_array( $m ) && isset( $m['count'], $m['qty'], $m['subtotal'], $m['subtotal_cents'] ) );
+	do_action( 'rest_api_init' ); $rs = rest_get_server()->get_routes();
+	$ok( 'minicart route registered', isset( $rs['/ftt/v1/clip/minicart'] ) );
+	$ok( 'no-cache hook for cart holders', false !== has_action( 'send_headers', [ 'FTT_Clip_Rest', 'nocache_for_cart_holders' ] ) );
+	$js = file_get_contents( FTT_DIR . 'modules/clip-selector/assets/clip-selector.js' );
+	$ok( 'JS refreshes the FluentCart mini-cart', false !== strpos( $js, 'fluentCartNotifyCartDrawerItemChanged' ) && false !== strpos( $js, "/minicart'" ) );
+	$ok( 'JS no longer hard-codes $0.00 estimate', false === strpos( $js, "'\$0.00'" ) );
+	$ok( 'JS uses server /quote price in the list', false !== strpos( $js, "C.rest + '/quote'" ) && false !== strpos( $js, 'row.price' ) );
+}
 echo "$p passed, $f failed\n";

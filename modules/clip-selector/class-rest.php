@@ -8,6 +8,7 @@ class FTT_Clip_Rest
     public static function init()
     {
         add_action('rest_api_init', [__CLASS__, 'routes']);
+        add_action('send_headers', [__CLASS__, 'nocache_for_cart_holders']);
     }
 
     public static function routes()
@@ -35,6 +36,10 @@ class FTT_Clip_Rest
             'methods' => 'POST', 'callback' => [__CLASS__, 'pending'],
             'permission_callback' => [__CLASS__, 'check_nonce'],
             'args' => ['clips' => ['required' => true], 'return' => ['required' => true]],
+        ]);
+        // 1.5.9: live mini-cart summary (count + subtotal) so a page served from a page cache can correct the header cart.
+        register_rest_route(self::NS, '/minicart', [
+            'methods' => 'GET', 'callback' => [__CLASS__, 'minicart'], 'permission_callback' => '__return_true',
         ]);
         register_rest_route(self::NS, '/resume', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'resume'],
@@ -74,6 +79,52 @@ class FTT_Clip_Rest
     public static function login_optout_sig($product_id)
     {
         return substr(hash_hmac('sha256', 'optout|' . absint($product_id), wp_salt('auth') . 'fwcc-login'), 0, 20);
+    }
+
+    /** 1.5.9: fresh mini-cart numbers (the CartCheckoutHelper singleton is reset so a stale empty cart is never reused). */
+    public static function mini_cart_summary()
+    {
+        $out = ['count' => 0, 'qty' => 0, 'subtotal' => '', 'subtotal_cents' => 0];
+        if (!class_exists('\FluentCart\App\Helpers\CartHelper')) return $out;
+        $cart = \FluentCart\App\Helpers\CartHelper::getCart(null, false);
+        $data = ($cart && !is_wp_error($cart)) ? (array) ($cart->cart_data ?? []) : [];
+        $cents = 0;
+        foreach ($data as $it) {
+            $q = (int) ($it['quantity'] ?? 1);
+            $out['qty'] += $q;
+            $cents += (int) round((float) ($it['unit_price'] ?? $it['price'] ?? 0)) * $q;
+        }
+        $out['count'] = count($data);
+        $h = '\FluentCart\App\Helpers\CartCheckoutHelper';
+        $fmt = '';
+        if ($data && class_exists($h)) {
+            try {
+                if (method_exists($h, 'resetInstance')) $h::resetInstance();
+                $fmt = (string) $h::make()->getItemsAmountSubtotal(true, true);
+                $raw = (int) $h::make()->getItemsAmountSubtotal(false, false);
+                if ($raw > 0) $cents = $raw;
+            } catch (\Throwable $e) { $fmt = ''; }
+        }
+        if ($fmt === '' || ($cents > 0 && preg_match('/^\D*0[.,]00\D*$/', $fmt))) {
+            $fmt = class_exists('\FluentCart\App\Helpers\Helper') ? (string) \FluentCart\App\Helpers\Helper::toDecimal($cents, true) : '$' . number_format($cents / 100, 2);
+        }
+        $out['subtotal'] = $fmt;
+        $out['subtotal_cents'] = $cents;
+        return $out;
+    }
+
+    public static function minicart(WP_REST_Request $req)
+    {
+        $r = rest_ensure_response(self::mini_cart_summary());
+        $r->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        return $r;
+    }
+
+    /** 1.5.9: a guest who holds a FluentCart cart gets no-cache headers, so a page cache does not keep serving an empty header cart. */
+    public static function nocache_for_cart_holders()
+    {
+        if (is_admin() || is_user_logged_in() || empty($_COOKIE['fct_cart_hash'])) return;
+        if (!headers_sent()) nocache_headers();
     }
 
     public static function add(WP_REST_Request $req)
@@ -128,6 +179,7 @@ class FTT_Clip_Rest
             'clip'      => $clip,
             'cart_hash' => $cart->cart_hash ?? '',
             'items'     => $items,
+            'mini_cart' => self::mini_cart_summary(), // 1.5.9: lets the page update the header mini-cart right away
             'checkout'  => function_exists('fluent_cart_get_option') ? '' : home_url('/checkout/'),
         ];
     }
