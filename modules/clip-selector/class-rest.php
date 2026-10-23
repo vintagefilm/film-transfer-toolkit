@@ -108,7 +108,7 @@ class FTT_Clip_Rest
         if ($fmt === '' || ($cents > 0 && preg_match('/^\D*0[.,]00\D*$/', $fmt))) {
             $fmt = class_exists('\FluentCart\App\Helpers\Helper') ? (string) \FluentCart\App\Helpers\Helper::toDecimal($cents, true) : '$' . number_format($cents / 100, 2);
         }
-        $out['subtotal'] = $fmt;
+        $out['subtotal'] = html_entity_decode(wp_strip_all_tags($fmt), ENT_QUOTES, 'UTF-8'); // plain text, e.g. &#36; -> $
         $out['subtotal_cents'] = $cents;
         return $out;
     }

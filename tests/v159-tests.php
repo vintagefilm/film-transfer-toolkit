@@ -61,6 +61,8 @@ delete_site_transient( FTT_Updater::CACHE ); @unlink( $st( 'latest.json' ) );
 if ( class_exists( 'FTT_Clip_Rest' ) ) {
 	$m = FTT_Clip_Rest::mini_cart_summary();
 	$ok( 'minicart summary has count/qty/subtotal', is_array( $m ) && isset( $m['count'], $m['qty'], $m['subtotal'], $m['subtotal_cents'] ) );
+	add_filter( 'fluent_cart/currency_sign', $cs = function () { return '&#36;'; } );
+	$ok( 'minicart subtotal is plain text (no HTML entities)', false === strpos( FTT_Clip_Rest::mini_cart_summary()['subtotal'], '&#' ) );
 	do_action( 'rest_api_init' ); $rs = rest_get_server()->get_routes();
 	$ok( 'minicart route registered', isset( $rs['/ftt/v1/clip/minicart'] ) );
 	$ok( 'no-cache hook for cart holders', false !== has_action( 'send_headers', [ 'FTT_Clip_Rest', 'nocache_for_cart_holders' ] ) );
