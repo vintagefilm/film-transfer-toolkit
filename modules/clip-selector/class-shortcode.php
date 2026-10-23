@@ -102,8 +102,10 @@ class FTT_Clip_Shortcode
         $page_id = (int) get_the_ID();
         // Frame rate: shortcode fps="29.97df" overrides; else the product's _fw_fps (cart mode); else the settings default.
         // In cart mode the server validates against the product's rate, so set _fw_fps on the product to match.
-        $fps = FTT_Timecode::norm($a['fps']) ?: ($pid ? FTT_Clip::product_fps($pid) : $set['default_fps']);
-        $offset = $pid ? FTT_Clip::product_offset_frames($pid) : 0;
+        // 1.5.4: a product set to "any" takes the video's own rate (fps attribute, else the settings default).
+        $pfps = $pid ? FTT_Clip::product_fps($pid) : null;
+        $fps = FTT_Timecode::norm($a['fps']) ?: (($pfps && $pfps !== 'any') ? $pfps : $set['default_fps']);
+        $offset = $pid ? FTT_Clip::product_offset_frames($pid, $fps) : 0;
         $title = $a['title'] !== '' ? sanitize_text_field($a['title']) : ($pid ? FTT_Clip::default_title($pid) : ($page_id ? get_the_title($page_id) : __('Clip', 'film-transfer-toolkit')));
         $clip_id = preg_match('/^[A-Za-z0-9._-]{1,64}$/', (string) $a['clip_id']) ? (string) $a['clip_id'] : '';
         if ($clip_id === '' && $pid) $clip_id = (string) get_post_meta($pid, '_fw_clip_id', true);
@@ -131,17 +133,15 @@ class FTT_Clip_Shortcode
 <?php endif; ?>
 <?php if ($heading !== '') : ?>  <h3 class="ftt-tool__title fwcc-heading"><?php echo esc_html($heading); ?></h3>
 <?php endif; ?>
-  <div class="fwcc-row fwcc-jumpbar" role="group" aria-label="<?php esc_attr_e('Jump to a mark', 'film-transfer-toolkit'); ?>">
-    <button type="button" class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I" <?php echo $ta('jump_in'); ?>><?php esc_html_e('Jump to In', 'film-transfer-toolkit'); ?></button>
-    <button type="button" class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O" <?php echo $ta('jump_out'); ?>><?php esc_html_e('Jump to Out', 'film-transfer-toolkit'); ?></button>
-  </div>
-  <div class="fwcc-marks">
+  <div class="fwcc-marks" role="group" aria-label="<?php esc_attr_e('In and Out marks', 'film-transfer-toolkit'); ?>">
     <button type="button" class="button fwcc-set" data-which="in" <?php echo $ta('set_in'); ?>>Set In</button>
+    <button type="button" class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I" <?php echo $ta('jump_in'); ?>><?php esc_html_e('Jump to In', 'film-transfer-toolkit'); ?></button>
     <span class="fwcc-tc" data-tc="in"></span>
     <span class="fwcc-trim-label" <?php echo $ta('trim_label', 'In'); ?>>Trim In</span>
     <span class="fwcc-nudge" data-which="in"><?php echo self::trim_buttons('in'); // phpcs:ignore ?></span>
 
     <button type="button" class="button fwcc-set" data-which="out" <?php echo $ta('set_out'); ?>>Set Out</button>
+    <button type="button" class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O" <?php echo $ta('jump_out'); ?>><?php esc_html_e('Jump to Out', 'film-transfer-toolkit'); ?></button>
     <span class="fwcc-tc" data-tc="out"></span>
     <span class="fwcc-trim-label" <?php echo $ta('trim_label', 'Out'); ?>>Trim Out</span>
     <span class="fwcc-nudge" data-which="out"><?php echo self::trim_buttons('out'); // phpcs:ignore ?></span>

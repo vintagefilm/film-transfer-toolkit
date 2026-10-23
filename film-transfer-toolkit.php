@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       FTT
  * Description:       Film calculator, reel size estimator, price table, multi-reel estimate builder with quote requests, and optional clip selector and quote-comparison (RFQ) modules. Includes a setup wizard, blocks, and step-by-step help under FTT.
- * Version:           1.5.3
+ * Version:           1.5.4
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Vintage Film Transfer
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FTT_VERSION', '1.5.3' );
+define( 'FTT_VERSION', '1.5.4' );
 define( 'FTT_FILE', __FILE__ );
 define( 'FTT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FTT_URL', plugin_dir_url( __FILE__ ) );

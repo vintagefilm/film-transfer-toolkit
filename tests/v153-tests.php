@@ -26,10 +26,10 @@ $ok( 'heading_for: string atts (no attributes) -> setting', 'Select Stock Footag
 $h = function ( $html ) { return preg_match( '#<h3 class="ftt-tool__title fwcc-heading">(.*?)</h3>#', $html, $m ) ? $m[1] : null; };
 $r = do_shortcode( '[ftt_clip_selector clip_id="V153"]' );
 $ok( 'render: default heading in an h3.ftt-tool__title', 'Select Stock Footage' === $h( $r ), $h( $r ) );
-$ok( 'render: heading before the jump bar, jump bar before the marks', strpos( $r, 'fwcc-heading' ) < strpos( $r, 'fwcc-jumpbar' ) && strpos( $r, 'fwcc-jumpbar' ) < strpos( $r, 'fwcc-marks' ) );
+$ok( 'render: heading before the marks, jump buttons inside the marks (1.5.4 layout)', strpos( $r, 'fwcc-heading' ) < strpos( $r, 'fwcc-marks' ) && strpos( $r, 'fwcc-marks' ) < strpos( $r, 'fwcc-jump' ) );
 $ok( 'render: two jump buttons with key shortcuts', 1 === substr_count( $r, 'class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I"' ) && 1 === substr_count( $r, 'class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O"' ) );
 $ok( 'render: jump buttons labelled', false !== strpos( $r, '>Jump to In</button>' ) && false !== strpos( $r, '>Jump to Out</button>' ) && false !== strpos( $r, 'aria-label="Move the video to your In point' ) );
-$ok( 'render: jump group labelled', false !== strpos( $r, 'role="group" aria-label="Jump to a mark"' ) );
+$ok( 'render: jump buttons in a labelled group (1.5.4: the In/Out marks group)', false !== strpos( $r, 'class="fwcc-marks" role="group" aria-label="In and Out marks"' ) );
 $ok( 'render: help mentions Shift+I', false !== strpos( $r, '<kbd>Shift</kbd>+<kbd>I</kbd> Jump to In' ) );
 $ok( 'render: escaped override', '&lt;i&gt;Hi&lt;/i&gt; &amp; co' === $h( do_shortcode( '[ftt_clip_selector heading="&lt;i&gt;Hi&lt;/i&gt; &amp; co"]' ) ) || 'Hi &amp; co' === $h( do_shortcode( '[ftt_clip_selector heading="<i>Hi</i> & co"]' ) ), $h( do_shortcode( '[ftt_clip_selector heading="<i>Hi</i> & co"]' ) ) );
 $ok( 'render: heading="none" hides', null === $h( do_shortcode( '[ftt_clip_selector heading="none"]' ) ) && false === strpos( do_shortcode( '[ftt_clip_selector heading="none"]' ), 'fwcc-heading' ) );
@@ -40,7 +40,7 @@ $ok( 'render: block default = bare shortcode', $h( do_blocks( '<!-- wp:ftt/clip-
 update_option( 'ftt_clip_settings', array( 'heading' => '' ) );
 $ok( 'blank setting hides on every plain selector', false === strpos( do_shortcode( '[ftt_clip_selector]' ), 'fwcc-heading' ) );
 $ok( 'blank setting: per-selector override still shows', 'Own' === $h( do_shortcode( '[ftt_clip_selector heading="Own"]' ) ) );
-$ok( 'blank setting: jump buttons still there', false !== strpos( do_shortcode( '[ftt_clip_selector]' ), 'fwcc-jumpbar' ) );
+$ok( 'blank setting: jump buttons still there', false !== strpos( do_shortcode( '[ftt_clip_selector]' ), 'fwcc-jump' ) );
 update_option( 'ftt_clip_settings', array( 'heading' => 'Site wide' ) );
 $ok( 'saved setting used', 'Site wide' === $h( do_shortcode( '[ftt_clip_selector]' ) ) );
 $ok( 'auto placement uses the setting', 'Site wide' === $h( FTT_Clip_Shortcode::render( array() ) ) );
@@ -59,7 +59,7 @@ $ok( 'admin: Heading field in the main clip settings', false !== strpos( $adm, '
 $ok( 'admin: field is outside the Advanced box', strpos( $adm, 'ftt-clip-heading' ) < strpos( $adm, 'id="ftt-adv-clips"' ) );
 $css = file_get_contents( FTT_DIR . 'modules/clip-selector/assets/clip-selector.css' );
 $ok( 'css: no hard-coded font for the heading (uses ftt-base title style)', ! preg_match( '/fwcc-heading[^}]*font-family/', $css ) );
-$ok( 'version 1.5.3', '1.5.3' === FTT_VERSION );
+$ok( 'version 1.5.3 or later', version_compare( FTT_VERSION, '1.5.3', '>=' ) );
 
 if ( null === $keep ) { delete_option( 'ftt_clip_settings' ); } else { update_option( 'ftt_clip_settings', $keep ); }
 echo "v153 php: $P passed, $F failed\n";

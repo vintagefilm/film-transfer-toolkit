@@ -78,7 +78,7 @@ function ftt_calc_shortcode( $atts ) {
 	}
 	$show_switch  = ftt_calc_bool_att( $atts['switch'], $o['show_switch'] );
 	$show_table   = ftt_calc_bool_att( $atts['table'], $o['show_table'] );
-	$title        = '' !== trim( (string) $atts['title'] ) ? sanitize_text_field( $atts['title'] ) : __( 'Film Calculator', 'film-transfer-toolkit' );
+	$title        = '' !== trim( (string) $atts['title'] ) ? sanitize_text_field( $atts['title'] ) : __( 'FTT Calculator', 'film-transfer-toolkit' );
 
 	if ( 'preset' === $heading_font ) {
 		$heading_font = ( 'light' === $theme ) ? 'yeseva' : 'theme';

@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,13 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+
+= 1.5.4 =
+* Clip selector: a product with frame rate (_fw_fps) "any" accepts the video's own rate (23.976, 24, 25, 29.97 DF/NDF, 30, 50, 59.94 DF/NDF, 60). Price stays frame-accurate and the rate stays in the signed clip data. Products with a fixed rate behave as before.
+* Timecode: added 50 and 59.94 NDF.
+* Clip selector: Jump to In / Jump to Out now sit in the Set In / Set Out rows and wrap on small screens. Shift+I / Shift+O unchanged.
+* Calculator: default heading is now "FTT Calculator".
+* Manual delivery helper: clip lines carry Source video, In, Out, Frame rate and a ready-to-paste ffmpeg command, shown in the admin order and order emails. Optional product meta _fw_source_file names the master file. No automatic delivery.
 = 1.5.3 =
 * Clip selector: "Jump to In" and "Jump to Out" buttons at the top of the clip editor seek the video to the current In or Out point (pausing there). They are real buttons, so Tab + Enter/Space work; shortcuts Shift+I and Shift+O.
 * Clip selector: a heading above the selector, default "Select Stock Footage". Edit it under FTT > Settings > Clip selector, or per selector with heading="..." (shortcode) or the block sidebar. A blank site setting hides it everywhere; heading="none" hides it on one selector. It uses the shared ftt-base.css title style and the site's heading font.

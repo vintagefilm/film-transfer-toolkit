@@ -1,7 +1,8 @@
 /* Clip selector (FTT 1.5.0): container, type, inputs and buttons (3px radius, Joanne) come from ftt-base.css (.ftt-tool). Tokens only. */
 .fwcc .button,.fwcc button.button{border-radius:var(--ftt-radius-sm)}
-.fwcc-marks{display:grid;grid-template-columns:max-content minmax(8em,max-content) max-content max-content;gap:.5em var(--ftt-gap);align-items:center;margin-bottom:.5em}
-.fwcc-marks .fwcc-set{width:100%}
+.fwcc{container-type:inline-size}
+.fwcc-marks{display:grid;grid-template-columns:max-content max-content minmax(8em,max-content) max-content max-content;gap:.5em var(--ftt-gap);align-items:center;margin-bottom:.5em}
+.fwcc-marks .fwcc-set,.fwcc-marks .fwcc-jump{width:100%}
 .fwcc-tc,.fwcc-list td.mono,.fwcc-debug{font-variant-numeric:tabular-nums}
 .fwcc-trim-label{cursor:help}
 .fwcc-nudge{display:inline-flex;flex-wrap:wrap;gap:.25em}
@@ -15,7 +16,11 @@
 .fwcc-help summary{cursor:pointer}
 .fwcc-help-body ol,.fwcc-keys{margin:0 0 .5em 1.4em;padding:0}
 .fwcc-debug{white-space:pre-wrap;margin:0 0 .5em}
-@media (max-width:600px){.fwcc-marks{grid-template-columns:max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2}}
+.fwcc-tc{white-space:nowrap}
+/* 1.5.4: Set + Jump share a row; trim controls drop to their own line when the selector is narrow. */
+@container (max-width:760px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2 / -1}}
+@container (max-width:420px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-tc{grid-column:1 / -1}.fwcc-trim-label{grid-column:1 / -1}.fwcc-nudge{grid-column:1 / -1}}
+@supports not (container-type:inline-size){@media (max-width:900px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2 / -1}}@media (max-width:480px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-tc,.fwcc-trim-label,.fwcc-nudge{grid-column:1 / -1}}}
 /* 1.3.0: request mode and preview notice */
 .fwcc-hp{position:absolute!important;left:-10000px!important;width:1px;height:1px;overflow:hidden}
 .fwcc-request{margin:.5em 0;padding:.75em;border:1px solid var(--ftt-border);border-radius:var(--ftt-radius-sm)}
@@ -26,5 +31,4 @@
 .fwcc-msg.bad{color:var(--ftt-bad)}
 /* 1.5.3: heading (type, font and colour from .ftt-tool__title in ftt-base.css) and Jump to In/Out */
 .fwcc-heading{margin-bottom:.5em}
-.fwcc-jumpbar{margin-top:0}
 .fwcc .fwcc-jump[aria-disabled="true"]{opacity:.6}

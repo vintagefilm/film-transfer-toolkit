@@ -36,8 +36,11 @@ class FTT_Clip
         }
         $fps = FTT_Timecode::norm($fps);
         if ($fps === null) return new WP_Error('fwcc_bad_fps', 'Unsupported frame rate.', ['status' => 400]);
-        // The product decides the frame rate; the browser must agree with it.
-        if ($fps !== self::product_fps($product_id)) {
+        // A product with a fixed frame rate decides it and the browser must agree.
+        // A product set to "any" (1.5.4, e.g. the default clip product) takes the video's own
+        // rate; the rate is still part of the signed data and the price is frame-accurate at that rate.
+        $pfps = self::product_fps($product_id);
+        if ($pfps !== 'any' && $fps !== $pfps) {
             return new WP_Error('fwcc_fps_mismatch', 'Frame rate does not match this video.', ['status' => 400]);
         }
 
@@ -77,7 +80,7 @@ class FTT_Clip
             $name = self::default_title($product_id) . ' ' . sprintf('%02d', $seq);
         }
 
-        $off = self::product_offset_frames($product_id);
+        $off = self::product_offset_frames($product_id, $fps);
         return [
             'v'           => 3,
             'seq'         => $seq,
@@ -103,19 +106,29 @@ class FTT_Clip
         ];
     }
 
-    /** Frame rate for a product: post meta _fw_fps, default 29.97 DF. */
+    /** True when the product accepts any supported frame rate (_fw_fps = "any"). */
+    public static function accepts_any_fps($product_id)
+    {
+        return $product_id && strtolower(trim((string) get_post_meta($product_id, '_fw_fps', true))) === 'any';
+    }
+
+    /** Frame rate for a product: post meta _fw_fps, "any" for any-rate products, default 29.97 DF. */
     public static function product_fps($product_id)
     {
+        if (self::accepts_any_fps($product_id)) return 'any';
         $k = FTT_Timecode::norm(get_post_meta($product_id, '_fw_fps', true));
         return $k ?: apply_filters('fwcc/default_fps', '29.97df');
     }
 
     /** Master timecode offset: post meta _fw_tc_offset as a timecode (e.g. 01:00:00;00), default 0. */
-    public static function product_offset_frames($product_id)
+    public static function product_offset_frames($product_id, $fps = null)
     {
         $tc = get_post_meta($product_id, '_fw_tc_offset', true);
         if ($tc === '') return 0;
-        $f = FTT_Timecode::tc_to_frames($tc, self::product_fps($product_id));
+        $pf = self::product_fps($product_id);
+        $use = $pf === 'any' ? FTT_Timecode::norm($fps) : $pf;
+        if ($use === null) return 0;
+        $f = FTT_Timecode::tc_to_frames($tc, $use);
         return $f === null ? 0 : (int) $f;
     }
 
@@ -163,7 +176,7 @@ class FTT_Clip
     public static function to_variation(array $clip)
     {
         $product = get_post($clip['product_id']);
-        $title = sprintf('%s "%s"  %s - %s (%ss)', $clip['clip_label'], $clip['clip_name'], $clip['in_tc'], $clip['out_tc'], rtrim(rtrim(number_format($clip['duration'], 3, '.', ''), '0'), '.'));
+        $title = sprintf('%s "%s"  %s - %s (%ss @ %s fps)', $clip['clip_label'], $clip['clip_name'], $clip['in_tc'], $clip['out_tc'], rtrim(rtrim(number_format($clip['duration'], 3, '.', ''), '0'), '.'), $clip['fps_label'] ?? FTT_Timecode::LABELS[$clip['fps']]);
         return [
             'id'                => self::item_id($clip),
             'object_id'         => self::item_id($clip),
@@ -183,7 +196,53 @@ class FTT_Clip
             'other_info'        => [
                 'fw_clip' => $clip,
                 'fw_sig'  => self::sign($clip),
+                // 1.5.4 manual delivery helper: shown as line details in the admin order and the
+                // order emails. Display only; validation and price use the signed fw_clip alone.
+                'item_attributes' => self::delivery_attributes($clip),
             ],
         ];
+    }
+
+    /** Source of a clip for manual delivery: product meta _fw_source_file if set, plus the clip id. */
+    public static function source_info(array $clip)
+    {
+        $file = trim((string) get_post_meta($clip['product_id'], '_fw_source_file', true));
+        return ['id' => (string) $clip['clip_id'], 'file' => sanitize_text_field($file)];
+    }
+
+    /** One ready-to-paste ffmpeg command (frame-accurate re-encode, Out frame exclusive). */
+    public static function ffmpeg_command(array $clip)
+    {
+        $src = self::source_info($clip);
+        $in  = sprintf('%.6f', FTT_Timecode::frames_to_seconds($clip['in_frame'], $clip['fps']));
+        $dur = sprintf('%.6f', FTT_Timecode::frames_to_seconds($clip['out_frame'] - $clip['in_frame'], $clip['fps']));
+        $frames = (int) $clip['out_frame'] - (int) $clip['in_frame'];
+        $input = $src['file'] !== '' ? $src['file'] : $src['id'] . '.mov';
+        $out = preg_replace('/[^A-Za-z0-9._-]+/', '_', $clip['clip_label'] . '_' . $clip['clip_name']) . '.mov';
+        $q = function ($s) { return "'" . str_replace("'", "'\\''", $s) . "'"; };
+        return sprintf('ffmpeg -n -i %s -ss %s -t %s -frames:v %d -c:v prores_ks -profile:v 3 -c:a pcm_s16le %s', $q($input), $in, $dur, $frames, $q($out));
+    }
+
+    /** FluentCart third-party item attributes (fw_*) carrying the delivery details. */
+    public static function delivery_attributes(array $clip)
+    {
+        $src = self::source_info($clip);
+        $source = $src['file'] !== '' ? $src['file'] . ' (' . $src['id'] . ')' : $src['id'];
+        $rows = [
+            'fw_source' => $source,
+            'fw_in'     => $clip['in_tc'],
+            'fw_out'    => $clip['out_tc'],
+            'fw_fps'    => ($clip['fps_label'] ?? FTT_Timecode::LABELS[$clip['fps']]) . ' fps',
+            'fw_ffmpeg' => self::ffmpeg_command($clip),
+        ];
+        $out = [];
+        foreach ($rows as $k => $v) $out[$k] = ['value' => $v, 'slug' => $k];
+        return $out;
+    }
+
+    /** Labels for the fw_* attributes. */
+    public static function delivery_labels()
+    {
+        return ['fw_source' => 'Source video', 'fw_in' => 'In', 'fw_out' => 'Out', 'fw_fps' => 'Frame rate', 'fw_ffmpeg' => 'ffmpeg'];
     }
 }

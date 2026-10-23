@@ -157,7 +157,7 @@ function ftt_calc_render_help_page( $wrap = true ) {
 		array( 'extras', 'yes, no', __( 'Show film speed (ft/min) and total seconds.', 'film-transfer-toolkit' ) ),
 		array( 'switch', 'yes, no', __( 'Show the Switch button (Length → Time / Time → Length).', 'film-transfer-toolkit' ) ),
 		array( 'table', 'yes, no', __( 'Show the format reference table.', 'film-transfer-toolkit' ) ),
-		array( 'title', __( 'any text', 'film-transfer-toolkit' ), __( 'Replace the "Film Calculator" heading.', 'film-transfer-toolkit' ) ),
+		array( 'title', __( 'any text', 'film-transfer-toolkit' ), __( 'Replace the "FTT Calculator" heading.', 'film-transfer-toolkit' ) ),
 	);
 	$examples = array(
 		'[ftt_calculator]'                                      => __( 'Uses the defaults from Settings.', 'film-transfer-toolkit' ),
