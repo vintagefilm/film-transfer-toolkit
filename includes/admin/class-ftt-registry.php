@@ -217,11 +217,13 @@ class FTT_Registry {
 							array( 'name' => 'title', 'label' => __( 'Footage title', 'film-transfer-toolkit' ), 'default_note' => __( 'The product title, otherwise the page title', 'film-transfer-toolkit' ), 'type' => 'text', 'default' => '', 'example' => 'Fire engines, 1950s', 'help' => __( 'Clip title used for clip names. Empty uses the product or page title.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'fps', 'label' => __( 'Timecode frame rate', 'film-transfer-toolkit' ), 'default_note' => __( 'The product\'s frame rate, otherwise the default fps (Clip selector settings)', 'film-transfer-toolkit' ), 'setting' => 'clip:default_fps', 'type' => 'select', 'default' => '', 'options' => array( '' => __( 'Use the product or settings frame rate', 'film-transfer-toolkit' ), '23.976' => '23.976', '24' => '24', '25' => '25', '29.97df' => '29.97 drop-frame', '29.97ndf' => '29.97 non-drop', '30' => '30', '50' => '50', '59.94df' => '59.94 drop-frame', '59.94ndf' => '59.94 non-drop', '60' => '60' ), 'help' => __( 'Timecode frame rate of the video. Products set to "Any frame rate" use this rate as is; products with a fixed rate need it to match.', 'film-transfer-toolkit' ) ),
 							array( 'name' => 'product_id', 'label' => __( 'FluentCart product ID', 'film-transfer-toolkit' ), 'default_note' => __( 'The default clip product (Clip selector settings); with no product the selector sends a request instead of adding to a cart', 'film-transfer-toolkit' ), 'setting' => 'clip:default_product_id', 'type' => 'number', 'default' => '', 'example' => '123', 'help' => __( 'FluentCart only: the product the clips are added under. Empty uses the default clip product from the Clip selector settings; with neither (or without FluentCart) visitors send a clip request instead.', 'film-transfer-toolkit' ) ),
+							array( 'name' => 'require_login', 'label' => __( 'Require sign-in to add to cart', 'film-transfer-toolkit' ), 'default_note' => __( 'The "Require sign-in to add to cart" setting (Clip selector settings)', 'film-transfer-toolkit' ), 'setting' => 'clip:require_login', 'type' => 'select', 'default' => '', 'options' => self::yn(), 'help' => __( 'FluentCart only. Yes: visitors who are not signed in save their clips, sign in or register, and come back with the clips in the cart. No: guests add to the cart directly on this selector.', 'film-transfer-toolkit' ) ),
 						),
 						'examples'  => array(
 							'[ftt_clip_selector]'                                     => __( 'Put it under any video. Clips are priced from the rate card and sent as a request (or to the cart when FluentCart and a clip product are set up).', 'film-transfer-toolkit' ),
 							'[ftt_clip_selector player_selector="#interview" clip_id="INT-01"]' => __( 'Attach to the video whose HTML anchor is "interview" when a page has several players.', 'film-transfer-toolkit' ),
 							'[ftt_clip_selector product_id="123" clip_id="FIRE-0001"]' => __( 'FluentCart: add the clips to the cart under product 123.', 'film-transfer-toolkit' ),
+							'[ftt_clip_selector require_login="yes"]'                => __( 'Ask visitors to sign in or create an account before the clips go into the cart; they come back with the clips added.', 'film-transfer-toolkit' ),
 							'[ftt_clip_selector heading="Choose your clip"]'          => __( 'Show your own heading above the selector; heading="none" hides it.', 'film-transfer-toolkit' ),
 						),
 					),
@@ -382,6 +384,9 @@ class FTT_Registry {
 		} elseif ( 'clip' === $src && class_exists( 'FTT_Clip_Settings' ) ) {
 			$o = FTT_Clip_Settings::get();
 			$v = $o[ $key ] ?? null;
+			if ( 'require_login' === $key ) {
+				return $v ? __( 'Yes', 'film-transfer-toolkit' ) : __( 'No', 'film-transfer-toolkit' );
+			}
 			if ( 'default_product_id' === $key ) {
 				$v = (int) $v;
 				return $v ? '#' . $v . ' ' . get_the_title( $v ) : __( 'none (request mode)', 'film-transfer-toolkit' );

@@ -22,6 +22,7 @@ require_once FTT_CLIP_DIR . 'class-rest.php';
 require_once FTT_CLIP_DIR . 'class-fluentcart-hooks.php';
 require_once FTT_CLIP_DIR . 'class-clip-settings.php';
 require_once FTT_CLIP_DIR . 'class-clip-request.php';
+require_once FTT_CLIP_DIR . 'class-clip-resume.php';
 require_once FTT_CLIP_DIR . 'class-shortcode.php';
 require_once FTT_CLIP_DIR . 'admin.php';
 
@@ -29,6 +30,7 @@ FTT_Clip_Shortcode::init();
 FTT_Clip_Rest::init();
 FTT_Clip_Request::init();
 FTT_Clip_Settings::init();
+FTT_Clip_Resume::init();
 if ( class_exists( '\FluentCart\App\Helpers\CartHelper' ) && ! defined( 'FTT_CLIP_SHARED_FWCC' ) ) {
 	FTT_Clip_FluentCart_Hooks::init();
 }

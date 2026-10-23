@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -38,6 +38,9 @@ wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|o
 
 == Changelog ==
 
+= 1.5.5 =
+* Clip selector: new "Require sign-in to add to cart" (FTT > Clip selector, default off). Visitors who are not signed in can still preview and mark clips; Add clips to cart saves the selection on the server for 2 hours (signed, single-use token) and offers Sign in / Create account. After signing in or registering (your chosen pages, e.g. the FluentCart Login and Registration pages, or wp-login.php) they return to the same page, the clips are added to the FluentCart cart with the price recalculated on the server, and a notice links to the cart (or, if set, they go straight to the cart). Signed-in customers are unaffected. Per selector: require_login="yes|no" (shortcode) or the block sidebar.
+* REST: POST ftt/v1/clip/pending and /resume (nonce + rate limit). /add refuses guests with 401 fwcc_login_required while the setting is on.
 = 1.5.4 =
 * Clip selector: a product with frame rate (_fw_fps) "any" accepts the video's own rate (23.976, 24, 25, 29.97 DF/NDF, 30, 50, 59.94 DF/NDF, 60). Price stays frame-accurate and the rate stays in the signed clip data. Products with a fixed rate behave as before.
 * Timecode: added 50 and 59.94 NDF.

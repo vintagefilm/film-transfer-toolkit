@@ -39,6 +39,56 @@
     function mk(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
     var $ = function (s) { return el.querySelector(s); };
     var msg = function (t, bad) { var m = $('.fwcc-msg'); m.textContent = t; m.className = 'fwcc-msg' + (bad ? ' bad' : ''); };
+    // ---- 1.5.5: sign-in before add to cart ----
+    var I18 = C.i18n || {}, LSK = 'ftt_clip_pending';
+    function msgLinks(t, links, bad) {
+      msg(t, bad); var m = $('.fwcc-msg');
+      links.forEach(function (l) {
+        if (!l[1]) return;
+        var a = document.createElement('a'); a.href = l[1]; a.textContent = l[0]; a.className = 'button fwcc-auth ' + (l[2] || ''); a.style.marginLeft = '8px';
+        m.appendChild(document.createTextNode(' ')); m.appendChild(a);
+      });
+    }
+    function toLogin(b) {
+      if (!st.list.length) return msg('Clip list is empty.', true);
+      b.disabled = true; msg('Saving your selection...');
+      var clips = st.list.map(function (c) {
+        return { product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)) };
+      });
+      fetch(C.rest + '/pending', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
+        body: JSON.stringify({ clips: clips, return: location.href })
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (r) {
+          b.disabled = false;
+          if (!r.ok) return msg((r.j && r.j.message) || 'Could not save your selection.', true);
+          try { localStorage.setItem(LSK, JSON.stringify({ token: r.j.token, exp: r.j.expires * 1000 })); } catch (e) {}
+          el.setAttribute('data-pending', r.j.token);
+          msgLinks(I18.login_needed || 'Please sign in or create an account to add these clips to your cart.',
+            [[I18.signin || 'Sign in', r.j.login_url, 'fwcc-signin'], [I18.register || 'Create account', r.j.register_url, 'fwcc-register']]);
+        })
+        .catch(function (e) { b.disabled = false; msg(String(e), true); });
+    }
+    // Backup resume: signed in now, and this browser still holds an unclaimed token (e.g. a form that ignored redirect_to).
+    (function resumeFromStorage() {
+      var p; try { p = JSON.parse(localStorage.getItem(LSK) || 'null'); } catch (e) { p = null; }
+      if (!p || !p.token) return;
+      if (p.exp && p.exp < Date.now()) { try { localStorage.removeItem(LSK); } catch (e) {} return; }
+      if (!C.loggedIn || window.__fttClipResuming) return;
+      window.__fttClipResuming = true;
+      try { localStorage.removeItem(LSK); } catch (e) {}
+      fetch(C.rest + '/resume', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce }, body: JSON.stringify({ token: p.token }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (r) {
+          if (!r.ok || !r.j.added || !r.j.added.length) return; // already claimed on the server, or expired.
+          if (r.j.after_login === 'cart' && r.j.cart_url) { location.href = r.j.cart_url; return; }
+          msgLinks((I18.resumed || '%d clip(s) added to your cart.').replace('%d', r.j.added.length), [[I18.viewcart || 'View cart', r.j.cart_url, 'fwcc-viewcart']]);
+          document.dispatchEvent(new CustomEvent('fwcc:added'));
+        }).catch(function () {});
+    })();
+    // Server-side resume already happened: forget the local copy.
+    if (C.loggedIn && document.querySelector('.ftt-clip-resume-notice')) { try { localStorage.removeItem(LSK); } catch (e) {} }
     var player = function () { return findPlayer(el); };
     function now() { var p = player(); return p ? TC.secondsToFrames(Number(p.currentTime) || 0, fps) : null; }
     function dur() { return (st.in !== null && st.out !== null && st.out > st.in) ? secOf(st.out - st.in) : 0; }
@@ -158,12 +208,15 @@
       if (b.classList.contains('fwcc-addcart')) {
         if (!st.list.length) return msg('Clip list is empty.', true);
         if (DEMO) return msg('Preview only: the Clip selector module is switched off on this site, so nothing is added to a cart.', true);
+        // 1.5.5: "Require sign-in to add to cart": save the selection server-side and offer sign-in / registration.
+        if (el.getAttribute('data-require-login') === '1' && !C.loggedIn) return toLogin(b);
         b.disabled = true; msg('Adding...');
-        var queue = st.list.slice(), done = 0, fail = [];
+        var queue = st.list.slice(), done = 0, fail = [], needLogin = false;
         (function next() {
           var c = queue.shift();
           if (!c) {
             b.disabled = false;
+            if (needLogin && !done) return toLogin(b);
             if (!fail.length) { st.list = []; draw(); msg(done + ' clip(s) added to cart.'); }
             else msg(done + ' added; ' + fail.length + ' rejected: ' + fail.join('; '), true);
             document.dispatchEvent(new CustomEvent('fwcc:added'));
@@ -172,9 +225,9 @@
           fetch(C.rest + '/add', {
             method: 'POST', credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
-            body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)) })
+            body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)), login_optout: el.getAttribute('data-login-optout') || '' })
           }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (r) { if (r.ok) done++; else fail.push(r.j.message || 'error'); next(); })
+            .then(function (r) { if (r.ok) done++; else { if (r.j && r.j.code === 'fwcc_login_required') { needLogin = true; queue = []; } else fail.push(r.j.message || 'error'); } next(); })
             .catch(function (e) { fail.push(String(e)); next(); });
         })();
       }

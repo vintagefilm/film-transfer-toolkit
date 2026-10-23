@@ -140,7 +140,7 @@ if ( class_exists( '\FluentCart\App\Services\Email\Mailer' ) ) {
 	$ok( 'admin email without clips unchanged', '<body>x</body>' === Closure::bind( function () { return $this->body; }, $m3, get_class( $m3 ) )() );
 	wp_delete_post( $pp, true );
 } else { echo "SKIP FluentCart email checks (FluentCart not active)\n"; }
-$ok( 'version 1.5.4', '1.5.4' === FTT_VERSION );
+$ok( 'version 1.5.4 or later', version_compare( FTT_VERSION, '1.5.4', '>=' ) );
 
 foreach ( array( $any, $fixed, $fixdf, $nofps, $filep ) as $id ) { wp_delete_post( $id, true ); }
 echo "v154 php: $P passed, $F failed\n";
