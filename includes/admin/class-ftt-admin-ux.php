@@ -301,6 +301,7 @@ class FTT_Admin_UX {
 		$t['storage']    = array( __( 'Storage calculator', 'film-transfer-toolkit' ), array( __CLASS__, 'tab_storage' ), 'storage' );
 		$t['clips']      = array( __( 'Clip selector', 'film-transfer-toolkit' ), array( __CLASS__, 'tab_clips' ), 'clips' );
 		$t['rfq']        = array( __( 'Quote comparison', 'film-transfer-toolkit' ), array( __CLASS__, 'tab_rfq' ), 'rfq' );
+		$t['updates']    = array( __( 'Updates', 'film-transfer-toolkit' ), array( 'FTT_Updater_Admin', 'tab' ), '' );
 		return $t;
 	}
 

@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.8
+Stable tag: 1.5.9
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -36,7 +36,17 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 == WP-CLI ==
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
+== Updates (1.5.9) ==
+FTT updates itself from the latest GitHub release of vintagefilm/film-transfer-toolkit, through the normal Dashboard > Updates screen and WordPress auto-updates (no extra updater plugin).
+* Each release attaches film-transfer-toolkit-<version>.zip and states its sha256 in the notes ("sha256: <hex>"); the download is checked before it is installed.
+* While the repository is private, each site needs a read-only token: define( 'FTT_GITHUB_TOKEN', '...' ); in wp-config.php, or FTT > Settings > Updates, or `wp ftt-updater token <value>`. The token is never shown. A public repository needs no token.
+* Pause every site: publish a release whose tag or title contains "hold", or add ftt-pause.json with {"pause": true} to the repository.
+* `wp ftt-updater status`, `wp ftt-updater check`, `wp plugin auto-updates enable film-transfer-toolkit`.
+
 == Changelog ==
+
+= 1.5.9 =
+* Built-in GitHub release updater (includes/class-ftt-updater.php): update offers, View details, authenticated download with sha256 check, pause switch, optional per-site read token, FTT > Settings > Updates and `wp ftt-updater`. Nothing else changes.
 
 = 1.5.8 =
 * Clip selector: new setting "When a signed-out visitor adds clips" (ftt_clip_settings login_mode). block (default) = sign in first, as in 1.5.5. add_then_prompt = the clips go into the FluentCart guest cart at once (server-priced) and Sign in / Create account / View cart are offered. At sign-in or registration (wp-login, FluentAuth, anything that sets the login cookie) the guest cart is recorded as the customer's; items are not merged, so nothing is duplicated. A resume token that is claimed now skips clips already in the cart.

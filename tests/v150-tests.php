@@ -96,7 +96,7 @@ foreach ( $map as $old => $tab ) {
 foreach ( array( 'ftt', 'ftt-tools', 'ftt-settings', 'ftt-help', 'ftt-setup' ) as $p ) {
 	$ok( "$p is not redirected", '' === FTT_Admin_UX::redirect_target( $p ) );
 }
-$ok( 'six settings tabs', array( 'email', 'calculator', 'prices', 'storage', 'clips', 'rfq' ) === array_keys( FTT_Admin_UX::tabs() ), implode( ',', array_keys( FTT_Admin_UX::tabs() ) ) );
+$ok( 'settings tabs (1.5.9 adds updates)', array( 'email', 'calculator', 'prices', 'storage', 'clips', 'rfq', 'updates' ) === array_keys( FTT_Admin_UX::tabs() ), implode( ',', array_keys( FTT_Admin_UX::tabs() ) ) );
 wp_set_current_user( 1 );
 if ( ! class_exists( 'FTT_Setup' ) ) { require_once FTT_DIR . 'includes/admin/class-ftt-setup.php'; }
 remove_action( 'admin_menu', array( 'FTT_Admin_UX', 'redirect_old_pages' ), 0 );
