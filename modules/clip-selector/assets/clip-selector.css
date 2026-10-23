@@ -1,7 +1,8 @@
 /* Clip selector (FTT 1.5.0): container, type, inputs and buttons (3px radius, Joanne) come from ftt-base.css (.ftt-tool). Tokens only. */
 .fwcc .button,.fwcc button.button{border-radius:var(--ftt-radius-sm)}
 .fwcc{container-type:inline-size}
-.fwcc-marks{display:grid;grid-template-columns:max-content max-content minmax(8em,max-content) max-content max-content;gap:.5em var(--ftt-gap);align-items:center;margin-bottom:.5em}
+/* 1.5.6: each row is Set, timecode, Trim label, trim buttons (ending +1s), Jump */
+.fwcc-marks{display:grid;grid-template-columns:max-content minmax(8em,max-content) max-content max-content max-content;gap:.5em var(--ftt-gap);align-items:center;margin-bottom:.5em}
 .fwcc-marks .fwcc-set,.fwcc-marks .fwcc-jump{width:100%}
 .fwcc-tc,.fwcc-list td.mono,.fwcc-debug{font-variant-numeric:tabular-nums}
 .fwcc-trim-label{cursor:help}
@@ -18,9 +19,9 @@
 .fwcc-debug{white-space:pre-wrap;margin:0 0 .5em}
 .fwcc-tc{white-space:nowrap}
 /* 1.5.4: Set + Jump share a row; trim controls drop to their own line when the selector is narrow. */
-@container (max-width:760px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2 / -1}}
-@container (max-width:420px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-tc{grid-column:1 / -1}.fwcc-trim-label{grid-column:1 / -1}.fwcc-nudge{grid-column:1 / -1}}
-@supports not (container-type:inline-size){@media (max-width:900px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2 / -1}}@media (max-width:480px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-tc,.fwcc-trim-label,.fwcc-nudge{grid-column:1 / -1}}}
+@container (max-width:1000px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-marks .fwcc-tc{grid-column:2 / -1}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2;flex-wrap:nowrap}.fwcc-marks .fwcc-jump{grid-column:3;justify-self:start;width:auto}}
+@container (max-width:680px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-set{grid-column:1}.fwcc-marks .fwcc-tc{grid-column:2}.fwcc-trim-label,.fwcc-nudge,.fwcc-marks .fwcc-jump{grid-column:1 / -1}.fwcc-nudge{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.fwcc-nudge .fwcc-trim-btn{min-width:0;padding-left:.25em;padding-right:.25em}.fwcc-marks .fwcc-set{white-space:nowrap;padding-left:.5em;padding-right:.5em}.fwcc-marks .fwcc-jump{justify-self:stretch;width:100%}}
+@supports not (container-type:inline-size){@media (max-width:1140px){.fwcc-marks{grid-template-columns:max-content max-content 1fr}.fwcc-marks .fwcc-tc{grid-column:2 / -1}.fwcc-trim-label{grid-column:1}.fwcc-nudge{grid-column:2;flex-wrap:nowrap}.fwcc-marks .fwcc-jump{grid-column:3;justify-self:start;width:auto}}@media (max-width:740px){.fwcc-marks{grid-template-columns:1fr 1fr}.fwcc-marks .fwcc-set{grid-column:1}.fwcc-marks .fwcc-tc{grid-column:2}.fwcc-trim-label,.fwcc-nudge,.fwcc-marks .fwcc-jump{grid-column:1 / -1}.fwcc-nudge{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.fwcc-nudge .fwcc-trim-btn{min-width:0;padding-left:.25em;padding-right:.25em}.fwcc-marks .fwcc-set{white-space:nowrap;padding-left:.5em;padding-right:.5em}.fwcc-marks .fwcc-jump{justify-self:stretch;width:100%}}}
 /* 1.3.0: request mode and preview notice */
 .fwcc-hp{position:absolute!important;left:-10000px!important;width:1px;height:1px;overflow:hidden}
 .fwcc-request{margin:.5em 0;padding:.75em;border:1px solid var(--ftt-border);border-radius:var(--ftt-radius-sm)}

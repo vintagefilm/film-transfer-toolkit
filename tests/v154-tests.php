@@ -100,7 +100,7 @@ $ok( 'registry default note', false !== strpos( wp_json_encode( FTT_Registry::to
 $r = $sc( 'product_id="' . $any . '" clip_id="VID-1"' );
 $m = substr( $r, strpos( $r, 'fwcc-marks' ) ); $m = substr( $m, 0, strpos( $m, 'fwcc-namebar' ) );
 $ok( 'no separate jump bar', false === strpos( $r, 'fwcc-jumpbar' ) );
-$ok( 'Set In, Jump to In, then Set Out, Jump to Out in the marks grid', preg_match( '/fwcc-set" data-which="in".*fwcc-jump" data-which="in".*fwcc-set" data-which="out".*fwcc-jump" data-which="out"/s', $m ) );
+$ok( 'Set In, In trims, Jump to In, then Set Out, Out trims, Jump to Out in the marks grid (1.5.6 order)', preg_match( '/fwcc-set" data-which="in".*fwcc-nudge" data-which="in".*fwcc-jump" data-which="in".*fwcc-set" data-which="out".*fwcc-nudge" data-which="out".*fwcc-jump" data-which="out"/s', $m ) );
 $ok( 'shortcuts kept', false !== strpos( $m, 'aria-keyshortcuts="Shift+I"' ) && false !== strpos( $m, 'aria-keyshortcuts="Shift+O"' ) );
 $ok( 'marks is a labelled group', false !== strpos( $r, 'class="fwcc-marks" role="group" aria-label=' ) );
 

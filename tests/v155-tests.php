@@ -17,7 +17,7 @@ $call = function ( $route, $body ) use ( $rl ) {
 	return array( $res->get_status(), $res->get_data() );
 };
 
-$ok( 'version 1.5.5', '1.5.5' === FTT_VERSION );
+$ok( 'version >= 1.5.5', version_compare( FTT_VERSION, '1.5.5', '>=' ) );
 // ---- settings ----
 delete_option( 'ftt_clip_settings' );
 $d = FTT_Clip_Settings::get();

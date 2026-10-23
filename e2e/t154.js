@@ -17,8 +17,16 @@ const rowCheck=async(v,label)=>{
   const S=v.locator('.fwcc').first();
   const bb=async s=>await S.locator(s).boundingBox();
   const si=await bb('.fwcc-set[data-which=in]'), ji=await bb('.fwcc-jump[data-which=in]'), so=await bb('.fwcc-set[data-which=out]'), jo=await bb('.fwcc-jump[data-which=out]');
-  ok(label+': Jump to In on the Set In row',Math.abs((si.y+si.height/2)-(ji.y+ji.height/2))<4&&ji.x>si.x,JSON.stringify([si,ji]));
-  ok(label+': Jump to Out on the Set Out row',Math.abs((so.y+so.height/2)-(jo.y+jo.height/2))<4&&jo.x>so.x,JSON.stringify([so,jo]));
+  const pi=await bb('.fwcc-nudge[data-which=in] .fwcc-trim-btn:last-child'), po=await bb('.fwcc-nudge[data-which=out] .fwcc-trim-btn:last-child');
+  const lastIn=await S.locator('.fwcc-nudge[data-which=in] .fwcc-trim-btn').last().textContent(), lastOut=await S.locator('.fwcc-nudge[data-which=out] .fwcc-trim-btn').last().textContent();
+  ok(label+': trim rows end with +1s',lastIn.trim()==='+1s'&&lastOut.trim()==='+1s',lastIn+' '+lastOut);
+  const mid=r=>r.y+r.height/2, same=(p,q)=>Math.abs(mid(p)-mid(q))<4, after=(j,p)=>(same(j,p)&&j.x>=p.x+p.width-1)||j.y>=p.y+p.height-2;
+  ok(label+': Jump to In comes after the In +1s button',after(ji,pi),JSON.stringify([pi,ji]));
+  ok(label+': Jump to Out comes after the Out +1s button',after(jo,po),JSON.stringify([po,jo]));
+  ok(label+': Jump to In stays above the Out row',ji.y+ji.height<=so.y+2,JSON.stringify([ji,so]));
+  const cw=await S.evaluate(x=>{const c=getComputedStyle(x);return x.clientWidth-parseFloat(c.paddingLeft)-parseFloat(c.paddingRight);});
+  if(cw>1000){ok(label+': Jump to In at the end of the In row (same line as Set In and +1s)',same(ji,pi)&&same(ji,si),JSON.stringify([si,pi,ji]));ok(label+': Jump to Out at the end of the Out row',same(jo,po)&&same(jo,so),JSON.stringify([so,po,jo]));}
+  else {ok(label+' ('+cw+'px selector): Jump buttons line up (same left edge)',Math.abs(ji.x-jo.x)<2,JSON.stringify([ji.x,jo.x]));}
   ok(label+': Out row below In row',so.y>si.y+si.height-2);
   const ov=await v.evaluate(()=>{const m=document.querySelector('.fwcc-marks');return [m.scrollWidth,m.clientWidth,document.documentElement.scrollWidth,window.innerWidth];});
   ok(label+': no horizontal overflow',ov[0]<=ov[1]+1&&ov[2]<=ov[3]+1,JSON.stringify(ov));
@@ -50,7 +58,7 @@ for(const [w,h,name] of [[1280,900,'desktop'],[390,844,'mobile-390'],[320,700,'m
     await v.keyboard.press('Shift+O');await v.waitForTimeout(400);
     ok('Shift+O jumps to Out',Math.abs(await vid.evaluate(x=>x.currentTime)-5.5)<0.05);
     const order=await S.locator('.fwcc-marks .button').evaluateAll(a=>a.map(x=>x.textContent.trim()).join('|'));
-    ok('tab order: Set In, Jump to In, ..., Set Out, Jump to Out',/^Set In\|Jump to In\|.*Set Out\|Jump to Out/.test(order),order);
+    ok('tab order: Set In, In trims ... +1s, Jump to In, Set Out, Out trims ... +1s, Jump to Out',/^Set In\|[^]*\+1s\|Jump to In\|Set Out\|[^]*\+1s\|Jump to Out$/.test(order),order);
     await S.locator('.fwcc-jump[data-which=in]').focus();
     ok('Jump to In focusable by keyboard',await v.evaluate(()=>document.activeElement.classList.contains('fwcc-jump')));
   }

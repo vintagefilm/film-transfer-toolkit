@@ -147,16 +147,16 @@ class FTT_Clip_Shortcode
 <?php endif; ?>
   <div class="fwcc-marks" role="group" aria-label="<?php esc_attr_e('In and Out marks', 'film-transfer-toolkit'); ?>">
     <button type="button" class="button fwcc-set" data-which="in" <?php echo $ta('set_in'); ?>>Set In</button>
-    <button type="button" class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I" <?php echo $ta('jump_in'); ?>><?php esc_html_e('Jump to In', 'film-transfer-toolkit'); ?></button>
     <span class="fwcc-tc" data-tc="in"></span>
     <span class="fwcc-trim-label" <?php echo $ta('trim_label', 'In'); ?>>Trim In</span>
     <span class="fwcc-nudge" data-which="in"><?php echo self::trim_buttons('in'); // phpcs:ignore ?></span>
+    <button type="button" class="button fwcc-jump" data-which="in" aria-keyshortcuts="Shift+I" <?php echo $ta('jump_in'); ?>><?php esc_html_e('Jump to In', 'film-transfer-toolkit'); ?></button>
 
     <button type="button" class="button fwcc-set" data-which="out" <?php echo $ta('set_out'); ?>>Set Out</button>
-    <button type="button" class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O" <?php echo $ta('jump_out'); ?>><?php esc_html_e('Jump to Out', 'film-transfer-toolkit'); ?></button>
     <span class="fwcc-tc" data-tc="out"></span>
     <span class="fwcc-trim-label" <?php echo $ta('trim_label', 'Out'); ?>>Trim Out</span>
     <span class="fwcc-nudge" data-which="out"><?php echo self::trim_buttons('out'); // phpcs:ignore ?></span>
+    <button type="button" class="button fwcc-jump" data-which="out" aria-keyshortcuts="Shift+O" <?php echo $ta('jump_out'); ?>><?php esc_html_e('Jump to Out', 'film-transfer-toolkit'); ?></button>
   </div>
   <div class="fwcc-row fwcc-namebar">
     <label>Clip <b class="fwcc-nextlabel"></b> name

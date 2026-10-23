@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.5
+Stable tag: 1.5.6
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,9 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+
+= 1.5.6 =
+* Clip selector: Jump to In now sits at the end of the In row (after the +1s trim button) and Jump to Out at the end of the Out row. Rows wrap cleanly on narrow screens (Jump goes on the trim row, then onto its own full-width line on phones). Tab order, aria-keyshortcuts and Shift+I / Shift+O are unchanged.
 
 = 1.5.5 =
 * Clip selector: new "Require sign-in to add to cart" (FTT > Clip selector, default off). Visitors who are not signed in can still preview and mark clips; Add clips to cart saves the selection on the server for 2 hours (signed, single-use token) and offers Sign in / Create account. After signing in or registering (your chosen pages, e.g. the FluentCart Login and Registration pages, or wp-login.php) they return to the same page, the clips are added to the FluentCart cart with the price recalculated on the server, and a notice links to the cart (or, if set, they go straight to the cart). Signed-in customers are unaffected. Per selector: require_login="yes|no" (shortcode) or the block sidebar.
