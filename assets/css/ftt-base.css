@@ -26,7 +26,9 @@
   --ftt-text:var(--ftt-site-text,var(--global-palette4,var(--wp--preset--color--contrast,#1d1d1d)));
   --ftt-heading-color:var(--ftt-site-heading,var(--ftt-site-text,var(--global-palette3,var(--wp--preset--color--contrast,#1d1d1d))));
   --ftt-accent:var(--global-palette1,var(--wp--preset--color--primary,var(--wp--preset--color--accent-1,#2b6cb0)));
-  --ftt-on-accent:var(--global-palette9,var(--wp--preset--color--base,#ffffff));
+  /* Text on accent-coloured buttons. Override hook: --ftt-site-on-accent. Without it, ftt-contrast.js switches to #fff or
+     #111 (whichever reads better) when this is under 4.5:1 against the computed accent. */
+  --ftt-on-accent:var(--ftt-site-on-accent,#fff);
   --ftt-muted:color-mix(in srgb,var(--ftt-text) 70%,transparent);
   --ftt-border:color-mix(in srgb,var(--ftt-text) 22%,transparent);
   --ftt-soft:color-mix(in srgb,var(--ftt-text) 5%,transparent);

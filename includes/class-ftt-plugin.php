@@ -76,6 +76,7 @@ class FTT_Plugin {
 		FTT_Price_Table::init();
 		add_action( 'init', array( __CLASS__, 'register_assets' ), 5 );
 		add_action( 'wp_footer', array( __CLASS__, 'print_contrast_check' ), 1 );
+		add_action( 'init', array( __CLASS__, 'ensure_array_options' ), 1 );
 		$on = self::enabled();
 		foreach ( self::files() as $k => $m ) {
 			if ( empty( $on[ $k ] ) ) {
@@ -165,6 +166,40 @@ class FTT_Plugin {
 		wp_register_script( 'ftt-core', FTT_URL . 'core/ftt-core.js', array(), FTT_VERSION, true );
 		wp_register_style( 'ftt-base', FTT_URL . 'assets/css/ftt-base.css', array(), FTT_VERSION );
 		wp_register_style( 'ftt-front', FTT_URL . 'assets/css/ftt.css', array( 'ftt-base' ), FTT_VERSION );
+	}
+
+	/**
+	 * 1.5.8: keep the FTT settings options that WP-CLI users patch stored as arrays with every default key, so
+	 * `wp option patch insert|update ftt_clip_settings require_login 1` works on a site that never saved the settings
+	 * screen. Saved values always win; only missing options/keys are filled in, and nothing is written when complete.
+	 */
+	public static function array_option_defaults() {
+		$d = array( 'ftt_general' => array( 'mail_mode' => 'log', 'notify_email' => '' ) );
+		if ( ! class_exists( 'FTT_Clip_Settings' ) && is_readable( FTT_DIR . 'modules/clip-selector/class-clip-settings.php' ) ) {
+			require_once FTT_DIR . 'modules/clip-selector/class-clip-settings.php'; // also when the clip module is off
+		}
+		if ( class_exists( 'FTT_Clip_Settings' ) ) {
+			$d[ FTT_Clip_Settings::OPTION ] = FTT_Clip_Settings::defaults();
+		}
+		return $d;
+	}
+
+	public static function ensure_array_options() {
+		foreach ( self::array_option_defaults() as $name => $def ) {
+			$cur = get_option( $name, null );
+			if ( ! is_array( $cur ) ) {
+				if ( null === $cur ) {
+					add_option( $name, $def );
+				} else {
+					update_option( $name, $def );
+				}
+				continue;
+			}
+			$full = $cur + $def;
+			if ( count( $full ) !== count( $cur ) ) {
+				update_option( $name, $full );
+			}
+		}
 	}
 
 	/** 1.5.7: print the small contrast check once, only on pages that loaded ftt-base. */

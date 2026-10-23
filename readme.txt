@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -37,6 +37,15 @@ Data-rate presets live in core/data/datarate-presets.json; after editing run nod
 wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|off <module>... | wp ftt maillog [--full] [--clear] | wp ftt clip-cutlist <order_id> | wp ftt-storage '<request json>' [--format=json]
 
 == Changelog ==
+
+= 1.5.8 =
+* Button text on the accent colour now defaults to white (#fff) instead of the theme's palette9, which gave dark text on a red accent on dark palettes. The contrast check switches it to #fff or #111, whichever reads better, when it is under 4.5:1 against the computed accent (class ftt--auto-on-accent). Override hook: --ftt-site-on-accent, e.g. `:root{--ftt-site-on-accent:#111}` (the check then leaves it alone).
+* ftt_clip_settings and ftt_general are always stored as arrays with every default key (saved values are kept; only missing options or keys are filled in), so WP-CLI patching works on any site, e.g.:
+  `wp option patch update ftt_clip_settings require_login 1`
+  `wp option patch update ftt_clip_settings login_page_id 15343`
+  `wp option patch update ftt_clip_settings register_page_id 15344`
+  `wp option patch update ftt_clip_settings after_login cart`   (page or cart)
+  Use `patch update` (the keys always exist now); `wp option get ftt_clip_settings --format=json` shows them all.
 
 = 1.5.7 =
 * Readability on dark and mixed themes: every tool now paints its own background and text as a matching pair from the theme (Kadence palette9 / palette4, then theme.json base / contrast), with headings in palette3. Muted text, borders and soft fills are mixed from the tool's text colour rather than the page's, so they stay readable.
