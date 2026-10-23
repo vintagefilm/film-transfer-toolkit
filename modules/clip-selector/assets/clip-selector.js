@@ -41,6 +41,7 @@
     var msg = function (t, bad) { var m = $('.fwcc-msg'); m.textContent = t; m.className = 'fwcc-msg' + (bad ? ' bad' : ''); };
     // ---- 1.5.5: sign-in before add to cart ----
     var I18 = C.i18n || {}, LSK = 'ftt_clip_pending';
+    C.loggedIn = +C.loggedIn === 1; // 1.5.8: wp_localize_script sends "0" (a truthy string)
     function msgLinks(t, links, bad) {
       msg(t, bad); var m = $('.fwcc-msg');
       links.forEach(function (l) {
@@ -211,13 +212,19 @@
         // 1.5.5: "Require sign-in to add to cart": save the selection server-side and offer sign-in / registration.
         if (el.getAttribute('data-require-login') === '1' && !C.loggedIn) return toLogin(b);
         b.disabled = true; msg('Adding...');
-        var queue = st.list.slice(), done = 0, fail = [], needLogin = false;
+        var queue = st.list.slice(), done = 0, fail = [], needLogin = false, auth = null;
+        var prompt = el.getAttribute('data-require-login') === 'prompt' && !C.loggedIn; // 1.5.8: add, then offer sign-in
         (function next() {
           var c = queue.shift();
           if (!c) {
             b.disabled = false;
             if (needLogin && !done) return toLogin(b);
-            if (!fail.length) { st.list = []; draw(); msg(done + ' clip(s) added to cart.'); }
+            if (prompt && done && auth && (auth.login_url || auth.register_url)) {
+              if (!fail.length) { st.list = []; draw(); }
+              msgLinks((I18.added_prompt || '%d clip(s) added to your cart. Please sign in or create an account to check out.').replace('%d', done) + (fail.length ? ' ' + fail.length + ' rejected: ' + fail.join('; ') : ''),
+                [[I18.signin || 'Sign in', auth.login_url, 'fwcc-signin'], [I18.register || 'Create account', auth.register_url, 'fwcc-register'], [I18.viewcart || 'View cart', C.cartUrl, 'fwcc-viewcart']], !!fail.length);
+            }
+            else if (!fail.length) { st.list = []; draw(); msg(done + ' clip(s) added to cart.'); }
             else msg(done + ' added; ' + fail.length + ' rejected: ' + fail.join('; '), true);
             document.dispatchEvent(new CustomEvent('fwcc:added'));
             return;
@@ -225,9 +232,9 @@
           fetch(C.rest + '/add', {
             method: 'POST', credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
-            body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)), login_optout: el.getAttribute('data-login-optout') || '' })
+            body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)), login_optout: el.getAttribute('data-login-optout') || '', return: location.href })
           }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (r) { if (r.ok) done++; else { if (r.j && r.j.code === 'fwcc_login_required') { needLogin = true; queue = []; } else fail.push(r.j.message || 'error'); } next(); })
+            .then(function (r) { if (r.ok) { done++; if (r.j && r.j.auth && r.j.auth.login_url) auth = r.j.auth; } else { if (r.j && r.j.code === 'fwcc_login_required') { needLogin = true; queue = []; } else fail.push(r.j.message || 'error'); } next(); })
             .catch(function (e) { fail.push(String(e)); next(); });
         })();
       }

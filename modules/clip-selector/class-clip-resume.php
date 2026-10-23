@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FTT_Clip_Resume {
 	const PARAM  = 'ftt_clip_resume';
 	const COOKIE = 'ftt_clip_resume';
+	const BACK   = 'ftt_clip_back'; // 1.5.8 add_then_prompt: where to go after sign-in (forms that ignore redirect_to).
 	const PREFIX = 'ftt_clip_pending_';
 	const TTL    = 7200; // 2 hours.
 	const MAX    = 20;   // clips per pending selection.
@@ -26,6 +27,58 @@ class FTT_Clip_Resume {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_resume' ), 5 );
 		add_action( 'wp_footer', array( __CLASS__, 'print_notice' ) );
 		add_filter( 'registration_redirect', array( __CLASS__, 'registration_redirect' ) );
+		// 1.5.8: keep the guest cart at sign-in / registration (every path that sets the auth cookie, incl. FluentAuth).
+		add_action( 'set_logged_in_cookie', array( __CLASS__, 'adopt_guest_cart' ), 10, 4 );
+	}
+
+	/**
+	 * 1.5.8: the guest's FluentCart cart (this device's cart cookie) becomes the user's cart when they sign in or
+	 * register. FluentCart already keeps using the cookie cart; this also records the user on it, so the clips are
+	 * still there on the user's next visit. Only an open, unowned cart holding FTT clips is touched; its items are
+	 * left exactly as they are (no merge, so nothing can be duplicated).
+	 */
+	public static function adopt_guest_cart( $cookie, $expire, $expiration, $user_id ) {
+		$user_id = (int) $user_id;
+		if ( ! $user_id || ! class_exists( '\FluentCart\Api\Cookie\Cookie' ) || ! class_exists( '\FluentCart\App\Models\Cart' ) ) {
+			return;
+		}
+		try {
+			$hash = \FluentCart\Api\Cookie\Cookie::getCartHash();
+			if ( ! $hash ) {
+				return;
+			}
+			$cart = \FluentCart\App\Models\Cart::query()->where( 'cart_hash', $hash )->where( 'cart_group', 'global' )->where( 'stage', '!=', 'completed' )->first();
+			if ( ! $cart || (int) $cart->user_id || ! self::has_clips( $cart ) ) {
+				return;
+			}
+			$cart->user_id = $user_id;
+			$cart->save();
+			do_action( 'ftt/clip/guest_cart_adopted', $hash, $user_id );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/** 1.5.8: remember where a guest who added clips (add_then_prompt) should land after signing in. */
+	public static function remember_back( $url ) {
+		if ( headers_sent() ) {
+			return;
+		}
+		setcookie( self::BACK, $url, array( 'expires' => time() + self::TTL, 'path' => COOKIEPATH ? COOKIEPATH : '/', 'domain' => COOKIE_DOMAIN, 'secure' => is_ssl(), 'httponly' => true, 'samesite' => 'Lax' ) );
+	}
+
+	/** Item ids in a FluentCart cart. */
+	public static function cart_ids( $cart ) {
+		return array_map( 'intval', array_column( (array) ( $cart->cart_data ?? array() ), 'id' ) );
+	}
+
+	public static function has_clips( $cart ) {
+		foreach ( self::cart_ids( $cart ) as $id ) {
+			if ( $id >= FTT_Clip::ID_BASE && $id < FTT_Clip::ID_BASE + FTT_Clip::ID_SPAN ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static function valid_token( $t ) {
@@ -120,6 +173,7 @@ class FTT_Clip_Resume {
 		}
 		$added = array();
 		$fail  = array();
+		$dup   = array();
 		foreach ( (array) $data['clips'] as $st ) {
 			$clip = FTT_Clip::from_stored( $st );
 			if ( is_wp_error( $clip ) || ! FTT_Clip_Settings::is_clip_product( $clip['product_id'] ) ) {
@@ -131,6 +185,10 @@ class FTT_Clip_Resume {
 				$fail[] = 'Could not open the cart.';
 				continue;
 			}
+			if ( in_array( (int) FTT_Clip::item_id( $clip ), self::cart_ids( $cart ), true ) ) { // 1.5.8: already in the cart (same signed clip): never added twice.
+				$dup[] = FTT_Clip::item_id( $clip );
+				continue;
+			}
 			$r = $cart->addByCustom( FTT_Clip::to_variation( $clip ), array( 'quantity' => 1 ) );
 			if ( is_wp_error( $r ) ) {
 				$fail[] = $r->get_error_message();
@@ -138,7 +196,7 @@ class FTT_Clip_Resume {
 				$added[] = FTT_Clip::item_id( $clip );
 			}
 		}
-		$res = array( 'added' => $added, 'failed' => $fail, 'return' => $data['return'] ?? home_url( '/' ) );
+		$res = array( 'added' => $added, 'already' => $dup, 'failed' => $fail, 'return' => $data['return'] ?? home_url( '/' ) );
 		set_transient( 'ftt_clip_notice_' . get_current_user_id(), array( 'added' => count( $added ), 'failed' => $fail ), 10 * MINUTE_IN_SECONDS );
 		return $res;
 	}
@@ -174,6 +232,18 @@ class FTT_Clip_Resume {
 			$t = isset( $_COOKIE[ self::COOKIE ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE ] ) ) : '';
 		}
 		if ( ! self::valid_token( $t ) ) {
+			// 1.5.8 add_then_prompt: the clips are already in the cart; just take the customer where they were going.
+			if ( isset( $_COOKIE[ self::BACK ] ) ) {
+				$to = wp_validate_redirect( esc_url_raw( wp_unslash( $_COOKIE[ self::BACK ] ) ), '' );
+				unset( $_COOKIE[ self::BACK ] );
+				setcookie( self::BACK, '', array( 'expires' => time() - 3600, 'path' => COOKIEPATH ? COOKIEPATH : '/', 'domain' => COOKIE_DOMAIN, 'secure' => is_ssl(), 'httponly' => true, 'samesite' => 'Lax' ) );
+				set_transient( 'ftt_clip_notice_' . get_current_user_id(), array( 'added' => 0, 'kept' => 1, 'failed' => array() ), 10 * MINUTE_IN_SECONDS );
+				$here = set_url_scheme( ( is_ssl() ? 'https://' : 'http://' ) . ( isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '' ) . ( isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '' ) );
+				if ( $to && untrailingslashit( strtok( $to, '#' ) ) !== untrailingslashit( strtok( $here, '#' ) ) ) {
+					wp_safe_redirect( $to );
+					exit;
+				}
+			}
 			return;
 		}
 		$r = self::claim( $t );
@@ -204,6 +274,10 @@ class FTT_Clip_Resume {
 		delete_transient( $k );
 		$bad = ! empty( $n['failed'] );
 		echo '<div class="ftt-clip-resume-notice' . ( $bad ? ' bad' : '' ) . '" role="status" style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:99999;max-width:92vw;padding:12px 16px;border-radius:6px;background:' . ( $bad ? '#7a1f1f' : '#1d4d2b' ) . ';color:#fff;font:15px/1.4 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.3)">';
+		if ( ! empty( $n['kept'] ) ) {
+			echo esc_html__( 'You are signed in. Your clips are in your cart.', 'film-transfer-toolkit' ) . ' ';
+			echo '<a class="ftt-clip-resume-cart" style="color:#fff;text-decoration:underline;font-weight:600" href="' . esc_url( self::cart_url() ) . '">' . esc_html__( 'View cart', 'film-transfer-toolkit' ) . '</a>';
+		}
 		if ( $n['added'] ) {
 			/* translators: %d: number of clips */
 			echo esc_html( sprintf( _n( 'You are signed in. %d clip was added to your cart.', 'You are signed in. %d clips were added to your cart.', (int) $n['added'], 'film-transfer-toolkit' ), (int) $n['added'] ) ) . ' ';

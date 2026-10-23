@@ -122,7 +122,7 @@ $ok( 'clip shortcode registered', isset( $shortcode_tags['ftt_clip_selector'] ) 
 delete_option( 'ftt_clip_settings' );
 $cs = FTT_Clip_Settings::get();
 $ok( 'clip settings defaults', 0 === $cs['default_product_id'] && '29.97df' === $cs['default_fps'] && 'off' === $cs['auto_attach'] );
-$ok( 'clip settings sanitize', array( 'default_product_id' => 5, 'default_fps' => '25', 'auto_attach' => 'off', 'heading' => 'Select Stock Footage', 'require_login' => 0, 'login_page_id' => 0, 'register_page_id' => 0, 'after_login' => 'page' ) === FTT_Clip_Settings::sanitize( array( 'default_product_id' => '5x', 'default_fps' => '25', 'auto_attach' => 'evil' ) ) );
+$ok( 'clip settings sanitize', array( 'default_product_id' => 5, 'default_fps' => '25', 'auto_attach' => 'off', 'heading' => 'Select Stock Footage', 'require_login' => 0, 'login_page_id' => 0, 'register_page_id' => 0, 'after_login' => 'page', 'login_mode' => 'block' ) === FTT_Clip_Settings::sanitize( array( 'default_product_id' => '5x', 'default_fps' => '25', 'auto_attach' => 'evil' ) ) );
 $fc = FTT_Clip_Settings::fluentcart_active();
 $h  = do_shortcode( '[ftt_clip_selector]' );
 $ok( 'no product -> request mode', false !== strpos( $h, 'data-mode="request"' ) );

@@ -24,5 +24,28 @@ $ok( 'complete option: nothing written', get_option( $O ) === $before && $wpdb->
 delete_option( 'ftt_general' ); FTT_Plugin::ensure_array_options();
 $ok( 'ftt_general created as array', array( 'mail_mode' => 'log', 'notify_email' => '' ) === get_option( 'ftt_general' ) );
 $ok( 'hooked on init', false !== has_action( 'init', array( 'FTT_Plugin', 'ensure_array_options' ) ) );
+// preferred service + badge
+$ex = FTT_Price_Table::preset( 'example' ); $ids = array_column( $ex['services'], 'id' );
+$ok( 'fresh install: 4K output + 1080p output built in, with rates', in_array( '4k_out', $ids, true ) && in_array( '1080_out', $ids, true ) && count( array_filter( $ex['rates'], function ( $r ) { return in_array( $r['service'], array( '4k_out', '1080_out' ), true ); } ) ) >= 8 );
+$ok( 'example preset unchanged: no preferred/badge keys', ! array_filter( $ex['services'], function ( $s ) { return isset( $s['preferred'] ) || isset( $s['badge'] ); } ) );
+$in = $ex; foreach ( $in['services'] as &$sv ) { if ( '4k_out' === $sv['id'] || 'hd' === $sv['id'] ) { $sv['preferred'] = 1; } if ( '4k_out' === $sv['id'] ) { $sv['badge'] = 'Recommended'; } } unset( $sv );
+$r = FTT_Price_Table::sanitize( $in ); $pf = array_values( array_filter( $r['table']['services'], function ( $s ) { return ! empty( $s['preferred'] ); } ) );
+$ok( 'sanitize: only one preferred kept (first)', 1 === count( $pf ) && 'hd' === $pf[0]['id'] && ! $r['errors'] );
+$b = array_column( $r['table']['services'], 'badge', 'id' );
+$ok( 'sanitize: badge kept', 'Recommended' === ( $b['4k_out'] ?? '' ) );
+$ok( 'sanitize: unset preferred/badge not stored (old tables byte-identical)', FTT_Price_Table::sanitize( $ex )['table'] === $ex );
+$keep_t = get_option( 'ftt_price_table', null ); $in2 = $ex; foreach ( $in2['services'] as &$sv ) { if ( '4k_out' === $sv['id'] ) { $sv['preferred'] = 1; $sv['badge'] = 'Recommended'; } } unset( $sv );
+FTT_Price_Table::save( $in2 ); $h = do_shortcode( '[ftt_price_table]' );
+$ok( 'price table shows badge + preferred class', false !== strpos( $h, 'ftt-table--preferred' ) && false !== strpos( $h, '<span class="ftt-badge">Recommended</span>' ) );
+$rm = new ReflectionMethod( "FTT_Estimate", "client_config" ); $rm->setAccessible( true ); $cfg = $rm->invoke( null ); $p4 = array_values( array_filter( $cfg['table']['services'], function ( $s ) { return ! empty( $s['preferred'] ); } ) );
+$ok( 'estimate config carries preferred', $p4 && '4k_out' === $p4[0]['id'] );
+$js = file_get_contents( FTT_DIR . 'modules/estimate/estimate.js' );
+$ok( 'estimate.js preselects preferred', false !== strpos( $js, 'return x.preferred;' ) );
+null === $keep_t ? delete_option( 'ftt_price_table' ) : update_option( 'ftt_price_table', $keep_t, false );
+// login_mode
+$ok( 'login_mode default block', 'block' === FTT_Clip_Settings::defaults()['login_mode'] && 'block' === FTT_Clip_Settings::sanitize( array() )['login_mode'] );
+$ok( 'login_mode add_then_prompt kept, junk -> block', 'add_then_prompt' === FTT_Clip_Settings::sanitize( array( 'login_mode' => 'add_then_prompt' ) )['login_mode'] && 'block' === FTT_Clip_Settings::sanitize( array( 'login_mode' => 'x' ) )['login_mode'] );
+$ok( 'set_logged_in_cookie hook (guest cart kept at sign-in)', false !== has_action( 'set_logged_in_cookie', array( 'FTT_Clip_Resume', 'adopt_guest_cart' ) ) );
+$ok( 'registry FAQ + admin mention login_mode', false !== strpos( file_get_contents( FTT_DIR . 'includes/admin/class-ftt-registry.php' ), 'login_mode add_then_prompt' ) && false !== strpos( file_get_contents( FTT_DIR . 'modules/clip-selector/admin.php' ), '[login_mode]' ) );
 foreach ( array( 'ftt_clip_settings', 'ftt_general' ) as $i => $n ) { null === $keep[ $i ] ? delete_option( $n ) : update_option( $n, $keep[ $i ] ); }
 echo "v158 php: $p passed, $f failed\n";

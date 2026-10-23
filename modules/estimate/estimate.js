@@ -27,7 +27,7 @@
     var state = { lines: [], order: [], qty: {} };
     function newLine(fmt) {
       fmt = fmt || ((T.formats || [])[0] || {}).id;
-      var s = servicesFor(fmt)[0], r = by(T.reels, 'format', fmt);
+      var sf = servicesFor(fmt), s = sf.filter(function (x) { return x.preferred; })[0] || sf[0], r = by(T.reels, 'format', fmt);
       return { format: fmt, service: s ? s.id : '', size: r.length ? r[r.length > 1 ? 1 : 0].size : '', reels: 1, feet: '', addons: [] };
     }
     function request() {
@@ -72,7 +72,7 @@
           if (servicesFor(v).some(function (s) { return s.id === l.service; })) { n.service = l.service; }
           state.lines[idx] = n; drawLines(); update();
         }));
-        g.appendChild(select(servicesFor(l.format).map(function (s) { return [s.id, s.label]; }), l.service, 'Service', function (v) { l.service = v; drawLines(); update(); }));
+        g.appendChild(select(servicesFor(l.format).map(function (s) { return [s.id, s.label + (s.badge ? ' (' + s.badge + ')' : '')]; }), l.service, 'Service', function (v) { l.service = v; drawLines(); update(); }));
         var sv = by(T.services, 'id', l.service)[0];
         if (sv && sv.description) { g.lastChild.appendChild(desc(sv.description)); }
         g.appendChild(select(by(T.reels, 'format', l.format).map(function (r) { return [r.size, r.label + ' (' + r.feet + ' ft)']; }).concat([['', 'Not sure / I know the footage']]), l.size, 'Reel size', function (v) { l.size = v; update(); }));

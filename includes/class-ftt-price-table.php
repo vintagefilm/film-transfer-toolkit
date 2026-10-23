@@ -160,6 +160,10 @@ class FTT_Price_Table {
 			$row = array( 'id' => $id, 'label' => FTT_Util::text( $s['label'] ?? $id, 80 ) );
 			$dsc = FTT_Util::text( $s['description'] ?? '', 300 );
 			if ( '' !== $dsc ) { $row['description'] = $dsc; } // only stored when set, so older tables stay byte-identical
+			// 1.5.8: one preferred service (preselected in the estimate builder) and an optional badge. Stored only when set.
+			if ( ! empty( $s['preferred'] ) && ! in_array( 1, array_column( $t['services'], 'preferred' ), true ) ) { $row['preferred'] = 1; }
+			$bdg = FTT_Util::text( $s['badge'] ?? '', 40 );
+			if ( '' !== $bdg ) { $row['badge'] = $bdg; }
 			$t['services'][] = $row;
 		}
 		$sids = array_column( $t['services'], 'id' );
@@ -244,12 +248,13 @@ class FTT_Price_Table {
 		$cur = self::get();
 		$adv = array();
 		$err = array();
+		$pref = isset( $p['preferred_service'] ) ? strtolower( trim( (string) $p['preferred_service'] ) ) : '';
 		foreach ( array( 'formats', 'services', 'reels' ) as $k ) {
 			if ( 'services' === $k && isset( $p['services'] ) && is_array( $p['services'] ) ) { // 1.5.2: services are editable rows
 				$adv['services'] = array();
 				foreach ( $p['services'] as $s ) {
 					if ( ! is_array( $s ) || '' === trim( (string) ( $s['id'] ?? '' ) ) ) { continue; }
-					$adv['services'][] = array( 'id' => $s['id'], 'label' => '' !== trim( (string) ( $s['label'] ?? '' ) ) ? $s['label'] : $s['id'], 'description' => $s['description'] ?? '' );
+					$adv['services'][] = array( 'id' => $s['id'], 'label' => '' !== trim( (string) ( $s['label'] ?? '' ) ) ? $s['label'] : $s['id'], 'description' => $s['description'] ?? '', 'preferred' => '' !== $pref && strtolower( trim( (string) $s['id'] ) ) === $pref ? 1 : 0, 'badge' => $s['badge'] ?? '' );
 				}
 				continue;
 			}
@@ -368,6 +373,8 @@ class FTT_Price_Table {
 			return '<tr data-ftt-service="' . esc_attr( $s['id'] ?? '' ) . '"><td><input type="text" class="small-text" name="' . esc_attr( "services[$i][id]" ) . '" value="' . esc_attr( $s['id'] ?? '' ) . '"' . ( $known ? ' readonly title="' . esc_attr__( 'The id stays the same so rates and saved requests keep working; change the label to rename.', 'film-transfer-toolkit' ) . '"' : ' placeholder="e.g. 2k"' ) . '></td>'
 				. '<td><input type="text" class="regular-text" aria-label="' . esc_attr__( 'Name customers see', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "services[$i][label]" ) . '" value="' . esc_attr( $s['label'] ?? '' ) . '"></td>'
 				. '<td><input type="text" class="large-text" aria-label="' . esc_attr__( 'Description (optional)', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "services[$i][description]" ) . '" value="' . esc_attr( $s['description'] ?? '' ) . '" placeholder="' . esc_attr__( 'optional helper text for customers', 'film-transfer-toolkit' ) . '"></td>'
+				. '<td><label><input type="radio" name="preferred_service" value="' . esc_attr( $s['id'] ?? '' ) . '"' . checked( ! empty( $s['preferred'] ), true, false ) . ' aria-label="' . esc_attr__( 'Preferred: preselected for customers', 'film-transfer-toolkit' ) . '"> ' . esc_html__( 'Preferred', 'film-transfer-toolkit' ) . '</label></td>'
+				. '<td><input type="text" class="small-text" style="width:9em" aria-label="' . esc_attr__( 'Badge (optional)', 'film-transfer-toolkit' ) . '" name="' . esc_attr( "services[$i][badge]" ) . '" value="' . esc_attr( $s['badge'] ?? '' ) . '" placeholder="' . esc_attr__( 'e.g. Recommended', 'film-transfer-toolkit' ) . '"></td>'
 				. '<td class="ftt-move"><button type="button" class="button button-small" data-ftt-up aria-label="' . esc_attr__( 'Move up', 'film-transfer-toolkit' ) . '">&uarr;</button> <button type="button" class="button button-small" data-ftt-down aria-label="' . esc_attr__( 'Move down', 'film-transfer-toolkit' ) . '">&darr;</button></td>'
 				. '<td><button type="button" class="button-link-delete" data-ftt-remove>' . esc_html__( 'Remove', 'film-transfer-toolkit' ) . '</button></td></tr>';
 		};
@@ -415,8 +422,8 @@ class FTT_Price_Table {
 					<tr><th><label for="ftt-minft"><?php esc_html_e( 'Minimum billed feet per reel', 'film-transfer-toolkit' ); ?></label></th><td><input id="ftt-minft" type="number" min="0" class="small-text" name="fee_min_feet" value="<?php echo esc_attr( $t['fees']['min_feet_per_reel'] ); ?>"> ft</td></tr>
 				</table>
 				<h2 id="ftt-services"><?php esc_html_e( 'Services (what customers choose)', 'film-transfer-toolkit' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'The service list in the estimate builder, in this order. Rename by changing the name (the id stays, so rates and saved requests keep working). A service is offered for a format once it has a rate below. Removing a service also removes its rates.', 'film-transfer-toolkit' ); ?></p>
-				<table class="widefat striped ftt-rows"><thead><tr><th>ID</th><th><?php esc_html_e( 'Name', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Description (optional)', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Order', 'film-transfer-toolkit' ); ?></th><th></th></tr></thead>
+				<p class="description"><?php esc_html_e( 'The service list in the estimate builder, in this order. Rename by changing the name (the id stays, so rates and saved requests keep working). A service is offered for a format once it has a rate below. Removing a service also removes its rates. Preferred: preselected in the estimate builder for every format that has a rate for it (one service at most). Badge: optional short label shown next to the service name, for example Recommended.', 'film-transfer-toolkit' ); ?> <label><input type="radio" name="preferred_service" value="" <?php checked( ! in_array( 1, array_column( $t['services'], 'preferred' ), true ) ); ?>> <?php esc_html_e( 'No preferred service (the first one in the list is preselected)', 'film-transfer-toolkit' ); ?></label></p>
+				<table class="widefat striped ftt-rows"><thead><tr><th>ID</th><th><?php esc_html_e( 'Name', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Description (optional)', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Preferred', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Badge (optional)', 'film-transfer-toolkit' ); ?></th><th><?php esc_html_e( 'Order', 'film-transfer-toolkit' ); ?></th><th></th></tr></thead>
 					<tbody data-ftt-rows="services"><?php foreach ( $t['services'] as $i => $s ) { echo $service_row( $i, $s ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></tbody></table>
 				<template data-ftt-template="services"><?php echo $service_row( '__i__', array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?></template>
 				<p><button type="button" class="button" data-ftt-add="services"><?php esc_html_e( 'Add service', 'film-transfer-toolkit' ); ?></button></p>

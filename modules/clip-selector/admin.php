@@ -53,6 +53,11 @@ function ftt_clip_render_settings() {
 					<p class="description"><?php esc_html_e( 'For example the FluentCart Login page (FluentCart > Settings > Pages). The page is opened with redirect_to back to the selector.', 'film-transfer-toolkit' ); ?></p></td></tr>
 				<tr><th><label for="ftt-clip-register-page"><?php esc_html_e( 'Registration page', 'film-transfer-toolkit' ); ?></label></th><td><?php wp_dropdown_pages( array( 'name' => $n . '[register_page_id]', 'id' => 'ftt-clip-register-page', 'selected' => (int) $o['register_page_id'], 'show_option_none' => __( 'WordPress registration (needs "Anyone can register")', 'film-transfer-toolkit' ), 'option_none_value' => '0' ) ); ?>
 					<p class="description"><?php esc_html_e( 'For example the FluentCart Registration page.', 'film-transfer-toolkit' ); ?></p></td></tr>
+				<tr><th><?php esc_html_e( 'When a signed-out visitor adds clips', 'film-transfer-toolkit' ); ?></th><td>
+					<?php foreach ( array( 'block' => __( 'Ask them to sign in first; the clips go into the cart after they sign in or register (default)', 'film-transfer-toolkit' ), 'add_then_prompt' => __( 'Add the clips to the cart now, then ask them to sign in or create an account (the same cart is kept, no duplicates)', 'film-transfer-toolkit' ) ) as $k => $l ) : ?>
+						<label class="ftt-radio" style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[login_mode]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $o['login_mode'], $k ); ?>> <?php echo esc_html( $l ); ?></label>
+					<?php endforeach; ?>
+					<p class="description"><?php esc_html_e( 'Only used when Require sign-in is on. WP-CLI: wp option patch update ftt_clip_settings login_mode add_then_prompt (or block).', 'film-transfer-toolkit' ); ?></p></td></tr>
 				<tr><th><?php esc_html_e( 'After sign-in', 'film-transfer-toolkit' ); ?></th><td>
 					<?php foreach ( array( 'page' => __( 'Return to the page with a "clips added" notice and a cart link (default)', 'film-transfer-toolkit' ), 'cart' => __( 'Go straight to the cart', 'film-transfer-toolkit' ) ) as $k => $l ) : ?>
 						<label class="ftt-radio" style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[after_login]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $o['after_login'], $k ); ?>> <?php echo esc_html( $l ); ?></label>

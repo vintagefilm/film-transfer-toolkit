@@ -22,6 +22,9 @@ class FTT_Clip_Settings {
 			'login_page_id'      => 0,          // Sign-in page (e.g. FluentCart login page); 0 = wp_login_url().
 			'register_page_id'   => 0,          // Registration page; 0 = wp_registration_url().
 			'after_login'        => 'page',     // page = back to the selector with a notice | cart = straight to the cart.
+			// 1.5.8: block = guests sign in first, then the clips are added (1.5.5 behaviour) | add_then_prompt = clips go
+			// into the guest cart at once and the sign-in / create account prompt is shown; the cart is kept at sign-in.
+			'login_mode'         => 'block',
 		);
 	}
 
@@ -40,6 +43,7 @@ class FTT_Clip_Settings {
 			'login_page_id'      => isset( $in['login_page_id'] ) ? absint( $in['login_page_id'] ) : 0,
 			'register_page_id'   => isset( $in['register_page_id'] ) ? absint( $in['register_page_id'] ) : 0,
 			'after_login'        => isset( $in['after_login'] ) && 'cart' === $in['after_login'] ? 'cart' : 'page',
+			'login_mode'         => isset( $in['login_mode'] ) && 'add_then_prompt' === $in['login_mode'] ? 'add_then_prompt' : 'block',
 		);
 	}
 

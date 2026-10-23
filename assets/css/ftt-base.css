@@ -77,3 +77,6 @@
 .ftt-tool table{max-width:100%}
 .ftt-off-note{box-sizing:border-box;max-width:var(--ftt-max-width);margin:var(--ftt-space) auto;padding:.75em 1em;border:1px dashed currentColor;border-radius:var(--ftt-radius-sm);font-size:var(--ftt-size-small);opacity:.85}
 @media (max-width:600px){.ftt-tool{padding:var(--ftt-pad-mobile);border-radius:0;border-left:0;border-right:0}}
+/* 1.5.8: optional service badge (Prices > Services > Badge), e.g. "Recommended" */
+.ftt-tool .ftt-badge{display:inline-block;margin-left:.5em;padding:.1em .55em;border-radius:999px;background:var(--ftt-accent);color:var(--ftt-on-accent);font-size:.75em;font-weight:600;line-height:1.5;vertical-align:middle}
+.ftt-tool .ftt-table--preferred{outline:2px solid var(--ftt-accent);outline-offset:-1px}

@@ -82,7 +82,10 @@ class FTT_Clip_Rest
         if (is_wp_error($clip)) return $clip;
 
         // 1.5.5: with "Require sign-in to add to cart" on, guests must go through /pending (sign in, then resume).
-        if (!is_user_logged_in() && FTT_Clip_Settings::get()['require_login']
+        // 1.5.8: login_mode = add_then_prompt lets guests add (server-priced as usual); the browser then shows the prompt.
+        $set = FTT_Clip_Settings::get();
+        $prompt = !is_user_logged_in() && $set['require_login'] && 'add_then_prompt' === $set['login_mode'];
+        if (!is_user_logged_in() && $set['require_login'] && !$prompt
             && !hash_equals(self::login_optout_sig($clip['product_id']), (string) $req->get_param('login_optout'))) {
             return new WP_Error('fwcc_login_required', 'Please sign in or create an account to add clips to your cart.', ['status' => 401]);
         }
@@ -113,7 +116,14 @@ class FTT_Clip_Rest
         foreach ((array) ($cart->cart_data ?? []) as $it) {
             $items[] = ['id' => $it['id'] ?? '', 'title' => $it['title'] ?? '', 'unit_price' => $it['unit_price'] ?? null, 'quantity' => $it['quantity'] ?? null];
         }
+        $auth = [];
+        if (!is_user_logged_in() && 'add_then_prompt' === $set['login_mode']) {
+            $back = 'cart' === $set['after_login'] ? FTT_Clip_Resume::cart_url() : FTT_Clip_Resume::safe_return((string) $req->get_param('return'));
+            if ($set['require_login']) FTT_Clip_Resume::remember_back($back);
+            $auth = ['login_url' => FTT_Clip_Resume::auth_url('login', $back), 'register_url' => FTT_Clip_Resume::auth_url('register', $back)];
+        }
         return [
+            'auth'      => $auth, // 1.5.8: sign-in / create account links when login_mode = add_then_prompt (guests only)
             'added'     => FTT_Clip::item_id($clip),
             'clip'      => $clip,
             'cart_hash' => $cart->cart_hash ?? '',

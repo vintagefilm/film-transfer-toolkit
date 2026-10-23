@@ -124,6 +124,8 @@ if ( ! $fc ) {
 	// tamper the stored price/frames before claim: signature + recalculation must catch it
 	$bad = $tr; $bad['clips'][1]['fw_clip']['out_frame'] += 500; $bad['clips'][0]['fw_clip']['price_cents'] = 1;
 	set_transient( FTT_Clip_Resume::PREFIX . $tok, $bad, 7200 );
+	// 1.5.8: claim skips clips already in the cart (the guest opt-out add above put clip One there in this process); start from an empty cart.
+	$c0 = \FluentCart\App\Helpers\CartHelper::getCart( null, true ); if ( $c0 && ! is_wp_error( $c0 ) ) { $c0->cart_data = array(); $c0->save(); }
 	$r = FTT_Clip_Resume::claim( $tok );
 	$ok( 'claim: tampered frames rejected, tampered price recalculated', ! is_wp_error( $r ) && 1 === count( $r['added'] ) && 1 === count( $r['failed'] ), $r );
 	$cart = \FluentCart\App\Helpers\CartHelper::getCart();

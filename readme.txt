@@ -39,12 +39,15 @@ wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|o
 == Changelog ==
 
 = 1.5.8 =
+* Clip selector: new setting "When a signed-out visitor adds clips" (ftt_clip_settings login_mode). block (default) = sign in first, as in 1.5.5. add_then_prompt = the clips go into the FluentCart guest cart at once (server-priced) and Sign in / Create account / View cart are offered. At sign-in or registration (wp-login, FluentAuth, anything that sets the login cookie) the guest cart is recorded as the customer's; items are not merged, so nothing is duplicated. A resume token that is claimed now skips clips already in the cart.
+* Prices: a service can be marked Preferred (preselected in the estimate builder for every format it has a rate for) and given an optional badge such as "Recommended" (price table and estimate builder). Stored only when set, so existing tables are unchanged.
 * Button text on the accent colour now defaults to white (#fff) instead of the theme's palette9, which gave dark text on a red accent on dark palettes. The contrast check switches it to #fff or #111, whichever reads better, when it is under 4.5:1 against the computed accent (class ftt--auto-on-accent). Override hook: --ftt-site-on-accent, e.g. `:root{--ftt-site-on-accent:#111}` (the check then leaves it alone).
 * ftt_clip_settings and ftt_general are always stored as arrays with every default key (saved values are kept; only missing options or keys are filled in), so WP-CLI patching works on any site, e.g.:
   `wp option patch update ftt_clip_settings require_login 1`
   `wp option patch update ftt_clip_settings login_page_id 15343`
   `wp option patch update ftt_clip_settings register_page_id 15344`
   `wp option patch update ftt_clip_settings after_login cart`   (page or cart)
+  `wp option patch update ftt_clip_settings login_mode add_then_prompt`   (block = default, or add_then_prompt)
   Use `patch update` (the keys always exist now); `wp option get ftt_clip_settings --format=json` shows them all.
 
 = 1.5.7 =
