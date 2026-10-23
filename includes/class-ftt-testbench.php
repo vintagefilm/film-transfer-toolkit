@@ -117,6 +117,8 @@ class FTT_Testbench {
 						. '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper">' . "\n" . esc_url( $youtube ) . "\n" . '</div></figure>' . "\n" . '<!-- /wp:embed -->' . "\n\n";
 					$c .= self::sc( '[ftt_clip_selector player="youtube" clip_id="BENCH-YT" title="Test bench YouTube sample" fps="29.97df"]' );
 				}
+				$c .= self::h( 'Clip selector block', 3 );
+				$c .= '<!-- wp:ftt/clip-selector {"clip_id":"BENCH-BLOCK","title":"Test bench clip selector (block)"} /-->' . "\n\n";
 				continue;
 			}
 			foreach ( $t['embeds'] as $e ) {

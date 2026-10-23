@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -38,6 +38,11 @@ wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|o
 
 == Changelog ==
 
+= 1.5.7 =
+* Readability on dark and mixed themes: every tool now paints its own background and text as a matching pair from the theme (Kadence palette9 / palette4, then theme.json base / contrast), with headings in palette3. Muted text, borders and soft fills are mixed from the tool's text colour rather than the page's, so they stay readable.
+* A small contrast check runs on pages with a tool. If the tool's text/background contrast is still under 4.5:1 it adds the class ftt--auto-contrast (palette9 background, palette3 text).
+* Override hook: set --ftt-site-bg and --ftt-site-text (and optionally --ftt-site-heading; headings follow --ftt-site-text when it is set) on :root or any parent element to choose the tool colours yourself, e.g. `:root{--ftt-site-bg:#222;--ftt-site-text:#eee}`. Set them as a pair.
+
 = 1.5.6 =
 * Clip selector: Jump to In now sits at the end of the In row (after the +1s trim button) and Jump to Out at the end of the Out row. Rows wrap cleanly on narrow screens (Jump goes on the trim row, then onto its own full-width line on phones). Tab order, aria-keyshortcuts and Shift+I / Shift+O are unchanged.
 
@@ -65,7 +70,7 @@ wp ftt status | wp ftt prices example|draft | wp ftt export | wp ftt module on|o
 * Clip selector: new rate card setting "rounding" (up | down | nearest) for turning a clip's length into whole billed seconds. Default "up" (unchanged behaviour). The on-page estimate and the cart/request price use the same rule. New filter ftt/clip/billable_seconds ($secs, $duration, $card).
 
 = 1.5.0 =
-* One look for every tool: a shared base stylesheet (ftt-base.css) with --ftt-* tokens that inherit the site theme (Kadence palette, then theme.json presets). Every tool has the same width, padding, border radius, buttons, fields and heading sizes, on desktop and mobile. Only ftt-base.css may contain literal colours or fonts; a test checks this.
+* One look for every tool: a shared base stylesheet (ftt-base.css) with --ftt-* tokens that inherit the site theme (Kadence palette, then theme.json presets). Every tool has the same width, padding, border radius, buttons, fields and heading sizes, on desktop and mobile. Only ftt-base.css may contain literal colours or fonts; a test checks this. To set tool colours yourself use the override hook --ftt-site-bg / --ftt-site-text (see 1.5.7).
 * The film calculator has a new colour scheme, "Site theme", which is now the default. Dark and Light are unchanged. A site that never saved a scheme now shows the site-theme look.
 * The admin is simpler: Dashboard (one card per tool, with how to add it to a page), Tools (switch on/off and the request lists), Settings (one tab per tool, with rarely needed options under Advanced) and Help. Old admin addresses redirect to the new place. No setting names changed.
 * Site check: the calculator check accepts the shortcode or the block.

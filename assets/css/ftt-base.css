@@ -20,13 +20,16 @@
   --ftt-size-input:max(16px,1rem); /* same in every tool; 16px+ so phones do not zoom */
   --ftt-line:1.5;
   /* colour: inherit the theme */
-  --ftt-text:inherit;
-  --ftt-bg:transparent;
+  /* Container colours come as a matching pair from the theme so text is never left light-on-light or
+     dark-on-dark. Override hook: set --ftt-site-bg and --ftt-site-text (together) on :root or any parent. */
+  --ftt-bg:var(--ftt-site-bg,var(--global-palette9,var(--wp--preset--color--base,#fff)));
+  --ftt-text:var(--ftt-site-text,var(--global-palette4,var(--wp--preset--color--contrast,#1d1d1d)));
+  --ftt-heading-color:var(--ftt-site-heading,var(--ftt-site-text,var(--global-palette3,var(--wp--preset--color--contrast,#1d1d1d))));
   --ftt-accent:var(--global-palette1,var(--wp--preset--color--primary,var(--wp--preset--color--accent-1,#2b6cb0)));
   --ftt-on-accent:var(--global-palette9,var(--wp--preset--color--base,#ffffff));
-  --ftt-muted:color-mix(in srgb,currentColor 70%,transparent);
-  --ftt-border:color-mix(in srgb,currentColor 22%,transparent);
-  --ftt-soft:color-mix(in srgb,currentColor 5%,transparent);
+  --ftt-muted:color-mix(in srgb,var(--ftt-text) 70%,transparent);
+  --ftt-border:color-mix(in srgb,var(--ftt-text) 22%,transparent);
+  --ftt-soft:color-mix(in srgb,var(--ftt-text) 5%,transparent);
   --ftt-field-bg:var(--global-palette9,var(--wp--preset--color--base,#ffffff));
   --ftt-field-text:var(--global-palette3,var(--wp--preset--color--contrast,#1d1d1d));
   --ftt-warn-bg:color-mix(in srgb,#f0b400 14%,transparent);
@@ -52,13 +55,15 @@
 
 /* Calculator colour schemes are token sets on top of the same base (scheme "site" = the theme, as for every tool). */
 .filmcalc--dark{--ftt-bg:#1d1d1f;--ftt-text:#f5f5f7;--ftt-accent:#ffb700;--ftt-on-accent:#1d1d1f;--ftt-field-bg:#2c2c2e;--ftt-field-text:#f5f5f7;--ftt-border:#444444;--ftt-muted:rgba(245,245,247,.8);--ftt-soft:#2c2c2e;--ftt-accent-2:var(--ftt-accent);--ftt-heading-color:var(--ftt-accent)}
+/* Set by the contrast check (ftt-contrast) when the computed text/background contrast is under 4.5:1. */
+.ftt-tool.ftt--auto-contrast{--ftt-bg:var(--global-palette9,#fff);--ftt-text:var(--global-palette3,#1d1d1d);--ftt-heading-color:var(--global-palette3,#1d1d1d);--ftt-muted:color-mix(in srgb,var(--global-palette3,#1d1d1d) 75%,var(--global-palette9,#fff));--ftt-border:color-mix(in srgb,var(--global-palette3,#1d1d1d) 25%,var(--global-palette9,#fff));--ftt-soft:color-mix(in srgb,var(--global-palette3,#1d1d1d) 5%,var(--global-palette9,#fff));background:var(--ftt-bg);color:var(--ftt-text)}
 .filmcalc--light{--ftt-bg:#faf5ed;--ftt-text:#161600;--ftt-accent:#a1b7e9;--ftt-accent-2:#d3d379;--ftt-on-accent:#161600;--ftt-field-bg:#fff3c7;--ftt-field-text:#161600;--ftt-border:rgba(22,22,0,.28);--ftt-muted:rgba(22,22,0,.75);--ftt-soft:#fff3c7;--ftt-heading-color:#161600}
 
 /* The shared container: same width, fit, spacing, radius and type in every tool. */
 .ftt-tool{box-sizing:border-box;width:100%;max-width:var(--ftt-max-width);margin:var(--ftt-space) auto;padding:var(--ftt-pad);border:1px solid var(--ftt-border);border-radius:var(--ftt-radius);background:var(--ftt-bg);color:var(--ftt-text);font-family:var(--ftt-font);line-height:var(--ftt-line);box-shadow:var(--ftt-shadow)}
 .ftt-tool *,.ftt-tool *::before,.ftt-tool *::after{box-sizing:border-box}
-.ftt-tool .ftt-tool__title,.ftt-tool .ftt-box__title,.ftt-tool .filmcalc__title{margin:0 0 .25em;font-family:var(--ftt-heading-font);font-size:var(--ftt-size-title);line-height:1.2;color:var(--ftt-heading-color,inherit)}
-.ftt-tool h3:not([class]),.ftt-tool h4{margin:1.1em 0 .4em;font-size:var(--ftt-size-h);line-height:1.3}
+.ftt-tool .ftt-tool__title,.ftt-tool .ftt-box__title,.ftt-tool .filmcalc__title{margin:0 0 .25em;font-family:var(--ftt-heading-font);font-size:var(--ftt-size-title);line-height:1.2;color:var(--ftt-heading-color)}
+.ftt-tool h3:not([class]),.ftt-tool h4{color:var(--ftt-heading-color);margin:1.1em 0 .4em;font-size:var(--ftt-size-h);line-height:1.3}
 .ftt-tool input:not([type=checkbox]):not([type=radio]),.ftt-tool select,.ftt-tool textarea{min-height:var(--ftt-control-h);padding:.5em .75em;font:inherit;font-size:var(--ftt-size-input);line-height:1.3;color:var(--ftt-field-text);background-color:var(--ftt-field-bg);border:1px solid var(--ftt-border);border-radius:var(--ftt-radius-sm);box-shadow:none}
 .ftt-tool select{-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:2.4em;background-image:linear-gradient(45deg,transparent 50%,var(--ftt-field-text) 50%),linear-gradient(135deg,var(--ftt-field-text) 50%,transparent 50%);background-position:calc(100% - 1.2em) 55%,calc(100% - .85em) 55%;background-size:.35em .35em,.35em .35em;background-repeat:no-repeat}
 .ftt-tool input:focus-visible,.ftt-tool select:focus-visible,.ftt-tool textarea:focus-visible,.ftt-tool button:focus-visible,.ftt-tool .button:focus-visible{outline:2px solid var(--ftt-accent);outline-offset:2px}

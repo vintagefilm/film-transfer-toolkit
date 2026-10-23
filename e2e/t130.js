@@ -213,7 +213,7 @@ ok('bench preview: robots noindex',/noindex/.test(await p.locator('meta[name=rob
 ok('bench preview: calculators',await p.locator('[data-ftt-calc]').count()>=2);
 ok('bench preview: standalone calculator',await p.locator('[data-filmcalc]').count()===1);
 ok('bench preview: storage',await p.locator('[data-ftt-storage]').count()===1);
-ok('bench preview: preview-only clip selectors',await p.locator('.fwcc[data-demo="1"]').count()===2,await p.locator('.fwcc').count());
+ok('bench preview: preview-only clip selectors (html5, YouTube, block)',await p.locator('.fwcc[data-demo="1"]').count()===3,await p.locator('.fwcc').count());
 const D=p.locator('.fwcc[data-demo="1"]').first();
 await p.evaluate(()=>new Promise(r=>{const v=document.querySelector('video');if(v.readyState>=1)r();else v.addEventListener('loadedmetadata',r);}));
 await setT('video',1);await D.locator('.fwcc-set[data-which=in]').click();await setT('video',3);await D.locator('.fwcc-set[data-which=out]').click();await D.locator('.fwcc-addlist').click();

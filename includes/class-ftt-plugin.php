@@ -75,6 +75,7 @@ class FTT_Plugin {
 	public static function boot() {
 		FTT_Price_Table::init();
 		add_action( 'init', array( __CLASS__, 'register_assets' ), 5 );
+		add_action( 'wp_footer', array( __CLASS__, 'print_contrast_check' ), 1 );
 		$on = self::enabled();
 		foreach ( self::files() as $k => $m ) {
 			if ( empty( $on[ $k ] ) ) {
@@ -164,6 +165,14 @@ class FTT_Plugin {
 		wp_register_script( 'ftt-core', FTT_URL . 'core/ftt-core.js', array(), FTT_VERSION, true );
 		wp_register_style( 'ftt-base', FTT_URL . 'assets/css/ftt-base.css', array(), FTT_VERSION );
 		wp_register_style( 'ftt-front', FTT_URL . 'assets/css/ftt.css', array( 'ftt-base' ), FTT_VERSION );
+	}
+
+	/** 1.5.7: print the small contrast check once, only on pages that loaded ftt-base. */
+	public static function print_contrast_check() {
+		if ( ! wp_style_is( 'ftt-base', 'done' ) && ! wp_style_is( 'ftt-base', 'enqueued' ) ) {
+			return;
+		}
+		wp_enqueue_script( 'ftt-contrast', FTT_URL . 'core/ftt-contrast.js', array(), FTT_VERSION, true );
 	}
 
 	public static function settings() {
