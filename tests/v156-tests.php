@@ -19,7 +19,7 @@ $ok( 'exactly two jump buttons, labelled', 2 === substr_count( $m, 'class="butto
 $ok( 'marks still a labelled group', false !== strpos( $r, 'class="fwcc-marks" role="group" aria-label="In and Out marks"' ) );
 $ok( 'block output identical to shortcode', do_blocks( '<!-- wp:ftt/clip-selector {"clip_id":"V156"} /-->' ) === $r );
 $css = file_get_contents( FTT_DIR . 'modules/clip-selector/assets/clip-selector.css' );
-$ok( 'css: 5-column wide grid starting Set, timecode', false !== strpos( $css, 'grid-template-columns:max-content minmax(8em,max-content) max-content max-content max-content' ) );
+$ok( 'css: 5-column wide grid starting Set, timecode', false !== strpos( $css, 'grid-template-columns:max-content minmax(6.5em,max-content) max-content max-content max-content' ) );
 $ok( 'css: narrow puts Jump in column 3 of the trim row (container + fallback)', 2 === substr_count( $css, '.fwcc-marks .fwcc-jump{grid-column:3;justify-self:start;width:auto}' ) );
 $ok( 'css: phone width puts Jump on its own full-width line', 2 === substr_count( $css, '.fwcc-trim-label,.fwcc-nudge,.fwcc-marks .fwcc-jump{grid-column:1 / -1}' ) );
 $js = file_get_contents( FTT_DIR . 'modules/clip-selector/assets/clip-selector.js' );

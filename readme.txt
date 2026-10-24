@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.9
+Stable tag: 1.5.10
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -44,6 +44,9 @@ FTT updates itself from the latest GitHub release of vintagefilm/film-transfer-t
 * `wp ftt-updater status`, `wp ftt-updater check`, `wp plugin auto-updates enable film-transfer-toolkit`.
 
 == Changelog ==
+
+= 1.5.10 =
+* Fix: clip selector rows (Set In / Set Out: timecode, Trim label, -1s -1f +1f +1s, Jump to In/Out) wrapped onto two lines on any selector narrower than 1000px, which is most laptop screens and most theme content columns. Each row now stays on one line down to a 710px selector and wraps only below that (Jump to In/Out beside the trim buttons, then full-width rows on phones). The breakpoints follow the theme's text size, and the trim and Jump buttons are a little narrower. No settings, markup or behaviour changed.
 
 = 1.5.9 =
 * Built-in GitHub release updater (includes/class-ftt-updater.php): update offers, View details, authenticated download with sha256 check, pause switch, optional per-site read token, FTT > Settings > Updates and `wp ftt-updater`. Settings, pages and prices are unchanged.
