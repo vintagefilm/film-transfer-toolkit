@@ -1,13 +1,12 @@
-// 1.5.9 e2e: guest + login_mode add_then_prompt: (1) header mini-cart shows the server price right after the add and after a
+// 1.5.9 e2e (1.5.11: plain guest, no sign-in settings): (1) header mini-cart shows the server price right after the add and after a
 // reload; (2) the selector estimate/list total match the server price (VFC card: $1/s, $29 minimum, rounding down).
 const {chromium}=require('playwright');const cp=require('child_process');const fs=require('fs');
 const B='http://localhost:8088';
 const wp=(a)=>{try{return cp.execSync('cd /workspace/wp && wp '+a+' 2>/dev/null',{encoding:'utf8'}).trim();}catch(e){return '';}};
 const out=[];const ok=(n,c,d)=>{out.push((c?'PASS ':'FAIL ')+n+(d!==undefined&&!c?' :: '+String(d).slice(0,300):''));};
-const [LP,RP]=fs.readFileSync('/workspace/ftt155-pages.txt','utf8').trim().split(/\s+/);
 const SAVED=wp('option get ftt_clip_settings --format=json')||'{}'; const CARD=wp('option get ftt_clip_rate_card --format=json')||'';
 fs.writeFileSync('/tmp/t159c.json',JSON.stringify({label:'VFC clip licence',per_second_cents:100,min_seconds:1,max_seconds:36000,min_charge_cents:2900,rounding:'down'}));wp('option update ftt_clip_rate_card --format=json < /tmp/t159c.json');
-fs.writeFileSync('/tmp/t159o.json',JSON.stringify(Object.assign((x=>Array.isArray(x)?{}:x)(JSON.parse(SAVED)),{require_login:1,login_page_id:+LP,register_page_id:+RP,after_login:'cart',login_mode:'add_then_prompt'})));wp('option update ftt_clip_settings --format=json < /tmp/t159o.json');
+fs.writeFileSync('/tmp/t159o.json',JSON.stringify(Object.assign((x=>Array.isArray(x)?{}:x)(JSON.parse(SAVED)),{})));wp('option update ftt_clip_settings --format=json < /tmp/t159o.json');
 const PROD=wp(`post create --post_type=fluent-products --post_status=private --post_title="T159 clip product" --porcelain`);
 wp(`post meta update ${PROD} _fw_fps any`); wp(`post meta update ${PROD} _fw_clip_cart_enabled 1`);
 fs.writeFileSync('/tmp/t159.html',`<!-- wp:shortcode -->[fluent_cart_mini_cart]<!-- /wp:shortcode --><!-- wp:video --><figure class="wp-block-video"><video controls preload="auto" src="${B}/ftt-test-media/sample.webm"></video></figure><!-- /wp:video -->

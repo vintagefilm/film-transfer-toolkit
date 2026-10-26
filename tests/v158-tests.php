@@ -14,11 +14,11 @@ delete_option( $O ); FTT_Plugin::ensure_array_options(); wp_cache_delete( 'allop
 $ok( 'missing option created as array with all defaults', get_option( $O ) === $D, wp_json_encode( get_option( $O ) ) );
 update_option( $O, '' ); FTT_Plugin::ensure_array_options();
 $ok( 'scalar option repaired to defaults', get_option( $O ) === $D );
-update_option( $O, array( 'require_login' => 1, 'login_page_id' => 15343, 'register_page_id' => 15344, 'after_login' => 'cart' ) ); FTT_Plugin::ensure_array_options();
+update_option( $O, array( 'default_product_id' => 15496, 'default_fps' => '23.976' ) ); FTT_Plugin::ensure_array_options();
 $g = get_option( $O );
-$ok( 'partial option: saved values kept', 1 === $g['require_login'] && 15343 === $g['login_page_id'] && 15344 === $g['register_page_id'] && 'cart' === $g['after_login'], wp_json_encode( $g ) );
+$ok( 'partial option: saved values kept', 15496 === $g['default_product_id'] && '23.976' === $g['default_fps'], wp_json_encode( $g ) );
 $ok( 'partial option: missing keys filled', count( $g ) === count( $D ) && $D['heading'] === $g['heading'] );
-$ok( 'effective settings unchanged by filling', FTT_Clip_Settings::sanitize( array( 'require_login' => 1, 'login_page_id' => 15343, 'register_page_id' => 15344, 'after_login' => 'cart' ) ) === FTT_Clip_Settings::get() );
+$ok( 'effective settings unchanged by filling', FTT_Clip_Settings::sanitize( array( 'default_product_id' => 15496, 'default_fps' => '23.976' ) ) === FTT_Clip_Settings::get() );
 $before = get_option( $O ); global $wpdb; $q = $wpdb->num_queries; FTT_Plugin::ensure_array_options();
 $ok( 'complete option: nothing written', get_option( $O ) === $before && $wpdb->num_queries === $q, $wpdb->num_queries - $q );
 delete_option( 'ftt_general' ); FTT_Plugin::ensure_array_options();
@@ -42,10 +42,7 @@ $ok( 'estimate config carries preferred', $p4 && '4k_out' === $p4[0]['id'] );
 $js = file_get_contents( FTT_DIR . 'modules/estimate/estimate.js' );
 $ok( 'estimate.js preselects preferred', false !== strpos( $js, 'return x.preferred;' ) );
 null === $keep_t ? delete_option( 'ftt_price_table' ) : update_option( 'ftt_price_table', $keep_t, false );
-// login_mode
-$ok( 'login_mode default block', 'block' === FTT_Clip_Settings::defaults()['login_mode'] && 'block' === FTT_Clip_Settings::sanitize( array() )['login_mode'] );
-$ok( 'login_mode add_then_prompt kept, junk -> block', 'add_then_prompt' === FTT_Clip_Settings::sanitize( array( 'login_mode' => 'add_then_prompt' ) )['login_mode'] && 'block' === FTT_Clip_Settings::sanitize( array( 'login_mode' => 'x' ) )['login_mode'] );
-$ok( 'set_logged_in_cookie hook (guest cart kept at sign-in)', false !== has_action( 'set_logged_in_cookie', array( 'FTT_Clip_Resume', 'adopt_guest_cart' ) ) );
-$ok( 'registry FAQ + admin mention login_mode', false !== strpos( file_get_contents( FTT_DIR . 'includes/admin/class-ftt-registry.php' ), 'login_mode add_then_prompt' ) && false !== strpos( file_get_contents( FTT_DIR . 'modules/clip-selector/admin.php' ), '[login_mode]' ) );
+// 1.5.11: login_mode and the other sign-in settings are retired (see v1511-tests.php); the guest-cart hook stays
+$ok( 'set_logged_in_cookie hook (guest cart kept at sign-in)', false !== has_action( 'set_logged_in_cookie', array( 'FTT_Clip_Cart', 'adopt_guest_cart' ) ) );
 foreach ( array( 'ftt_clip_settings', 'ftt_general' ) as $i => $n ) { null === $keep[ $i ] ? delete_option( $n ) : update_option( $n, $keep[ $i ] ); }
 echo "v158 php: $p passed, $f failed\n";

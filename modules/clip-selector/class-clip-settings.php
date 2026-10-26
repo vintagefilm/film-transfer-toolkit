@@ -11,20 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FTT_Clip_Settings {
 	const OPTION = 'ftt_clip_settings';
 
+	/** 1.5.11: sign-in settings of 1.5.5 to 1.5.10, retired. Ignored everywhere; moved to ftt_clip_retired_login on upgrade. */
+	const RETIRED = array( 'require_login', 'login_page_id', 'register_page_id', 'after_login', 'login_mode' );
+
 	public static function defaults() {
 		return array(
 			'default_product_id' => 0,          // FluentCart product used when a selector has no product_id.
 			'default_fps'        => '29.97df',  // Timecode rate when neither the shortcode nor a product sets one.
 			'auto_attach'        => 'off',      // off | page | post | all: add a selector under the content's first video player.
 			'heading'            => __( 'Select Stock Footage', 'film-transfer-toolkit' ), // 1.5.3: title above the selector; '' hides it.
-			// 1.5.5: sign-in before add to cart (cart mode only).
-			'require_login'      => 0,          // 1 = visitors must sign in or register before clips go into the cart.
-			'login_page_id'      => 0,          // Sign-in page (e.g. FluentCart login page); 0 = wp_login_url().
-			'register_page_id'   => 0,          // Registration page; 0 = wp_registration_url().
-			'after_login'        => 'page',     // page = back to the selector with a notice | cart = straight to the cart.
-			// 1.5.8: block = guests sign in first, then the clips are added (1.5.5 behaviour) | add_then_prompt = clips go
-			// into the guest cart at once and the sign-in / create account prompt is shown; the cart is kept at sign-in.
-			'login_mode'         => 'block',
 		);
 	}
 
@@ -38,12 +33,6 @@ class FTT_Clip_Settings {
 			'auto_attach'        => isset( $in['auto_attach'] ) && in_array( $in['auto_attach'], array( 'off', 'page', 'post', 'all' ), true ) ? $in['auto_attach'] : 'off',
 			// 1.5.3: missing key = default heading (older saved settings); a saved blank hides it.
 			'heading'            => array_key_exists( 'heading', $in ) ? self::clean_heading( $in['heading'] ) : $d['heading'],
-			// 1.5.5: missing keys (older saved settings) = defaults, so nothing changes until switched on.
-			'require_login'      => ! empty( $in['require_login'] ) ? 1 : 0,
-			'login_page_id'      => isset( $in['login_page_id'] ) ? absint( $in['login_page_id'] ) : 0,
-			'register_page_id'   => isset( $in['register_page_id'] ) ? absint( $in['register_page_id'] ) : 0,
-			'after_login'        => isset( $in['after_login'] ) && 'cart' === $in['after_login'] ? 'cart' : 'page',
-			'login_mode'         => isset( $in['login_mode'] ) && 'add_then_prompt' === $in['login_mode'] ? 'add_then_prompt' : 'block',
 		);
 	}
 
@@ -65,16 +54,31 @@ class FTT_Clip_Settings {
 		return 'none' === strtolower( $h ) ? '' : $h;
 	}
 
-	/** 1.5.5: does this selector require sign-in? require_login="yes|no" on one selector overrides the setting; empty = setting. */
-	public static function login_required_for( $atts ) {
-		$v = is_array( $atts ) && isset( $atts['require_login'] ) ? strtolower( trim( (string) $atts['require_login'] ) ) : '';
-		if ( in_array( $v, array( 'yes', '1', 'true', 'on' ), true ) ) {
-			return true;
-		}
-		if ( in_array( $v, array( 'no', '0', 'false', 'off' ), true ) ) {
+	/**
+	 * 1.5.11: one-time clean-up of the retired sign-in settings. The five keys (RETIRED) are copied to the option
+	 * ftt_clip_retired_login (not autoloaded) and removed from ftt_clip_settings, and unfinished sign-in selections
+	 * (transients ftt_clip_pending_*) are deleted. Does nothing when the keys are already gone, so it is safe to repeat.
+	 * Returns true when it changed something.
+	 */
+	public static function retire_login_settings() {
+		$cur = get_option( self::OPTION, null );
+		if ( ! is_array( $cur ) ) {
 			return false;
 		}
-		return (bool) self::get()['require_login'];
+		$old = array_intersect_key( $cur, array_flip( self::RETIRED ) );
+		if ( ! $old ) {
+			return false;
+		}
+		if ( false === get_option( 'ftt_clip_retired_login', false ) ) {
+			add_option( 'ftt_clip_retired_login', array( 'saved' => gmdate( 'c' ), 'version' => defined( 'FTT_VERSION' ) ? FTT_VERSION : '', 'values' => $old ), '', false );
+		}
+		update_option( self::OPTION, array_diff_key( $cur, $old ) );
+		global $wpdb;
+		$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( '_transient_ftt_clip_pending_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $names as $n ) {
+		delete_transient( substr( $n, strlen( '_transient_' ) ) );
+	}
+		return true;
 	}
 
 	public static function get() {

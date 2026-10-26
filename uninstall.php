@@ -8,7 +8,7 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
-foreach ( array( 'ftt_modules', 'ftt_general', 'ftt_price_table', 'ftt_calc_options', 'ftt_clip_rate_card', 'ftt_clip_help_html', 'ftt_rfq', 'ftt_mail_log', 'ftt_setup', 'ftt_pages', 'ftt_storage', 'ftt_clip_settings' ) as $o ) {
+foreach ( array( 'ftt_modules', 'ftt_general', 'ftt_price_table', 'ftt_calc_options', 'ftt_clip_rate_card', 'ftt_clip_help_html', 'ftt_rfq', 'ftt_mail_log', 'ftt_setup', 'ftt_pages', 'ftt_storage', 'ftt_clip_settings', 'ftt_clip_retired_login' ) as $o ) {
 	delete_option( $o );
 }
 delete_transient( 'ftt_setup_redirect' );

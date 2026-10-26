@@ -45,23 +45,8 @@ function ftt_clip_render_settings() {
 				<?php foreach ( $fields as $k => $l ) : ?>
 					<tr><th><label for="ftt-clip-<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $l ); ?></label></th><td><input id="ftt-clip-<?php echo esc_attr( $k ); ?>" type="number" min="0" class="small-text" name="ftt_clip_rate_card[<?php echo esc_attr( $k ); ?>]" value="<?php echo esc_attr( $c[ $k ] ); ?>"></td></tr>
 				<?php endforeach; ?>
-				<tr><th><?php esc_html_e( 'Require sign-in to add to cart', 'film-transfer-toolkit' ); ?></th><td>
-					<input type="hidden" name="<?php echo esc_attr( $n ); ?>[require_login]" value="0">
-					<label><input id="ftt-clip-require-login" type="checkbox" name="<?php echo esc_attr( $n ); ?>[require_login]" value="1" <?php checked( $o['require_login'], 1 ); ?>> <?php esc_html_e( 'Visitors must sign in or create an account before clips go into the cart', 'film-transfer-toolkit' ); ?></label>
-					<p class="description"><?php esc_html_e( 'FluentCart clip products only. Visitors can still preview and mark clips. Add to cart saves their selection for 2 hours and offers Sign in / Create account; after signing in or registering they come back to the same page and the clips are added to the cart automatically (price recalculated on the server). Signed-in customers are not affected. One selector can override this with require_login="yes" or "no".', 'film-transfer-toolkit' ); ?></p></td></tr>
-				<tr><th><label for="ftt-clip-login-page"><?php esc_html_e( 'Sign-in page', 'film-transfer-toolkit' ); ?></label></th><td><?php wp_dropdown_pages( array( 'name' => $n . '[login_page_id]', 'id' => 'ftt-clip-login-page', 'selected' => (int) $o['login_page_id'], 'show_option_none' => __( 'WordPress sign-in (wp-login.php)', 'film-transfer-toolkit' ), 'option_none_value' => '0' ) ); ?>
-					<p class="description"><?php esc_html_e( 'For example the FluentCart Login page (FluentCart > Settings > Pages). The page is opened with redirect_to back to the selector.', 'film-transfer-toolkit' ); ?></p></td></tr>
-				<tr><th><label for="ftt-clip-register-page"><?php esc_html_e( 'Registration page', 'film-transfer-toolkit' ); ?></label></th><td><?php wp_dropdown_pages( array( 'name' => $n . '[register_page_id]', 'id' => 'ftt-clip-register-page', 'selected' => (int) $o['register_page_id'], 'show_option_none' => __( 'WordPress registration (needs "Anyone can register")', 'film-transfer-toolkit' ), 'option_none_value' => '0' ) ); ?>
-					<p class="description"><?php esc_html_e( 'For example the FluentCart Registration page.', 'film-transfer-toolkit' ); ?></p></td></tr>
-				<tr><th><?php esc_html_e( 'When a signed-out visitor adds clips', 'film-transfer-toolkit' ); ?></th><td>
-					<?php foreach ( array( 'block' => __( 'Ask them to sign in first; the clips go into the cart after they sign in or register (default)', 'film-transfer-toolkit' ), 'add_then_prompt' => __( 'Add the clips to the cart now, then ask them to sign in or create an account (the same cart is kept, no duplicates)', 'film-transfer-toolkit' ) ) as $k => $l ) : ?>
-						<label class="ftt-radio" style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[login_mode]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $o['login_mode'], $k ); ?>> <?php echo esc_html( $l ); ?></label>
-					<?php endforeach; ?>
-					<p class="description"><?php esc_html_e( 'Only used when Require sign-in is on. WP-CLI: wp option patch update ftt_clip_settings login_mode add_then_prompt (or block).', 'film-transfer-toolkit' ); ?></p></td></tr>
-				<tr><th><?php esc_html_e( 'After sign-in', 'film-transfer-toolkit' ); ?></th><td>
-					<?php foreach ( array( 'page' => __( 'Return to the page with a "clips added" notice and a cart link (default)', 'film-transfer-toolkit' ), 'cart' => __( 'Go straight to the cart', 'film-transfer-toolkit' ) ) as $k => $l ) : ?>
-						<label class="ftt-radio" style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[after_login]" value="<?php echo esc_attr( $k ); ?>" <?php checked( $o['after_login'], $k ); ?>> <?php echo esc_html( $l ); ?></label>
-					<?php endforeach; ?></td></tr>
+				<tr><th><?php esc_html_e( 'Sign-in and accounts', 'film-transfer-toolkit' ); ?></th><td>
+					<p class="description" style="margin-top:0"><?php esc_html_e( 'Nothing to set here. Any visitor can add clips to the cart: the clip selector never asks anyone to sign in or create an account. FluentCart handles that after the cart: View cart, Checkout (guest checkout, sign-in or the account it creates), then My Account. Put Cart and My Account links in your site menu (Appearance > Menus), and a mini-cart in the header if you like.', 'film-transfer-toolkit' ); ?></p></td></tr>
 			</table>
 			<details class="ftt-advanced" id="ftt-adv-clips"><summary><?php esc_html_e( 'Advanced: rounding, frame rate, FluentCart product and automatic placement', 'film-transfer-toolkit' ); ?></summary><div class="ftt-advanced__body">
 			<table class="form-table" role="presentation">

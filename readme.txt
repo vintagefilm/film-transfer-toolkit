@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.10
+Stable tag: 1.5.11
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -44,6 +44,13 @@ FTT updates itself from the latest GitHub release of vintagefilm/film-transfer-t
 * `wp ftt-updater status`, `wp ftt-updater check`, `wp plugin auto-updates enable film-transfer-toolkit`.
 
 == Changelog ==
+
+= 1.5.11 =
+* Clip selector: the sign-in / create-account feature inside the selector is removed. The selector never asks anyone to sign in or create an account, and no Sign in / Create account buttons or messages appear in it. Any visitor, signed in or not, can add clips to the cart. After "Add clips to cart" the message offers a View cart link, and FluentCart takes it from there: Cart, Checkout (guest checkout, sign-in, or the account FluentCart creates, per FluentCart > Settings), then My Account. Put Cart and My Account links in your site menu (Appearance > Menus) and a mini-cart in the header.
+* Retired settings (now ignored): require_login ("Require sign-in to add to cart", and the shortcode/block attribute require_login), login_page_id, register_page_id, after_login, login_mode. On upgrade from 1.5.5 to 1.5.10 the saved values are copied to the option ftt_clip_retired_login (kept, not autoloaded; removed only by uninstall) and taken out of ftt_clip_settings; all other settings, pages and prices are unchanged. Shortcodes and blocks that still carry require_login="..." keep working; the attribute is ignored.
+* Removed: REST routes POST ftt/v1/clip/pending and /resume, the 2-hour saved selection (transients ftt_clip_pending_*, cookie ftt_clip_resume, browser storage ftt_clip_pending), the sign-in notice, and the 401 fwcc_login_required reply. /add now accepts every visitor (still server-priced, nonce and rate limited) and returns the cart URL.
+* Kept: a guest's FluentCart cart is recorded on the user when they sign in or register anywhere on the site (no merge, no duplicates; the hook ftt/clip/guest_cart_adopted is unchanged).
+* The 1.5.8 WP-CLI examples for the retired settings no longer apply; `wp option patch update ftt_clip_settings default_fps 25` style patching of the remaining settings still works.
 
 = 1.5.10 =
 * Fix: clip selector rows (Set In / Set Out: timecode, Trim label, -1s -1f +1f +1s, Jump to In/Out) wrapped onto two lines on any selector narrower than 1000px, which is most laptop screens and most theme content columns. Each row now stays on one line down to a 710px selector and wraps only below that (Jump to In/Out beside the trim buttons, then full-width rows on phones). The breakpoints follow the theme's text size, and the trim and Jump buttons are a little narrower. No settings, markup or behaviour changed.

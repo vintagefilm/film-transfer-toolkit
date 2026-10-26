@@ -93,7 +93,7 @@ class FTT_Clip_Shortcode
 
     public static function render($atts)
     {
-        $a = shortcode_atts(['product_id' => 0, 'clip_id' => '', 'fps' => '', 'player' => 'auto', 'player_selector' => '', 'title' => '', 'heading' => '', 'require_login' => ''], $atts, 'ftt_clip_selector');
+        $a = shortcode_atts(['product_id' => 0, 'clip_id' => '', 'fps' => '', 'player' => 'auto', 'player_selector' => '', 'title' => '', 'heading' => ''], $atts, 'ftt_clip_selector');
         $heading = FTT_Clip_Settings::heading_for($a); // 1.5.3
         $set = FTT_Clip_Settings::get();
         $pid = absint($a['product_id']) ?: (int) $set['default_product_id'];
@@ -126,23 +126,14 @@ class FTT_Clip_Shortcode
             'rest'  => esc_url_raw(rest_url(FTT_Clip_Rest::NS)),
             'nonce' => wp_create_nonce('wp_rest'),
             'card'  => $card,
-            'loggedIn' => is_user_logged_in() ? 1 : 0, // 1.5.5
-            'cartUrl'  => class_exists('FTT_Clip_Resume') ? FTT_Clip_Resume::cart_url() : '', // 1.5.8 (the resume class loads only with the clips module on; the test bench preview renders without it)
+            'cartUrl'  => class_exists('FTT_Clip_Cart') ? FTT_Clip_Cart::cart_url() : '', // 1.5.8 (the cart class loads only with the clips module on; the test bench preview renders without it)
             'i18n'  => [
-                'login_needed' => __('Please sign in or create an account to add these clips to your cart. Your selection is saved for 2 hours.', 'film-transfer-toolkit'),
-                'signin'       => __('Sign in', 'film-transfer-toolkit'),
-                'register'     => __('Create account', 'film-transfer-toolkit'),
-                'resumed'      => __('%d clip(s) added to your cart.', 'film-transfer-toolkit'),
+                'added'        => __('%d clip(s) added to your cart.', 'film-transfer-toolkit'),
                 'viewcart'     => __('View cart', 'film-transfer-toolkit'),
-                'added_prompt' => __('%d clip(s) added to your cart. Please sign in or create an account to check out; your cart is kept.', 'film-transfer-toolkit'), // 1.5.8
             ],
         ]);
-        // 1.5.5: sign-in before add to cart (cart mode only; signed-in visitors are not affected).
-        $need_login = $mode === 'cart' && FTT_Clip_Settings::login_required_for($a);
-        $login_attr = $need_login ? ' data-require-login="' . ('add_then_prompt' === $set['login_mode'] ? 'prompt' : '1') . '"' : ''; // 1.5.8: prompt = add first, then offer sign-in
-        if ($mode === 'cart' && !$need_login && $set['require_login']) $login_attr = ' data-login-optout="' . esc_attr(FTT_Clip_Rest::login_optout_sig($pid)) . '"';
         ob_start(); ?>
-<div class="ftt-tool fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>"<?php echo $login_attr; ?>>
+<div class="ftt-tool fwcc" data-mode="<?php echo esc_attr($mode); ?>"<?php echo self::$demo ? ' data-demo="1"' : ''; ?> data-page="<?php echo esc_attr($page_id); ?>" data-product="<?php echo esc_attr($pid); ?>" data-clip="<?php echo esc_attr($a['clip_id']); ?>" data-fps="<?php echo esc_attr($fps); ?>" data-offset="<?php echo esc_attr($offset); ?>" data-player="<?php echo esc_attr($player); ?>" data-player-selector="<?php echo esc_attr(sanitize_text_field($a['player_selector'])); ?>" data-title="<?php echo esc_attr($title); ?>">
 <?php if (self::$demo) : ?>  <p class="fwcc-demo"><strong><?php esc_html_e('Preview only:', 'film-transfer-toolkit'); ?></strong> <?php esc_html_e('the Clip selector module is switched off on this site, so visitors do not see this and nothing can be sent.', 'film-transfer-toolkit'); ?></p>
 <?php endif; ?>
 <?php if ($heading !== '') : ?>  <h3 class="ftt-tool__title fwcc-heading"><?php echo esc_html($heading); ?></h3>

@@ -12,7 +12,7 @@ $d = FTT_Clip_Settings::get();
 $ok( 'default heading', 'Select Stock Footage' === $d['heading'] );
 $old = array( 'default_product_id' => 15496, 'default_fps' => '23.976', 'auto_attach' => 'off' ); // live 1.5.2 shape
 $ok( '1.5.2 settings (no heading key) get the default heading', 'Select Stock Footage' === FTT_Clip_Settings::sanitize( $old )['heading'] );
-$ok( '1.5.2 settings keep their other values', array_diff_key( FTT_Clip_Settings::sanitize( $old ), array( 'heading' => 1, 'require_login' => 1, 'login_page_id' => 1, 'register_page_id' => 1, 'after_login' => 1, 'login_mode' => 1 ) ) === $old );
+$ok( '1.5.2 settings keep their other values', array_diff_key( FTT_Clip_Settings::sanitize( $old ), array( 'heading' => 1 ) ) === $old );
 $ok( 'blank saved heading stays blank', '' === FTT_Clip_Settings::sanitize( array( 'heading' => '   ' ) )['heading'] );
 $ok( 'heading strips tags and collapses space', 'Pick a clip' === FTT_Clip_Settings::sanitize( array( 'heading' => "<b>Pick</b>\n a   clip<script>x</script>" ) )['heading'] );
 $ok( 'heading capped at 120 chars', 120 === strlen( FTT_Clip_Settings::sanitize( array( 'heading' => str_repeat( 'a', 300 ) ) )['heading'] ) );

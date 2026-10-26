@@ -170,7 +170,7 @@ class FTT_Plugin {
 
 	/**
 	 * 1.5.8: keep the FTT settings options that WP-CLI users patch stored as arrays with every default key, so
-	 * `wp option patch insert|update ftt_clip_settings require_login 1` works on a site that never saved the settings
+	 * `wp option patch insert|update ftt_clip_settings default_fps 25` works on a site that never saved the settings
 	 * screen. Saved values always win; only missing options/keys are filled in, and nothing is written when complete.
 	 */
 	public static function array_option_defaults() {
@@ -185,6 +185,12 @@ class FTT_Plugin {
 	}
 
 	public static function ensure_array_options() {
+		if ( ! class_exists( 'FTT_Clip_Settings' ) && is_readable( FTT_DIR . 'modules/clip-selector/class-clip-settings.php' ) ) {
+			require_once FTT_DIR . 'modules/clip-selector/class-clip-settings.php';
+		}
+		if ( class_exists( 'FTT_Clip_Settings' ) ) {
+			FTT_Clip_Settings::retire_login_settings(); // 1.5.11: sign-in settings of 1.5.5 to 1.5.10 are retired (kept in ftt_clip_retired_login)
+		}
 		foreach ( self::array_option_defaults() as $name => $def ) {
 			$cur = get_option( $name, null );
 			if ( ! is_array( $cur ) ) {
