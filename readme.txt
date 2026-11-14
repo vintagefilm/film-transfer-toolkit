@@ -3,7 +3,7 @@ Contributors: vintagefilmtransfer
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.11
+Stable tag: 1.5.12
 License: GPLv2 or later
 
 One plugin with selectable modules for film transfer businesses.
@@ -45,6 +45,9 @@ FTT updates itself from the latest GitHub release of vintagefilm/film-transfer-t
 
 == Changelog ==
 
+= 1.5.12 =
+* Fix: on a page served from a page cache (for example SiteGround's dynamic cache, which can keep a page for up to 48 hours), "Add clips to cart" could fail with "Nothing was added: Cookie check failed" and the server price in the clip list was not shown. The page carried a WordPress REST nonce that had expired (nonces last 12 to 24 hours). The clip selector now fetches a fresh nonce from an uncached endpoint before it prices or adds clips, and if the server still says the nonce is invalid it gets a new one and retries once by itself. If that also fails, the message asks the visitor to reload the page and offers a Reload page link.
+* New endpoints, both sent with no-cache headers (Cache-Control: no-store, private): admin-ajax.php?action=ftt_clip_nonce (primary; knows the signed-in user from the cookie, same-origin only) and GET /wp-json/ftt/v1/clip/nonce (fallback when admin-ajax is blocked for visitors; it only ever returns a visitor nonce). The server checks on /quote and /add are unchanged (wp_rest nonce, rate limit, server prices). No theme or functions.php change is needed and no settings change.
 = 1.5.11 =
 * Clip selector: the sign-in / create-account feature inside the selector is removed. The selector never asks anyone to sign in or create an account, and no Sign in / Create account buttons or messages appear in it. Any visitor, signed in or not, can add clips to the cart. After "Add clips to cart" the message offers a View cart link, and FluentCart takes it from there: Cart, Checkout (guest checkout, sign-in, or the account FluentCart creates, per FluentCart > Settings), then My Account. Put Cart and My Account links in your site menu (Appearance > Menus) and a mini-cart in the header.
 * Retired settings (now ignored): require_login ("Require sign-in to add to cart", and the shortcode/block attribute require_login), login_page_id, register_page_id, after_login, login_mode. On upgrade from 1.5.5 to 1.5.10 the saved values are copied to the option ftt_clip_retired_login (kept, not autoloaded; removed only by uninstall) and taken out of ftt_clip_settings; all other settings, pages and prices are unchanged. Shortcodes and blocks that still carry require_login="..." keep working; the attribute is ignored.

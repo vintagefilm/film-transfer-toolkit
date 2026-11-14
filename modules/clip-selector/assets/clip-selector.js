@@ -36,6 +36,42 @@
     fetch(C.rest + '/minicart', { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { if (m && m.count) applyMini(m); }, function () {});
   }
+  // 1.5.12: fresh wp_rest nonce. A page cache can serve this page for longer than a nonce lives (12-24 h), so the nonce
+  // baked into FTT_CLIP may be expired ("Cookie check failed"). Before /quote and /add, fetch a fresh one from an uncached
+  // endpoint (admin-ajax knows the signed-in user; the REST /nonce route is a visitor fallback), keep it in memory for
+  // a while, and on a 403 invalid-nonce reply refresh once and retry. The server checks are unchanged.
+  var NONCE = { v: '', t: 0, p: null }, NONCE_MAX_AGE = 30 * 60 * 1000;
+  function getJSON(url) {
+    return fetch(url, { credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  function freshNonce(force) {
+    if (!force && NONCE.v && Date.now() - NONCE.t < NONCE_MAX_AGE) return Promise.resolve(NONCE.v);
+    if (NONCE.p) return NONCE.p;
+    var first = C.nonceUrl ? getJSON(C.nonceUrl) : Promise.reject(new Error('no nonce url'));
+    NONCE.p = first.then(function (j) { if (!j || typeof j.nonce !== 'string' || !j.nonce) throw new Error('bad nonce reply'); return j; })
+      .catch(function () { return C.rest ? getJSON(C.rest + '/nonce') : null; })
+      .then(function (j) {
+        if (j && typeof j.nonce === 'string' && j.nonce) { NONCE.v = j.nonce; NONCE.t = Date.now(); return j.nonce; }
+        return C.nonce || ''; // last resort: the nonce printed in the page
+      }, function () { return C.nonce || ''; })
+      .then(function (v) { NONCE.p = null; return v; });
+    return NONCE.p;
+  }
+  function isNonceError(r) { return !!r && r.status === 403 && !!r.j && (r.j.code === 'rest_cookie_invalid_nonce' || r.j.code === 'fwcc_nonce'); }
+  function apiPost(path, body) {
+    function send(n) {
+      var h = { 'Content-Type': 'application/json' }; if (n) h['X-WP-Nonce'] = n;
+      return fetch(C.rest + path, { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers: h, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }, function () { return { ok: r.ok, status: r.status, j: null }; }); });
+    }
+    return freshNonce(false).then(send).then(function (r) {
+      if (!isNonceError(r)) return r;
+      NONCE.v = ''; // stale: refresh once, then retry once
+      return freshNonce(true).then(send).then(function (r2) { if (isNonceError(r2)) r2.expired = true; return r2; });
+    });
+  }
+  window.FTT_CLIP_NET = { freshNonce: freshNonce, apiPost: apiPost, isNonceError: isNonceError, _state: NONCE };
   var TC = window.FTTCore.timecode;
   function findPlayer(el) {
     return window.FTT_PLAYERS.find(el, el.getAttribute('data-player') || 'auto', el.getAttribute('data-player-selector') || '');
@@ -79,10 +115,9 @@
     var blank = R.drop ? '--:--:--;--' : '--:--:--:--';
     // 1.5.9: price each listed clip on the server (/quote) so the list shows exactly what the cart will charge.
     function quoteRow(row) {
-      if (!C.rest || !C.nonce || el.getAttribute('data-mode') === 'request' || DEMO) return;
-      fetch(C.rest + '/quote', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
-        body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: row.seq, name: row.name, in: secOf(row.in), out: secOf(row.out), fps: fps }) })
-        .then(function (r) { return r.ok ? r.json() : null; })
+      if (!C.rest || el.getAttribute('data-mode') === 'request' || DEMO) return;
+      apiPost('/quote', { product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: row.seq, name: row.name, in: secOf(row.in), out: secOf(row.out), fps: fps })
+        .then(function (r) { return r.ok ? r.j : null; })
         .then(function (j) { if (j && j.clip && j.clip.price_cents != null && st.list.indexOf(row) > -1) { row.price = +j.clip.price_cents; draw(); } }, function () {});
     }
     function draw() {
@@ -202,7 +237,7 @@
         if (!st.list.length) return msg('Clip list is empty.', true);
         if (DEMO) return msg('Preview only: the Clip selector module is switched off on this site, so nothing is added to a cart.', true);
         b.disabled = true; msg('Adding...');
-        var queue = st.list.slice(), done = 0, fail = [], mini = null, cartUrl = C.cartUrl || '';
+        var queue = st.list.slice(), done = 0, fail = [], mini = null, cartUrl = C.cartUrl || '', expired = false;
         (function next() {
           var c = queue.shift();
           if (!c) {
@@ -210,17 +245,14 @@
             if (!fail.length) { st.list = []; draw(); }
             if (done && !fail.length) msgLinks((I18.added || '%d clip(s) added to your cart.').replace('%d', done), [[I18.viewcart || 'View cart', cartUrl]]);
             else if (done) msgLinks(done + ' added; ' + fail.length + ' rejected: ' + fail.join('; '), [[I18.viewcart || 'View cart', cartUrl]], true);
+            else if (expired) msgLinks('Nothing was added: ' + (I18.expired || 'Your session on this page has expired. Please reload the page and try again.'), [[I18.reload || 'Reload page', location.href.split('#')[0]]], true); // 1.5.12
             else msg('Nothing was added: ' + fail.join('; '), true);
             if (done) refreshMini(mini); draw();
             document.dispatchEvent(new CustomEvent('fwcc:added'));
             return;
           }
-          fetch(C.rest + '/add', {
-            method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': C.nonce },
-            body: JSON.stringify({ product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)) })
-          }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (r) { if (r.ok) { done++; if (r.j && r.j.clip && r.j.clip.price_cents != null) st.added = (st.added || 0) + (+r.j.clip.price_cents); if (r.j && r.j.mini_cart) mini = r.j.mini_cart; if (r.j && r.j.cart_url) cartUrl = r.j.cart_url; } else { fail.push((r.j && r.j.message) || 'error'); } next(); })
+          apiPost('/add', { product_id: +el.getAttribute('data-product'), clip_id: clipId, seq: c.seq, name: c.name, in: secOf(c.in), out: secOf(c.out), fps: fps, client_price_cents: estimate(secOf(c.out - c.in)) })
+            .then(function (r) { if (r.ok) { done++; if (r.j && r.j.clip && r.j.clip.price_cents != null) st.added = (st.added || 0) + (+r.j.clip.price_cents); if (r.j && r.j.mini_cart) mini = r.j.mini_cart; if (r.j && r.j.cart_url) cartUrl = r.j.cart_url; } else if (r.expired) { expired = true; fail.push(I18.expired || 'Your session on this page has expired. Please reload the page and try again.'); } else { fail.push((r.j && r.j.message) || 'error'); } next(); })
             .catch(function (e) { fail.push(String(e)); next(); });
         })();
       }

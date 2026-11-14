@@ -9,6 +9,49 @@ class FTT_Clip_Rest
     {
         add_action('rest_api_init', [__CLASS__, 'routes']);
         add_action('send_headers', [__CLASS__, 'nocache_for_cart_holders']);
+        // 1.5.12: fresh wp_rest nonce for pages served from a page cache (the nonce baked into the page can be expired).
+        // admin-ajax knows the signed-in user from the cookie without a nonce; same-origin only (no CORS echo).
+        add_action('wp_ajax_' . self::AJAX_NONCE, [__CLASS__, 'ajax_nonce']);
+        add_action('wp_ajax_nopriv_' . self::AJAX_NONCE, [__CLASS__, 'ajax_nonce']);
+    }
+
+    const AJAX_NONCE = 'ftt_clip_nonce';
+
+    /** 1.5.12: never let a page cache, CDN or browser store a nonce response. */
+    public static function nonce_headers()
+    {
+        if (headers_sent()) return;
+        nocache_headers();
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+        header('X-LiteSpeed-Cache-Control: no-cache');
+        header('X-Robots-Tag: noindex');
+    }
+
+    /** 1.5.12: the nonce payload. Cookie-authenticated user (or visitor) only; nothing else is returned. */
+    public static function nonce_payload()
+    {
+        return ['nonce' => wp_create_nonce('wp_rest'), 'ttl' => (int) apply_filters('nonce_life', DAY_IN_SECONDS)];
+    }
+
+    /** 1.5.12: admin-ajax.php?action=ftt_clip_nonce (GET). Primary source: correct for signed-in users and visitors. */
+    public static function ajax_nonce()
+    {
+        self::nonce_headers();
+        wp_send_json(self::nonce_payload());
+    }
+
+    /**
+     * 1.5.12: GET /ftt/v1/clip/nonce, a fallback for sites that block admin-ajax for visitors. WordPress treats a REST
+     * request without a valid nonce as a visitor, so this only ever mints a visitor nonce (or one for a user whose request
+     * already carried a valid nonce); it never hands a signed-in user's nonce to another origin.
+     */
+    public static function rest_nonce(WP_REST_Request $req)
+    {
+        self::nonce_headers();
+        $r = rest_ensure_response(self::nonce_payload());
+        $r->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private');
+        $r->header('X-LiteSpeed-Cache-Control', 'no-cache');
+        return $r;
     }
 
     public static function routes()
@@ -29,6 +72,9 @@ class FTT_Clip_Rest
         register_rest_route(self::NS, '/add', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'add'],
             'permission_callback' => [__CLASS__, 'check_nonce'], 'args' => $args,
+        ]);
+        register_rest_route(self::NS, '/nonce', [
+            'methods' => 'GET', 'callback' => [__CLASS__, 'rest_nonce'], 'permission_callback' => '__return_true',
         ]);
         // 1.5.9: live mini-cart summary (count + subtotal) so a page served from a page cache can correct the header cart.
         register_rest_route(self::NS, '/minicart', [

@@ -124,12 +124,15 @@ class FTT_Clip_Shortcode
         wp_localize_script('ftt-clip', 'FTT_CLIP', [
             'tips'  => ['edit' => $T['edit'], 'remove' => $T['remove'], 'rowname' => $T['name']],
             'rest'  => esc_url_raw(rest_url(FTT_Clip_Rest::NS)),
-            'nonce' => wp_create_nonce('wp_rest'),
+            'nonce' => wp_create_nonce('wp_rest'), // 1.5.12: fallback only; may be stale on a cached page, so the script fetches a fresh one first
+            'nonceUrl' => esc_url_raw(add_query_arg('action', FTT_Clip_Rest::AJAX_NONCE, admin_url('admin-ajax.php'))),
             'card'  => $card,
             'cartUrl'  => class_exists('FTT_Clip_Cart') ? FTT_Clip_Cart::cart_url() : '', // 1.5.8 (the cart class loads only with the clips module on; the test bench preview renders without it)
             'i18n'  => [
                 'added'        => __('%d clip(s) added to your cart.', 'film-transfer-toolkit'),
                 'viewcart'     => __('View cart', 'film-transfer-toolkit'),
+                'expired'      => __('Your session on this page has expired. Please reload the page and try again.', 'film-transfer-toolkit'),
+                'reload'       => __('Reload page', 'film-transfer-toolkit'),
             ],
         ]);
         ob_start(); ?>
